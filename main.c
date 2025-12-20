@@ -1,7 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 // The main 3x3 game board
 char board[3][3];
@@ -56,6 +54,8 @@ int check_winner()
     {
         return 1;
     }
+
+    return 0;
 }
 
 // Check the draw
@@ -71,7 +71,7 @@ int check_draw()
             }
         }
     }
-    return 1;
+    return 2;
 }
 
 // Merk the cell with O/X
@@ -95,8 +95,9 @@ void mark_board(char choise, int cell_no, char player_name[])
         chance++;
         if (chance == 3) // If player chose invaid cell for 3 time, the player loos his chance to play
         {
-            printf("\nYOU BITCH! \nYOU DON'T HAVE KNOW A SIMPLE GAME RULES! \nGO DIE!!\n\n");
-            break;
+            printf("\nToo many invalid attempts!\n");
+            printf("Turn skipped. Please follow the game rules carefully.\n\n");
+            return; // skip marking and lose the turn
         }
     }
     int r = (cell_no - 1) / 3; // Determain the row in 2D array
@@ -107,7 +108,7 @@ void mark_board(char choise, int cell_no, char player_name[])
 }
 
 // Chose player and cell number
-void chose_player(char name1[], char name2[])
+int chose_player(char name1[], char name2[])
 {
     int player = 1;
     while (1)
@@ -149,14 +150,23 @@ void chose_player(char name1[], char name2[])
             print_board();
             printf("\nCONGRATULATION! %s", player_name);
             printf("\nYOU WON THE MATCH");
+            if (player % 2 != 0)
+            {
+                return 1; // Plyer 1 win this round
+            }
+            else
+            {
+                return 2; // Plyer 2 win this round
+            }
             break;
         }
 
         // Check all cell fill or not if all cell filled it declare draw the match
         int draw = check_draw();
-        if (draw == 1)
+        if (draw == 2)
         {
             printf("\nTHE MATCH IS DRAW!");
+            return 0; // Return 0 to for match draw
             break;
         }
 
@@ -202,13 +212,55 @@ int main()
     printf("\nWELLCOME TO THE TIC-TAC-TOE GAME!\n");
     printf("A GAME OF REFLEX AND LUCK!\n\n");
 
+    // Store players winning scorre
+    int player1_score = 0;
+    int player2_score = 0;
+    // Store final result of winning
+    int result = 0;
+
     do
     {
-        // initialize the main board
-        init_board();
+        // To play 3 rounds
+        int round = 0;
+        while (round < 3)
+        {
+            printf("\n\nROUND %d\n", round + 1);
+            // initialize the main board
+            init_board();
 
-        // Give chance player 1 and 2 equaly
-        chose_player(name1, name2);
+            // Give chance player 1 and 2 equaly
+            int result = chose_player(name1, name2);
+
+            // Increase player score
+            if (result == 1)
+            {
+                player1_score++;
+            }
+            else if (result == 2)
+            {
+                player2_score++;
+            }
+
+            // Increase round
+            round++;
+        }
+
+        // Show final result after 3 round
+        printf("\n\n%s score is: %d", name1, player1_score);
+        printf("\n%s score is: %d", name2, player2_score);
+
+        if (player1_score > player2_score)
+        {
+            printf("WINNER: %s\n", name1);
+        }
+        else if (player1_score < player2_score)
+        {
+            printf("WINNER: %s\n", name2);
+        }
+        else
+        {
+            printf("MATCH DRAW!\n");
+        }
 
         // Take the player decision for play again or not
         printf("\n\nDo you want to play again?\n");
