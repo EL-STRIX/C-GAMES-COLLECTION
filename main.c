@@ -4,6 +4,47 @@
 // Game board represented as a 3x3 2D array
 char board[3][3];
 
+//Clear input buffer to prevent scanf issues
+void clear_input_buffer()
+{
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+}
+
+// Only accept single digit 1-9, reject letters/symbols/special characters
+int get_valid_cell_number()
+{
+    int cell_no;
+    
+    while (1)
+    {
+        if (scanf("%d", &cell_no) != 1)
+        {
+            clear_input_buffer();
+            printf("Invalid input! Only numbers 1-9 are allowed. Please try again: ");
+            continue;
+        }
+        
+        // Check if there are extra characters after the number
+        char next_char = getchar();
+        if (next_char != '\n' && next_char != EOF)
+        {
+            clear_input_buffer();
+            printf("Invalid input! Only single digit 1-9 allowed. Please try again: ");
+            continue;
+        }
+        
+        // Validate range 1-9
+        if (cell_no < 1 || cell_no > 9)
+        {
+            printf("Invalid cell number! Must be between 1-9. Please try again: ");
+            continue;
+        }
+        
+        return cell_no;
+    }
+}
+
 /*
   Initialize the board with numbers 1-9
   These numbers represent the cell positions players can choose
@@ -100,28 +141,29 @@ int check_draw()
 */
 void mark_board(char choice, int cell_no, char player_name[])
 {
-    int attempts = 0;
+    int attempts = 0; // store the time of invalid marking on board by player
+    // If player chose invalid cell for 3 time, the player loses his chance to play
     
     while (1)
     {
         // Convert cell number to array indices
-        int r = (cell_no - 1) / 3;
-        int c = (cell_no - 1) % 3;
+        int r = (cell_no - 1) / 3; // Determine the row index in 2D array
+        int c = (cell_no - 1) % 3; // Determine the column index in 2D array
         
         // Check if cell is already occupied
         if (board[r][c] == 'X' || board[r][c] == 'O')
         {
             printf("The cell number is already selected!");
             printf("\nPlayer %s please enter another cell number: ", player_name);
-            scanf("%d", &cell_no);
+            cell_no = get_valid_cell_number();
             attempts++;
             
             // After 3 invalid attempts, skip the player's turn
-            if (attempts == 3)
+            if (attempts == 2)
             {
                 printf("\nToo many invalid attempts!\n");
                 printf("Turn skipped. Please follow the game rules carefully.\n\n");
-                return;
+                return; // skip marking and lose the turn
             }
         }
         else
@@ -131,10 +173,10 @@ void mark_board(char choice, int cell_no, char player_name[])
     }
     
     // Convert cell number to array indices
-    int r = (cell_no - 1) / 3;
-    int c = (cell_no - 1) % 3;
+    int r = (cell_no - 1) / 3; // Determine the row index in 2D array
+    int c = (cell_no - 1) % 3; // Determine the column index in 2D array
 
-    // Mark the cell
+    // Mark the cell with O/X
     board[r][c] = choice;
 }
 
@@ -156,39 +198,33 @@ int choose_player(char name1[], char name2[])
     
     while (1)
     {
-        print_board();
-        char player_name[30];
-        char choice;
-        int cell_no;
+        print_board(); // print the game board
+        char player_name[30]; // Create another variable to copy the current player name
+        char choice; // Define the mark(O/X)
+        int cell_no; // For marking O/X
 
-        // Determine current player and their symbol
+        // Calculate the current player using even, odd method
         if (player % 2 != 0)
         {
+            // For player 1
             choice = 'X';
             strcpy(player_name, name1);
         }
         else
         {
+            // For player 2
             choice = 'O';
             strcpy(player_name, name2);
         }
 
         // Get player's move
         printf("\nPlayer %s enter your cell number(1-9): ", player_name);
-        scanf("%d", &cell_no);
-        
-        // Validate cell number is within range
-        while (cell_no < 1 || cell_no > 9)
-        {
-            printf("Invalid cell number!");
-            printf("\nplease enter the cell number again: ");
-            scanf("%d", &cell_no);
-        }
+        cell_no = get_valid_cell_number();
 
-        // Mark the chosen cell
+        // Mark the game board with O/X in the chosen cell number
         mark_board(choice, cell_no, player_name);
 
-        // Check for a winner
+        // Check all possibilities of winning the game
         int win = check_winner();
         if (win == 1)
         {
@@ -198,21 +234,22 @@ int choose_player(char name1[], char name2[])
             
             if (player % 2 != 0)
             {
-                return 1; // Player 1 wins
+                return 1; // Player 1 win this round
             }
             else
             {
-                return 2; // Player 2 wins
+                return 2; // Player 2 win this round
             }
         }
 
-        // Check for a draw
+        // Check all cell fill or not if all cell filled it declare draw the match
         int draw = check_draw();
         if (draw == 2)
         {
             print_board();
             printf("\nTHE MATCH IS DRAW!");
-            return 0;
+            return 0; // Return 0 for match draw
+            break;
         }
 
         // Switch to next player
@@ -222,9 +259,9 @@ int choose_player(char name1[], char name2[])
 
 int main()
 {
-    char name1[20];
-    char name2[20];
-    char play_again;
+    char name1[20]; // Player name 1
+    char name2[20]; // Player name 2
+    char play_again; // Take char (y/n) for play again
 
     // Get Player 1's name
     printf("\nENTER THE 1st PLAYER NAME: ");
@@ -258,19 +295,20 @@ int main()
     // Score tracking
     int player1_score = 0;
     int player2_score = 0;
+    // Store final result of winning
     int result = 0;
 
     do
     {
+        // To play 3 rounds
         int round = 0;
-        
-        // Play 3 rounds
         while (round < 3)
         {
             printf("\n\nROUND %d\n\n", round + 1);
+            // initialize the main board
             init_board();
 
-            // Play one round and get the result
+            // Give chance player 1 and 2 equally
             result = choose_player(name1, name2);
 
             // Update scores based on round result
@@ -283,10 +321,11 @@ int main()
                 player2_score++;
             }
 
+            // Increase round
             round++;
         }
 
-        // Display final scores
+        // Show final result after 3 rounds
         printf("\n\n%s score is: %d", name1, player1_score);
         printf("\n%s score is: %d", name2, player2_score);
 
@@ -310,16 +349,15 @@ int main()
         printf("Enter \"N\" for 'NO'\n");
         printf("Enter your choice: ");
         
-        // Clear input buffer
-        while (getchar() != '\n')
-            ;
+        // Clear buffer properly
+        clear_input_buffer();
 
         // Get valid input (Y/N)
         while (1)
         {
             play_again = getchar();
-            while (getchar() != '\n')
-                ;
+            // Clear buffer properly
+            clear_input_buffer();
 
             if (play_again == 'Y' || play_again == 'y' || play_again == 'N' || play_again == 'n')
             {
