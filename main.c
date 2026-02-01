@@ -225,6 +225,11 @@ void on_cell_clicked(GtkWidget *widget, gpointer data)
     }
 }
 
+// Helper: Focus on the second entry field
+void focus_entry_2(GtkWidget *widget, gpointer data) {
+    gtk_widget_grab_focus(entry_p2);
+}
+
 void on_start_clicked(GtkWidget *widget, gpointer data)
 {
     const char *n1 = gtk_editable_get_text(GTK_EDITABLE(entry_p1));
@@ -233,11 +238,13 @@ void on_start_clicked(GtkWidget *widget, gpointer data)
     // UPDATED VALIDATION LOGIC
     if (strlen(n1) == 0) {
         gtk_label_set_text(GTK_LABEL(lbl_start_error), "IDENTIFY YOURSELF! Name is required. 🛡️");
+        gtk_widget_grab_focus(entry_p1); // Focus back to P1
         return;
     }
 
     if (strlen(n2) == 0) {
         gtk_label_set_text(GTK_LABEL(lbl_start_error), "CHALLENGER MISSING! Don't be shy. ⚔️");
+        gtk_widget_grab_focus(entry_p2); // Focus back to P2
         return;
     }
 
@@ -333,10 +340,16 @@ static void activate(GtkApplication *app, gpointer user_data)
     entry_p1 = gtk_entry_new();
     gtk_entry_set_placeholder_text(GTK_ENTRY(entry_p1), "User_Alpha...");
     gtk_widget_add_css_class(entry_p1, "styled-entry");
+    
+    // BETTER UX: Pressing Enter on P1 jumps to P2
+    g_signal_connect(entry_p1, "activate", G_CALLBACK(focus_entry_2), NULL);
 
     entry_p2 = gtk_entry_new();
     gtk_entry_set_placeholder_text(GTK_ENTRY(entry_p2), "User_Beta...");
     gtk_widget_add_css_class(entry_p2, "styled-entry");
+    
+    // Pressing Enter on P2 starts the game
+    g_signal_connect(entry_p2, "activate", G_CALLBACK(on_start_clicked), NULL);
 
     GtkWidget *btn_start = gtk_button_new_with_label("LOCK IN ⚔️");
     gtk_widget_set_name(btn_start, "start_btn"); 
