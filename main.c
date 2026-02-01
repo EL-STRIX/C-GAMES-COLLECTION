@@ -30,57 +30,43 @@ GtkWidget *result_title;
 GtkWidget *result_subtitle;
 GtkWidget *result_score_label;
 
-// NEW: Global reference so we can show error messages
-GtkWidget *lbl_tip_start; 
+// NEW: Dedicated error label separate from the tip
+GtkWidget *lbl_start_error; 
 
 // ============================================================
 // CSS STYLING
 // ============================================================
 
 const char *css_data =
-    /* Main background - Grey */
     ".window-bg { background-color: #cfcfcf; }"
-    
-    /* The White Card */
     ".login-card { background-color: #ffffff; border-radius: 12px; padding: 30px; margin: 20px; box-shadow: 0px 4px 8px rgba(0,0,0,0.1); }"
-    
-    /* Typography */
     ".game-title { font-size: 16pt; font-weight: bold; color: #4a00e0; margin-bottom: 5px; }"
     ".welcome-text { font-size: 14pt; font-weight: bold; color: #2979ff; margin-bottom: 20px; }"
     ".input-label { font-size: 11pt; color: #555555; margin-bottom: 5px; }"
     ".round-header { font-size: 18pt; font-weight: bold; color: #6200ea; margin-bottom: 5px; }"
     ".score-info { font-size: 10pt; color: #666666; margin-bottom: 15px; }"
-
-    /* Entry Field */
     ".styled-entry { background: #ffffff; border: 1px solid #aaa; border-radius: 4px; padding: 10px; color: #000; }"
     ".styled-entry:focus { border: 2px solid #2962ff; }"
-    
-    /* Start Button ID */
     "#start_btn { background-color: #1a237e; background-image: none; color: white; font-weight: bold; border-radius: 5px; padding: 10px; margin-top: 15px; }"
     "#start_btn:hover { background-color: #2a3ed1; }"
     "#start_btn:active { background-color: #1123eb; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }"
     "#start_btn:focus { border: 2px solid #534bae; }"
-
-    /* Exit Button Class */
     ".btn-exit { background-color: #d50000; background-image: none; color: white; font-weight: bold; font-size: 16px; border-radius: 5px; padding: 10px; margin-top: 15px; }"
     ".btn-exit:hover { background-color: #b71c1c; }"
     ".btn-exit:active { background-color: #d50000; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }"
     ".btn-exit:focus { border: 2px solid #ff5131; }"
-
-    /* Footer Text */
     ".footer-tip { font-size: 9pt; color: #888888; margin-top: 15px; }"
     ".footer-credit { font-size: 8pt; color: #555555; margin-top: 5px; font-weight: bold; }"
-    
-    /* Game Screen Elements */
     ".success { color: #00c853; font-weight: bold; font-size: 14pt; }"
     ".error { color: #d50000; font-weight: bold; font-size: 11pt; }"
     ".warning { color: #ffab00; font-weight: bold; font-size: 14pt; }"
-
-    /* Grid Buttons */
     ".grid-button { font-size: 36px; font-weight: 900; min-width: 70px; min-height: 70px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; color: #333; }"
     ".grid-button:hover { background-color: #e9ecef; }"
     ".player-x { color: #2979ff; }"
     ".player-o { color: #d50000; }"
+    
+    /* NEW CSS for the specific error label under button */
+    ".error-msg { color: #d50000; font-size: 10pt; font-weight: bold; margin-top: 5px; margin-bottom: 0px; }"
     ;
 
 // ============================================================
@@ -114,28 +100,19 @@ int check_winner()
 {
     for (int i = 0; i < 3; i++)
     {
-        if (game.board[i][0] == game.board[i][1] && game.board[i][1] == game.board[i][2])
-            return 1;
-        if (game.board[0][i] == game.board[1][i] && game.board[1][i] == game.board[2][i])
-            return 1;
+        if (game.board[i][0] == game.board[i][1] && game.board[i][1] == game.board[i][2]) return 1;
+        if (game.board[0][i] == game.board[1][i] && game.board[1][i] == game.board[2][i]) return 1;
     }
-    if (game.board[0][0] == game.board[1][1] && game.board[1][1] == game.board[2][2])
-        return 1;
-    if (game.board[0][2] == game.board[1][1] && game.board[1][1] == game.board[2][0])
-        return 1;
+    if (game.board[0][0] == game.board[1][1] && game.board[1][1] == game.board[2][2]) return 1;
+    if (game.board[0][2] == game.board[1][1] && game.board[1][1] == game.board[2][0]) return 1;
     return 0;
 }
 
 int check_draw()
 {
     for (int r = 0; r < 3; r++)
-    {
         for (int c = 0; c < 3; c++)
-        {
-            if (game.board[r][c] != 'X' && game.board[r][c] != 'O')
-                return 0;
-        }
-    }
+            if (game.board[r][c] != 'X' && game.board[r][c] != 'O') return 0;
     return 1;
 }
 
@@ -145,14 +122,12 @@ int check_draw()
 
 void update_ui_board()
 {
-    // Update Score Labels
     char s1[50], s2[50];
     snprintf(s1, 50, "%s: %d", game.name1, game.score1);
     snprintf(s2, 50, "%s: %d", game.name2, game.score2);
     gtk_label_set_text(GTK_LABEL(label_score_p1), s1);
     gtk_label_set_text(GTK_LABEL(label_score_p2), s2);
 
-    // Update Grid
     for (int r = 0; r < 3; r++)
     {
         for (int c = 0; c < 3; c++)
@@ -163,18 +138,13 @@ void update_ui_board()
             gtk_widget_remove_css_class(btn, "player-x");
             gtk_widget_remove_css_class(btn, "player-o");
 
-            if (val == 'X')
-            {
+            if (val == 'X') {
                 gtk_button_set_label(GTK_BUTTON(btn), "X");
                 gtk_widget_add_css_class(btn, "player-x");
-            }
-            else if (val == 'O')
-            {
+            } else if (val == 'O') {
                 gtk_button_set_label(GTK_BUTTON(btn), "O");
                 gtk_widget_add_css_class(btn, "player-o");
-            }
-            else
-            {
+            } else {
                 char numStr[2] = {val, '\0'};
                 gtk_button_set_label(GTK_BUTTON(btn), numStr);
             }
@@ -184,22 +154,18 @@ void update_ui_board()
 
 void show_result_screen()
 {
-    // 1. Set Header
     gtk_label_set_text(GTK_LABEL(result_title), "GAME OVER");
 
-    // 2. Set Winner Text
     char result_txt[100];
     if (game.score1 > game.score2) {
         snprintf(result_txt, 100, "VICTORY!\n%s won the match.", game.name1);
         gtk_widget_remove_css_class(result_subtitle, "error");
         gtk_widget_add_css_class(result_subtitle, "success");
-    }
-    else if (game.score2 > game.score1) {
+    } else if (game.score2 > game.score1) {
         snprintf(result_txt, 100, "VICTORY!\n%s won the match.", game.name2);
         gtk_widget_remove_css_class(result_subtitle, "success");
         gtk_widget_add_css_class(result_subtitle, "error");
-    }
-    else {
+    } else {
         snprintf(result_txt, 100, "DRAW!\nNo clear winner.");
         gtk_widget_remove_css_class(result_subtitle, "success");
         gtk_widget_remove_css_class(result_subtitle, "error");
@@ -208,7 +174,6 @@ void show_result_screen()
 
     gtk_label_set_text(GTK_LABEL(result_subtitle), result_txt);
 
-    // 3. Set Final Score
     char score_txt[100];
     snprintf(score_txt, 100, "Final Score: %d - %d", game.score1, game.score2);
     gtk_label_set_text(GTK_LABEL(result_score_label), score_txt);
@@ -219,19 +184,14 @@ void show_result_screen()
 void handle_round_end(int winner_id)
 {
     game.game_over = 1;
-    if (winner_id == 1)
-        game.score1++;
-    else if (winner_id == 2)
-        game.score2++;
+    if (winner_id == 1) game.score1++;
+    else if (winner_id == 2) game.score2++;
 
     game.round_winners[game.current_round - 1] = winner_id;
 
-    if (game.current_round >= 3)
-    {
+    if (game.current_round >= 3) {
         show_result_screen();
-    }
-    else
-    {
+    } else {
         game.current_round++;
         reset_board_logic();
         update_ui_board();
@@ -244,57 +204,46 @@ void handle_round_end(int winner_id)
 
 void on_cell_clicked(GtkWidget *widget, gpointer data)
 {
-    if (game.game_over)
-        return;
+    if (game.game_over) return;
     int id = GPOINTER_TO_INT(data);
     int r = id / 3;
     int c = id % 3;
 
-    if (game.board[r][c] == 'X' || game.board[r][c] == 'O')
-        return;
+    if (game.board[r][c] == 'X' || game.board[r][c] == 'O') return;
 
     game.board[r][c] = (game.current_player == 1) ? 'X' : 'O';
 
-    if (check_winner())
-    {
+    if (check_winner()) {
         update_ui_board();
         handle_round_end(game.current_player);
-    }
-    else if (check_draw())
-    {
+    } else if (check_draw()) {
         update_ui_board();
         handle_round_end(0);
-    }
-    else
-    {
+    } else {
         game.current_player = (game.current_player == 1) ? 2 : 1;
         update_ui_board();
     }
 }
 
-// --- NEW VALIDATION LOGIC HERE ---
 void on_start_clicked(GtkWidget *widget, gpointer data)
 {
     const char *n1 = gtk_editable_get_text(GTK_EDITABLE(entry_p1));
     const char *n2 = gtk_editable_get_text(GTK_EDITABLE(entry_p2));
 
-    // 1. Check Player 1 Empty
+    // UPDATED VALIDATION LOGIC
     if (strlen(n1) == 0) {
-        gtk_label_set_text(GTK_LABEL(lbl_tip_start), "IDENTIFY YOURSELF! Name is required. 🛡️");
-        gtk_widget_remove_css_class(lbl_tip_start, "footer-tip");
-        gtk_widget_add_css_class(lbl_tip_start, "error"); // Turn Red
+        gtk_label_set_text(GTK_LABEL(lbl_start_error), "IDENTIFY YOURSELF! Name is required. 🛡️");
         return;
     }
 
-    // 2. Check Player 2 Empty
     if (strlen(n2) == 0) {
-        gtk_label_set_text(GTK_LABEL(lbl_tip_start), "CHALLENGER MISSING! Don't be shy. ⚔️");
-        gtk_widget_remove_css_class(lbl_tip_start, "footer-tip");
-        gtk_widget_add_css_class(lbl_tip_start, "error"); // Turn Red
+        gtk_label_set_text(GTK_LABEL(lbl_start_error), "CHALLENGER MISSING! Don't be shy. ⚔️");
         return;
     }
 
-    // 3. If Valid, Proceed
+    // Clear error if success
+    gtk_label_set_text(GTK_LABEL(lbl_start_error), "");
+
     strncpy(game.name1, n1, 49);
     strncpy(game.name2, n2, 49);
 
@@ -312,9 +261,6 @@ void on_reset_game_clicked(GtkWidget *widget, gpointer data)
 
 void on_play_again_clicked(GtkWidget *widget, gpointer data)
 {
-    // Reset inputs when going back to start? 
-    // Usually "Play Again" goes to start screen or restarts the match with same names
-    // Based on previous code flow, we restart with same names on game page.
     init_game_state();
     reset_board_logic();
     update_ui_board();
@@ -353,7 +299,6 @@ void add_footer(GtkWidget *box)
 
 static void activate(GtkApplication *app, gpointer user_data)
 {
-    // Load CSS
     GtkCssProvider *provider = gtk_css_provider_new();
     gtk_css_provider_load_from_string(provider, css_data);
     gtk_style_context_add_provider_for_display(gdk_display_get_default(), GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
@@ -397,8 +342,13 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_widget_set_name(btn_start, "start_btn"); 
     g_signal_connect(btn_start, "clicked", G_CALLBACK(on_start_clicked), NULL);
 
-    // Initialize the Global Label here
-    lbl_tip_start = gtk_label_new("💡 Hint: Use your brain. It helps.");
+    // --- ERROR MESSAGE (Initially Empty) ---
+    // This is placed RIGHT UNDER the button
+    lbl_start_error = gtk_label_new("");
+    gtk_widget_add_css_class(lbl_start_error, "error-msg");
+
+    // Tip Label (Bottom)
+    GtkWidget *lbl_tip_start = gtk_label_new("💡 Hint: Use your brain. It helps.");
     gtk_widget_add_css_class(lbl_tip_start, "footer-tip");
 
     gtk_box_append(GTK_BOX(start_card), lbl_icon);
@@ -409,7 +359,13 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_box_append(GTK_BOX(start_card), entry_p2);
     
     gtk_box_append(GTK_BOX(start_card), btn_start);
+    
+    // Append Error Label Here
+    gtk_box_append(GTK_BOX(start_card), lbl_start_error);
+    
+    // Append Tip Label Here
     gtk_box_append(GTK_BOX(start_card), lbl_tip_start);
+    
     add_footer(start_card);
 
     gtk_box_append(GTK_BOX(start_page_wrapper), start_card);
@@ -467,7 +423,6 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_box_append(GTK_BOX(game_card), box_scores);
     gtk_box_append(GTK_BOX(game_card), grid);
     gtk_box_append(GTK_BOX(game_card), btn_reset);
-    
     gtk_box_append(GTK_BOX(game_card), lbl_tip_game);
     
     add_footer(game_card); 
