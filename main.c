@@ -30,8 +30,11 @@ GtkWidget *result_title;
 GtkWidget *result_subtitle;
 GtkWidget *result_score_label;
 
+// NEW: Global reference so we can show error messages
+GtkWidget *lbl_tip_start; 
+
 // ============================================================
-// CSS STYLING (Your Custom CSS)
+// CSS STYLING
 // ============================================================
 
 const char *css_data =
@@ -73,7 +76,7 @@ const char *css_data =
     ".error { color: #d50000; font-weight: bold; font-size: 11pt; }"
     ".warning { color: #ffab00; font-weight: bold; font-size: 14pt; }"
 
-    /* Grid Buttons (Added to match your style) */
+    /* Grid Buttons */
     ".grid-button { font-size: 36px; font-weight: 900; min-width: 70px; min-height: 70px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; color: #333; }"
     ".grid-button:hover { background-color: #e9ecef; }"
     ".player-x { color: #2979ff; }"
@@ -269,14 +272,29 @@ void on_cell_clicked(GtkWidget *widget, gpointer data)
     }
 }
 
+// --- NEW VALIDATION LOGIC HERE ---
 void on_start_clicked(GtkWidget *widget, gpointer data)
 {
     const char *n1 = gtk_editable_get_text(GTK_EDITABLE(entry_p1));
     const char *n2 = gtk_editable_get_text(GTK_EDITABLE(entry_p2));
 
-    if (strlen(n1) == 0 || strlen(n2) == 0)
+    // 1. Check Player 1 Empty
+    if (strlen(n1) == 0) {
+        gtk_label_set_text(GTK_LABEL(lbl_tip_start), "IDENTIFY YOURSELF! Name is required. 🛡️");
+        gtk_widget_remove_css_class(lbl_tip_start, "footer-tip");
+        gtk_widget_add_css_class(lbl_tip_start, "error"); // Turn Red
         return;
+    }
 
+    // 2. Check Player 2 Empty
+    if (strlen(n2) == 0) {
+        gtk_label_set_text(GTK_LABEL(lbl_tip_start), "CHALLENGER MISSING! Don't be shy. ⚔️");
+        gtk_widget_remove_css_class(lbl_tip_start, "footer-tip");
+        gtk_widget_add_css_class(lbl_tip_start, "error"); // Turn Red
+        return;
+    }
+
+    // 3. If Valid, Proceed
     strncpy(game.name1, n1, 49);
     strncpy(game.name2, n2, 49);
 
@@ -294,6 +312,9 @@ void on_reset_game_clicked(GtkWidget *widget, gpointer data)
 
 void on_play_again_clicked(GtkWidget *widget, gpointer data)
 {
+    // Reset inputs when going back to start? 
+    // Usually "Play Again" goes to start screen or restarts the match with same names
+    // Based on previous code flow, we restart with same names on game page.
     init_game_state();
     reset_board_logic();
     update_ui_board();
@@ -309,7 +330,6 @@ void on_exit_clicked(GtkWidget *widget, gpointer data)
 // BUILD CARD HELPERS
 // ============================================================
 
-// Creates a "Card" container (Using your .login-card class)
 GtkWidget *create_card_box()
 {
     GtkWidget *card = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
@@ -320,7 +340,6 @@ GtkWidget *create_card_box()
     return card;
 }
 
-// Adds the "Developed by..." footer
 void add_footer(GtkWidget *box)
 {
     GtkWidget *footer = gtk_label_new("Developed by SUJAY PAUL");
@@ -340,11 +359,8 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_style_context_add_provider_for_display(gdk_display_get_default(), GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
     window = gtk_application_window_new(app);
-    // RESTORED TEXT:
     gtk_window_set_title(GTK_WINDOW(window), "Epic Tic Tac Toe Battle");
     gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
-
-    // Apply Background Class to Window
     gtk_widget_add_css_class(window, "window-bg");
 
     stack = gtk_stack_new();
@@ -360,7 +376,6 @@ static void activate(GtkApplication *app, gpointer user_data)
 
     GtkWidget *start_card = create_card_box();
 
-    // Header - RESTORED TEXT
     GtkWidget *lbl_icon = gtk_label_new("🎮 TIC TAC TOE");
     gtk_widget_add_css_class(lbl_icon, "game-title"); 
 
@@ -370,7 +385,6 @@ static void activate(GtkApplication *app, gpointer user_data)
     GtkWidget *lbl_prompt = gtk_label_new("Select your fighter:");
     gtk_widget_add_css_class(lbl_prompt, "input-label");
 
-    // Inputs - RESTORED TEXT
     entry_p1 = gtk_entry_new();
     gtk_entry_set_placeholder_text(GTK_ENTRY(entry_p1), "User_Alpha...");
     gtk_widget_add_css_class(entry_p1, "styled-entry");
@@ -379,16 +393,14 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_entry_set_placeholder_text(GTK_ENTRY(entry_p2), "User_Beta...");
     gtk_widget_add_css_class(entry_p2, "styled-entry");
 
-    // Start Button - RESTORED TEXT
     GtkWidget *btn_start = gtk_button_new_with_label("LOCK IN ⚔️");
-    gtk_widget_set_name(btn_start, "start_btn"); // Use ID for correct styling
+    gtk_widget_set_name(btn_start, "start_btn"); 
     g_signal_connect(btn_start, "clicked", G_CALLBACK(on_start_clicked), NULL);
 
-    // Tip Label - RESTORED TEXT
-    GtkWidget *lbl_tip_start = gtk_label_new("💡 Hint: Use your brain. It helps.");
+    // Initialize the Global Label here
+    lbl_tip_start = gtk_label_new("💡 Hint: Use your brain. It helps.");
     gtk_widget_add_css_class(lbl_tip_start, "footer-tip");
 
-    // Assembly Page 1
     gtk_box_append(GTK_BOX(start_card), lbl_icon);
     gtk_box_append(GTK_BOX(start_card), lbl_welcome);
     gtk_box_append(GTK_BOX(start_card), lbl_prompt);
@@ -412,12 +424,10 @@ static void activate(GtkApplication *app, gpointer user_data)
 
     GtkWidget *game_card = create_card_box();
     
-    // Header
     GtkWidget *lbl_round = gtk_label_new("Battle Arena");
     gtk_widget_add_css_class(lbl_round, "round-header");
     gtk_box_append(GTK_BOX(game_card), lbl_round);
 
-    // Scoreboard setup
     GtkWidget *box_scores = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 30);
     gtk_widget_set_halign(box_scores, GTK_ALIGN_CENTER);
 
@@ -429,7 +439,6 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_box_append(GTK_BOX(box_scores), label_score_p1);
     gtk_box_append(GTK_BOX(box_scores), label_score_p2);
 
-    // Grid setup
     GtkWidget *grid = gtk_grid_new();
     gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
     gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
@@ -446,24 +455,19 @@ static void activate(GtkApplication *app, gpointer user_data)
         gtk_grid_attach(GTK_GRID(grid), buttons[r][c], c, r, 1, 1);
     }
 
-    // Reset button - RESTORED TEXT
     GtkWidget *btn_reset = gtk_button_new_with_label("RUN IT BACK 🔄");
     gtk_widget_set_margin_top(btn_reset, 10);
-    // Using start_btn ID for blue styling or you can remove for default
     gtk_widget_set_name(btn_reset, "start_btn"); 
     g_signal_connect(btn_reset, "clicked", G_CALLBACK(on_reset_game_clicked), NULL);
     
-    // Tip Label (Game Page) - RESTORED TEXT
     GtkWidget *lbl_tip_game = gtk_label_new("💡 Hint: Use your brain. It helps.");
     gtk_widget_set_margin_top(lbl_tip_game, 15);
     gtk_widget_add_css_class(lbl_tip_game, "footer-tip");
 
-    // Assembly Page 2
     gtk_box_append(GTK_BOX(game_card), box_scores);
     gtk_box_append(GTK_BOX(game_card), grid);
     gtk_box_append(GTK_BOX(game_card), btn_reset);
     
-    // Add tip below reset button inside card (or outside if preferred)
     gtk_box_append(GTK_BOX(game_card), lbl_tip_game);
     
     add_footer(game_card); 
@@ -494,7 +498,6 @@ static void activate(GtkApplication *app, gpointer user_data)
     GtkWidget *box_actions = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
     gtk_widget_set_halign(box_actions, GTK_ALIGN_CENTER);
 
-    // Buttons - RESTORED TEXT
     GtkWidget *btn_rematch = gtk_button_new_with_label("Rematch?");
     gtk_widget_set_name(btn_rematch, "start_btn"); 
     g_signal_connect(btn_rematch, "clicked", G_CALLBACK(on_play_again_clicked), NULL);
@@ -503,7 +506,6 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_widget_add_css_class(btn_end, "btn-exit"); 
     g_signal_connect(btn_end, "clicked", G_CALLBACK(on_exit_clicked), NULL);
 
-    // Assembly Page 3
     gtk_box_append(GTK_BOX(box_actions), btn_rematch);
     gtk_box_append(GTK_BOX(box_actions), btn_end);
 
