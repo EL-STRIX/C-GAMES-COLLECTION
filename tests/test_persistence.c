@@ -82,6 +82,38 @@ void load_global_settings(char *player_name, int *theme_id) {
     }
     g_key_file_free(kf);
 }
+
+gboolean return_to_launcher(void) {
+    char *full_path = NULL; 
+    const char *exe_name = "launcher.exe";
+#ifdef _WIN32
+    char path[MAX_PATH]; GetModuleFileNameA(NULL, path, MAX_PATH);
+    char *dir = g_path_get_dirname(path); full_path = g_build_filename(dir, exe_name, NULL); g_free(dir);
+#else
+    char *exe_path = g_file_read_link("/proc/self/exe", NULL);
+    if (exe_path) {
+        char *dir = g_path_get_dirname(exe_path); full_path = g_build_filename(dir, exe_name, NULL);
+        g_free(dir); g_free(exe_path);
+    } else { 
+        char *cwd = g_get_current_dir();
+        full_path = g_build_filename(cwd, exe_name, NULL); 
+        g_free(cwd);
+    }
+#endif
+    
+    GError *error = NULL;
+    if (!g_spawn_command_line_async(full_path, &error)) {
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
+            "Failed to return to launcher: %s\nPath: %s", error->message, full_path);
+        g_signal_connect(dialog, "response", G_CALLBACK(gtk_window_destroy), NULL);
+        gtk_window_present(GTK_WINDOW(dialog));
+        g_error_free(error);
+        g_free(full_path);
+        return FALSE;
+    }
+    g_free(full_path);
+    return TRUE;
+}
 // --- END INJECTED ENGINE ---
 
 static void test_settings(void) {

@@ -95,7 +95,7 @@ void load_global_settings(char *player_name, int *theme_id) {
     g_key_file_free(kf);
 }
 
-void return_to_launcher(void) {
+gboolean return_to_launcher(void) {
     char *full_path = NULL; 
     const char *exe_name = "launcher.exe";
 #ifdef _WIN32
@@ -106,7 +106,11 @@ void return_to_launcher(void) {
     if (exe_path) {
         char *dir = g_path_get_dirname(exe_path); full_path = g_build_filename(dir, exe_name, NULL);
         g_free(dir); g_free(exe_path);
-    } else { full_path = g_strdup_printf("./bin/%s", exe_name); }
+    } else { 
+        char *cwd = g_get_current_dir();
+        full_path = g_build_filename(cwd, exe_name, NULL); 
+        g_free(cwd);
+    }
 #endif
     
     GError *error = NULL;
@@ -116,8 +120,11 @@ void return_to_launcher(void) {
         g_signal_connect(dialog, "response", G_CALLBACK(gtk_window_destroy), NULL);
         gtk_window_present(GTK_WINDOW(dialog));
         g_error_free(error);
+        g_free(full_path);
+        return FALSE;
     }
     g_free(full_path);
+    return TRUE;
 }
 
 void apply_theme(int theme_id) {
@@ -214,11 +221,12 @@ static void start_game_logic(GameApp *app)
 // 5. Called when "EXIT" button is clicked
 static void on_exit_clicked(GtkButton *btn, gpointer user_data)
 {
-    return_to_launcher();
-    GameApp *app = (GameApp *)user_data;
-    GtkWindow *window = GTK_WINDOW(app->window);
-    GtkApplication *gtk_app = gtk_window_get_application(window);
-    g_application_quit(gtk_app);
+    if (return_to_launcher()) {
+        GameApp *app = (GameApp *)user_data;
+        GtkWindow *window = GTK_WINDOW(app->window);
+        GtkApplication *gtk_app = gtk_window_get_application(window);
+        g_application_quit(gtk_app);
+    }
 }
 
 // 3. Called when "SUBMIT GUESS" button is clicked
