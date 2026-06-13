@@ -249,9 +249,9 @@ int check_draw()
 
 void update_ui_board()
 {
-    char s1[50], s2[50];
-    snprintf(s1, 50, "%s: %d", game.name1, game.score1);
-    snprintf(s2, 50, "%s: %d", game.name2, game.score2);
+    char s1[100], s2[100];
+    snprintf(s1, sizeof(s1), "%s: %d", game.name1, game.score1);
+    snprintf(s2, sizeof(s2), "%s: %d", game.name2, game.score2);
     gtk_label_set_text(GTK_LABEL(label_score_p1), s1);
     gtk_label_set_text(GTK_LABEL(label_score_p2), s2);
 
@@ -535,8 +535,8 @@ static void activate(GtkApplication *app, gpointer user_data)
     load_global_settings(player_name, &theme_id);
     apply_theme(theme_id);
     
-    strncpy(game.name1, player_name, 49);
-    strncpy(game.name2, "Guest", 49);
+    snprintf(game.name1, sizeof(game.name1), "%s", player_name);
+    snprintf(game.name2, sizeof(game.name2), "Guest");
     
     init_game_state();
     reset_board_logic();
