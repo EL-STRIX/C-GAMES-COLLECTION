@@ -12,25 +12,22 @@ TARGETS = $(BIN_DIR)/launcher.exe \
 # Ensure bin directory exists
 $(shell mkdir -p $(BIN_DIR))
 
-all: $(TARGETS) copy_assets
-
-copy_assets:
-	cp -r assets $(BIN_DIR)/
+all: $(TARGETS)
 
 # Launcher
-$(BIN_DIR)/launcher.exe: launcher/main.c common/persistence.c common/audio.c
+$(BIN_DIR)/launcher.exe: launcher/main.c common/persistence.c
 	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
 
 # Number Guessing
-$(BIN_DIR)/number-guessing.exe: games/number-guessing/main.c common/persistence.c common/audio.c
+$(BIN_DIR)/number-guessing.exe: games/number-guessing/main.c common/persistence.c
 	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
 
 # Rock Paper Scissors
-$(BIN_DIR)/rock-paper-scissors.exe: games/rock-paper-scissors/main.c common/persistence.c common/audio.c
+$(BIN_DIR)/rock-paper-scissors.exe: games/rock-paper-scissors/main.c common/persistence.c
 	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
 
 # Snake Gun Water
-$(BIN_DIR)/snake-gun-water.exe: games/snake-gun-water/main.c common/persistence.c common/audio.c
+$(BIN_DIR)/snake-gun-water.exe: games/snake-gun-water/main.c common/persistence.c
 	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
 
 

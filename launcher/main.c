@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../common/persistence.h"
-#include "../common/audio.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -25,7 +24,6 @@ const char *css_data =
 
 static void launch_game(GtkButton *btn, gpointer user_data)
 {
-    play_sound("assets/click.wav");
     const char *exe_name = (const char *)user_data;
     char *full_path = NULL;
 
@@ -182,11 +180,9 @@ static void activate(GtkApplication *app, gpointer user_data)
 
 int main(int argc, char **argv)
 {
-    init_audio();
     GtkApplication *app = gtk_application_new("org.sujay.gameslauncher", G_APPLICATION_DEFAULT_FLAGS);
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
     int status = g_application_run(G_APPLICATION(app), argc, argv);
     g_object_unref(app);
-    uninit_audio();
     return status;
 }

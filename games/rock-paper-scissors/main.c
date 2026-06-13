@@ -15,7 +15,6 @@
 #include <time.h>
 #include <gtk/gtk.h>
 #include "../../common/persistence.h"
-#include "../../common/audio.h"
 
 /* --- Game Constants --- */
 #define CHOICE_ROCK 1
@@ -103,10 +102,7 @@ gboolean on_show_final_results(gpointer user_data) {
     }
 
     if (data->player_score > data->computer_score) {
-        play_sound("assets/win.wav");
         save_score("rps", data->player_name, data->player_score, 0);
-    } else {
-        play_sound("assets/draw.wav"); // Re-using draw/lose sound
     }
     char best_player[50];
     int best_score = load_top_score("rps", best_player);
@@ -249,9 +245,9 @@ void on_start_clicked(GtkButton *btn, gpointer user_data) {
 }
 
 /* Simple wrappers connecting each choice button to process_round() */
-void on_rock_clicked(GtkButton *btn, gpointer user_data) { play_sound("assets/click.wav"); process_round((AppData*)user_data, CHOICE_ROCK); }
-void on_paper_clicked(GtkButton *btn, gpointer user_data) { play_sound("assets/click.wav"); process_round((AppData*)user_data, CHOICE_PAPER); }
-void on_scissors_clicked(GtkButton *btn, gpointer user_data) { play_sound("assets/click.wav"); process_round((AppData*)user_data, CHOICE_SCISSORS); }
+void on_rock_clicked(GtkButton *btn, gpointer user_data) { process_round((AppData*)user_data, CHOICE_ROCK); }
+void on_paper_clicked(GtkButton *btn, gpointer user_data) { process_round((AppData*)user_data, CHOICE_PAPER); }
+void on_scissors_clicked(GtkButton *btn, gpointer user_data) { process_round((AppData*)user_data, CHOICE_SCISSORS); }
 void on_next_round_clicked(GtkButton *btn, gpointer user_data) { start_next_round_ui((AppData*)user_data); }
 void on_play_again_clicked(GtkButton *btn, gpointer user_data) { start_new_game((AppData*)user_data); }
 
@@ -560,11 +556,9 @@ void activate(GtkApplication *app, gpointer user_data) {
 }
 
 int main(int argc, char **argv) {
-    init_audio();
     GtkApplication *app = gtk_application_new("org.sujay.rps", G_APPLICATION_DEFAULT_FLAGS);
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
     int status = g_application_run(G_APPLICATION(app), argc, argv);
     g_object_unref(app);
-    uninit_audio();
     return status;
 }
