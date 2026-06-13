@@ -121,7 +121,7 @@ void apply_theme(int theme_id) {
     else if (theme_id == 2) theme_css = "window { background-color: #0d0d0d; } .card { background-color: #000000; border: 2px solid #00ff00; box-shadow: 0 0 15px rgba(0,255,0,0.3); } label { color: #00ff00; font-family: monospace; } button { background-color: #002200; color: #00ff00; border: 1px solid #00ff00; }";
     if (theme_id != 0) {
         GtkCssProvider *provider = gtk_css_provider_new();
-        gtk_css_provider_load_from_data(provider, theme_css, -1);
+        gtk_css_provider_load_from_string(provider, theme_css);
         gtk_style_context_add_provider_for_display(gdk_display_get_default(), GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
         g_object_unref(provider);
     }
