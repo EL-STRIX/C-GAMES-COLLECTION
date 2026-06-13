@@ -9,30 +9,30 @@ TARGETS = $(BIN_DIR)/launcher.exe \
           $(BIN_DIR)/snake-gun-water.exe \
           $(BIN_DIR)/tic-tac-toe-gui.exe
 
-# Ensure bin directory exists
-$(shell mkdir -p $(BIN_DIR))
+$(BIN_DIR):
+	-mkdir $(BIN_DIR)
 
 all: $(TARGETS)
 
 # Launcher
-$(BIN_DIR)/launcher.exe: launcher/main.c common/persistence.c
+$(BIN_DIR)/launcher.exe: launcher/main.c common/persistence.c | $(BIN_DIR)
 	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
 
 # Number Guessing
-$(BIN_DIR)/number-guessing.exe: games/number-guessing/main.c common/persistence.c
+$(BIN_DIR)/number-guessing.exe: games/number-guessing/main.c common/persistence.c | $(BIN_DIR)
 	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
 
 # Rock Paper Scissors
-$(BIN_DIR)/rock-paper-scissors.exe: games/rock-paper-scissors/main.c common/persistence.c
+$(BIN_DIR)/rock-paper-scissors.exe: games/rock-paper-scissors/main.c common/persistence.c | $(BIN_DIR)
 	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
 
 # Snake Gun Water
-$(BIN_DIR)/snake-gun-water.exe: games/snake-gun-water/main.c common/persistence.c
+$(BIN_DIR)/snake-gun-water.exe: games/snake-gun-water/main.c common/persistence.c | $(BIN_DIR)
 	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
 
 
 # Tic Tac Toe GUI
-$(BIN_DIR)/tic-tac-toe-gui.exe: games/tic-tac-toe-gui/main.c common/persistence.c
+$(BIN_DIR)/tic-tac-toe-gui.exe: games/tic-tac-toe-gui/main.c common/persistence.c | $(BIN_DIR)
 	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
 
 clean:
