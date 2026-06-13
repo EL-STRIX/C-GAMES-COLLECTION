@@ -225,19 +225,9 @@ As these are standalone desktop applications, deployment involves compiling bina
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please follow this workflow:
+Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) to understand our branching strategy, workflow, and code style.
 
-1. **Fork the repository**
-2. **Create a feature branch**: `git checkout -b feature/awesome-new-game`
-3. **Commit your changes**: `git commit -m 'Add space invaders clone'`
-4. **Push to the branch**: `git push origin feature/awesome-new-game`
-5. **Open a Pull Request**
-
-### Coding Standards
-- Maintain strict C99 or C11 standards.
-- UI construction should be cleanly separated from Game Logic.
-- Document internal states and use consistent variable naming (`snake_case`).
-- Ensure no memory leaks when manually allocating pointers (though GTK handles most UI widgets).
+Once your Pull Request is merged, you will be added to the [Contributors List](CONTRIBUTORS.md).
 
 ---
 
