@@ -224,7 +224,7 @@ static void on_exit_clicked(GtkButton *btn, gpointer user_data)
         GameApp *app = (GameApp *)user_data;
         GtkWindow *window = GTK_WINDOW(app->window);
         GtkApplication *gtk_app = gtk_window_get_application(window);
-        g_application_quit(gtk_app);
+        g_application_quit(G_APPLICATION(gtk_app));
     }
 }
 
@@ -308,12 +308,7 @@ static void on_play_again_clicked(GtkButton *btn, GameApp *app)
     start_game_logic(app); // Restart logic
 }
 
-// 5. Called when "EXIT GAME" is clicked
-static void on_exit_clicked(GtkButton *btn, GameApp *app)
-{
-    // Close the window and quit the app
-    g_application_quit(G_APPLICATION(gtk_window_get_application(GTK_WINDOW(app->window))));
-}
+
 
 // --- UI BUILDER FUNCTIONS ---
 
