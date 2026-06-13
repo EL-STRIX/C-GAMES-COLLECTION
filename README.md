@@ -17,7 +17,7 @@ It serves as an excellent educational resource for developers wanting to learn:
 - State management without object-oriented paradigms
 
 ### Key business value
-Provides a foundational template for building GTK4 desktop applications, demonstrating clean code structure, CSS integration, and responsive UI components.
+Provides a foundational template for building GTK4 desktop applications, demonstrating clean code structure, CSS integration, responsive UI components, and resilient inter-process communication logic.
 
 ---
 
@@ -40,10 +40,11 @@ Provides a foundational template for building GTK4 desktop applications, demonst
 * **Tic Tac Toe**: 2-player local multiplayer with dynamic grid updates and win detection.
 
 ### System Features
+* **Central Launcher**: A master menu to seamlessly navigate between games.
 * **Modern GUI**: Completely graphical interfaces replacing traditional CLI implementations.
-* **CSS Styling**: Beautifully styled components, cards, hover effects, and typography using GTK4 CSS providers.
+* **CSS Styling & Themes**: Beautifully styled components, cards, hover effects, and live theme switching (e.g., Hacker Mode) via GTK4 CSS providers.
 * **Page Navigation**: Smooth screen transitions (Welcome -> Game -> Result) using `GtkStack`.
-* **State Management**: Robust internal state tracking for scores, rounds, and player names.
+* **Robust Persistence**: Cross-session state management using GLib's `GKeyFile` INI parser for saving high scores and global player profiles without data corruption risks.
 
 ---
 
@@ -53,19 +54,21 @@ Provides a foundational template for building GTK4 desktop applications, demonst
 | --- | --- |
 | **Language** | C (C99/C11) |
 | **GUI Toolkit** | GTK4 |
+| **Data Persistence**| GLib (`GKeyFile` INI parsing) |
 | **Styling** | CSS (Injected via `GtkCssProvider`) |
 | **Compiler** | GCC / Clang |
-| **Build System** | Make / CMake (Recommended) |
+| **Build System** | GNU Make |
 
 ---
 
 ## 🏗 Architecture
 
-The project follows an Event-Driven Architecture typical for GUI applications. Each game is a standalone GTK4 application containing its own state structure and UI lifecycle.
+The project follows an Event-Driven Architecture typical for GUI applications. Each game, along with the central launcher, is compiled as an entirely independent GTK4 executable. The launcher asynchronously spawns game processes to navigate the arcade, ensuring zero memory leaks between sessions.
 
 ```mermaid
 graph TD
-    A[GtkApplication] -->|activates| B[Main Window]
+    L[Launcher.exe] -->|Spawns via g_spawn| A[Game.exe]
+    A -->|activates| B[Main Window]
     B --> C[GtkStack Container]
     C --> D[Welcome Screen]
     C --> E[Game Screen]
@@ -75,6 +78,7 @@ graph TD
     G --> H{Game Logic / State Update}
     H -->|Update| E
     H -->|Game Over| F
+    F -->|Return| L
 ```
 
 ### Component Relationships
@@ -88,24 +92,26 @@ graph TD
 
 ```text
 C-GAMES-COLLECTION/
+├── launcher/
+│   └── main.c              # Central Arcade Launcher logic
 ├── games/
 │   ├── number-guessing/
-│   │   ├── main.c          # Logic and UI for Number Guessing
-│   │   └── main.exe        # Compiled executable
+│   │   └── main.c          # Logic and UI for Number Guessing
 │   ├── rock-paper-scissors/
-│   │   ├── main.c          # Logic and UI for Rock Paper Scissors
-│   │   └── main.exe        # Compiled executable
+│   │   └── main.c          # Logic and UI for Rock Paper Scissors
 │   ├── snake-gun-water/
-│   │   ├── main.c          # Logic and UI for Snake Gun Water
-│   │   └── main.exe        # Compiled executable
+│   │   └── main.c          # Logic and UI for Snake Gun Water
 │   └── tic-tac-toe-gui/
-│       ├── main.c          # Enhanced GTK4 Tic Tac Toe with UX improvements
-│       └── main.exe        # Compiled executable
+│       └── main.c          # Logic and UI for Tic Tac Toe
+├── tests/
+│   └── test_persistence.c  # GLib unit tests for the INI data layer
+├── Makefile                # Automated build script
 └── README.md               # Project documentation
 ```
 
-**Major Directories:**
-- `games/`: Contains individual game folders. Each subfolder is a completely independent project and executable.
+**Major Components:**
+- `launcher/` & `games/`: Each subfolder is a completely independent executable that communicates with the other binaries via the OS process tree. All files self-contain the `GKeyFile` persistence engine.
+- `bin/` (auto-generated): Where all compiled `.exe` files and `.ini` save files are stored.
 
 ---
 
@@ -114,6 +120,7 @@ C-GAMES-COLLECTION/
 To compile and run these games from source, you must have the following installed on your system:
 
 * **C Compiler**: `gcc` or `clang`
+* **Make**: GNU Make or `mingw32-make`
 * **GTK4 Development Libraries**: 
   * *Linux (Ubuntu/Debian)*: `sudo apt install libgtk-4-dev`
   * *Windows*: MSYS2 with `mingw-w64-x86_64-gtk4`
@@ -130,34 +137,27 @@ To compile and run these games from source, you must have the following installe
    cd C-GAMES-COLLECTION
    ```
 
-2. **Navigate to a game directory**
+2. **Compile the entire collection**
+   Using GNU Make (or `mingw32-make` on Windows):
    ```bash
-   cd games/tic-tac-toe-gui
+   make all
    ```
-
-3. **Compile the source code**
-   Using GCC and `pkg-config`:
-   ```bash
-   gcc main.c -o main.exe `pkg-config --cflags --libs gtk4`
-   ```
-   *(Note: On Windows MSYS2, use `pkg-config --cflags --libs gtk4` appropriately within your mingw64 shell).*
+   *This will automatically generate the `bin/` directory and compile the launcher and all 4 games using `pkg-config --cflags --libs gtk4`.*
 
 ---
 
 ## 💻 Running the Project
 
-### Development / Local Mode
-
-Once compiled, execute the generated binary directly.
+Once compiled, execute the central launcher from the `bin` directory to access the games.
 
 **On Linux/macOS:**
 ```bash
-./main
+./bin/launcher.exe
 ```
 
 **On Windows:**
 ```cmd
-main.exe
+bin\launcher.exe
 ```
 
 *Note: Ensure your environment variables (like `PATH` on Windows) include the GTK4 `bin` directories so dynamic linked libraries (`.dll`s) are found at runtime.*
@@ -166,13 +166,18 @@ main.exe
 
 ## 🧪 Testing
 
-Currently, the games rely on manual testing. 
-To verify functionality:
-1. Launch the executable.
-2. Enter player details to pass validation checks.
+The repository utilizes the `g_test` framework to run automated headless unit tests against the `GKeyFile` persistence engine, verifying that data boundaries (like strings containing newlines) are properly escaped.
+
+To run the automated test suite:
+```bash
+make test
+```
+
+For UI testing, manually verify functionality:
+1. Launch `launcher.exe`.
+2. Ensure theme switching dynamically applies to all GTK elements.
 3. Play a complete cycle (until Result Screen).
-4. Use the "Play Again" / "Rematch" buttons to ensure state properly resets.
-5. Exit using the application buttons to ensure memory is released and app terminates correctly.
+4. Exit using the "Return to Launcher" buttons to ensure the OS gracefully handles the cross-process spawning.
 
 ---
 
@@ -182,7 +187,7 @@ As these are standalone desktop applications, deployment involves compiling bina
 
 **Windows Distribution:**
 - Compile using MSYS2.
-- Bundle the resulting `main.exe` with required GTK4 `.dll` files (using tools like `ldd` or MSYS2 deployment scripts) into a ZIP archive or installer.
+- Bundle the resulting `bin/` directory with required GTK4 `.dll` files (using tools like `ldd` or MSYS2 deployment scripts) into a ZIP archive or installer.
 
 **Linux Distribution:**
 - Applications can be packaged as Flatpaks, AppImages, or native `.deb`/`.rpm` packages depending on the target ecosystem.
@@ -193,6 +198,7 @@ As these are standalone desktop applications, deployment involves compiling bina
 
 * **Memory Management**: UI elements are managed by the GTK framework's reference counting system. Stack containers ensure inactive screens are hidden rather than destroyed/recreated continuously, reducing CPU overhead.
 * **Inline CSS**: CSS data is compiled directly into the binary as C-strings (`css_data`), avoiding external file I/O operations at runtime.
+* **Atomic Save States**: The `GKeyFile` parser is highly optimized for writing standard INI files safely, preventing UI blocking or corruption during fast data persistence.
 
 ---
 
@@ -202,17 +208,18 @@ As these are standalone desktop applications, deployment involves compiling bina
 | :--- | :--- | :--- |
 | **"gtk/gtk.h: No such file or directory"** | GTK4 headers not found during compilation. | Ensure GTK4 development packages are installed and `pkg-config` is correctly setup in your PATH. |
 | **Application crashes instantly on Windows** | Missing DLLs in the runtime environment. | Run the `.exe` from the MSYS2 Mingw64 shell, or copy the required GTK `.dll` files into the executable's folder. |
-| **CSS Styles not applying** | GTK Theme overrides or missing provider priority. | The code uses `GTK_STYLE_PROVIDER_PRIORITY_APPLICATION`/`USER`. Ensure your environment doesn't strictly force high-contrast overriding themes. |
+| **"Failed to return to launcher" Dialog** | Operating System path resolution failed. | Ensure you are launching the games via `launcher.exe` inside the `bin/` directory, rather than executing the game binaries from a separate arbitrary working directory. |
 
 ---
 
 ## 🗺 Roadmap
 
-- [ ] **Cross-Game Menu**: Create a master launcher `main.exe` in the root folder to select and launch any of the 5 games.
-- [ ] **Data Persistence**: Implement SQLite or local file I/O to save high scores and player histories between sessions.
+- [x] **Cross-Game Menu**: Create a master launcher `main.exe` in the root folder to select and launch any of the 5 games.
+- [x] **Data Persistence**: Implement local INI file I/O to save high scores and player histories between sessions.
+- [x] **Makefiles**: Add a standard `Makefile` for automated cross-compiling.
 - [ ] **AI Opponent for Tic-Tac-Toe**: Add a single-player mode with a Minimax algorithm for the computer.
 - [ ] **Audio Feedback**: Integrate a lightweight audio library (e.g., SDL_mixer or Miniaudio) for button clicks and win/loss sound effects.
-- [ ] **Makefiles**: Add a standard `Makefile` or `CMakeLists.txt` for easier automated building.
+- [ ] **Cross-Process API**: Shift from standalone binaries to a dynamically loaded library (`.so`/`.dll`) architecture for unified memory.
 
 ---
 
