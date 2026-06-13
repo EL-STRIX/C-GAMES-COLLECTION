@@ -7,7 +7,8 @@ TARGETS = $(BIN_DIR)/launcher.exe \
           $(BIN_DIR)/number-guessing.exe \
           $(BIN_DIR)/rock-paper-scissors.exe \
           $(BIN_DIR)/snake-gun-water.exe \
-          $(BIN_DIR)/tic-tac-toe-gui.exe
+          $(BIN_DIR)/tic-tac-toe-gui.exe \
+          $(BIN_DIR)/test_persistence.exe
 
 $(BIN_DIR):
 	-mkdir $(BIN_DIR)
@@ -34,6 +35,13 @@ $(BIN_DIR)/snake-gun-water.exe: games/snake-gun-water/main.c | $(BIN_DIR)
 # Tic Tac Toe GUI
 $(BIN_DIR)/tic-tac-toe-gui.exe: games/tic-tac-toe-gui/main.c | $(BIN_DIR)
 	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
+
+# Tests
+$(BIN_DIR)/test_persistence.exe: tests/test_persistence.c | $(BIN_DIR)
+	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
+
+test: $(BIN_DIR)/test_persistence.exe
+	./$(BIN_DIR)/test_persistence.exe
 
 clean:
 	rm -rf $(BIN_DIR)/*.exe

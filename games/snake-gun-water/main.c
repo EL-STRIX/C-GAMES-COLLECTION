@@ -24,40 +24,83 @@
 
 int load_top_score(const char *game_name, char *out_player_name) {
     char filename[100];
-    snprintf(filename, sizeof(filename), "%s_score.dat", game_name);
-    FILE *f = fopen(filename, "r");
-    if (!f) { if (out_player_name) strcpy(out_player_name, "None"); return -1; }
-    int score = -1; char name[50];
-    if (fgets(name, sizeof(name), f)) {
-        name[strcspn(name, "\n")] = 0;
-        if (fscanf(f, "%d", &score) == 1 && out_player_name) strcpy(out_player_name, name);
+    snprintf(filename, sizeof(filename), "%s_score.ini", game_name);
+    
+    GKeyFile *kf = g_key_file_new();
+    if (!g_key_file_load_from_file(kf, filename, G_KEY_FILE_NONE, NULL)) {
+        if (out_player_name) strcpy(out_player_name, "None");
+        g_key_file_free(kf);
+        return -1;
     }
-    fclose(f); return score;
+    
+    int score = g_key_file_get_integer(kf, "Score", "Value", NULL);
+    gchar *name = g_key_file_get_string(kf, "Score", "Player", NULL);
+    if (name && out_player_name) {
+        strncpy(out_player_name, name, 49);
+        out_player_name[49] = '\0';
+    } else if (out_player_name) {
+        strcpy(out_player_name, "Unknown");
+    }
+    
+    g_free(name);
+    g_key_file_free(kf);
+    return score;
 }
+
 void save_score(const char *game_name, const char *player_name, int score, int is_lower_better) {
-    char top_player[50]; int top_score = load_top_score(game_name, top_player);
+    char top_player[50]; 
+    int top_score = load_top_score(game_name, top_player);
     int is_new_record = (top_score == -1) || (is_lower_better ? (score < top_score) : (score > top_score));
+    
     if (is_new_record) {
-        char filename[100]; snprintf(filename, sizeof(filename), "%s_score.dat", game_name);
-        FILE *f = fopen(filename, "w");
-        if (f) { fprintf(f, "%s\n%d\n", player_name, score); fclose(f); }
+        char filename[100]; 
+        snprintf(filename, sizeof(filename), "%s_score.ini", game_name);
+        GKeyFile *kf = g_key_file_new();
+        g_key_file_set_string(kf, "Score", "Player", player_name);
+        g_key_file_set_integer(kf, "Score", "Value", score);
+        g_key_file_save_to_file(kf, filename, NULL);
+        g_key_file_free(kf);
     }
 }
+
 void save_global_settings(const char *player_name, int theme_id) {
-    FILE *f = fopen("settings.dat", "w");
-    if (f) { fprintf(f, "%s\n%d\n", player_name, theme_id); fclose(f); }
+    GKeyFile *kf = g_key_file_new();
+    g_key_file_set_string(kf, "Settings", "PlayerName", player_name);
+    g_key_file_set_integer(kf, "Settings", "ThemeID", theme_id);
+    g_key_file_save_to_file(kf, "settings.ini", NULL);
+    g_key_file_free(kf);
 }
+
 void load_global_settings(char *player_name, int *theme_id) {
-    FILE *f = fopen("settings.dat", "r");
-    if (f) {
-        if (fgets(player_name, 50, f)) player_name[strcspn(player_name, "\n")] = 0;
-        else strcpy(player_name, "Player 1");
-        if (fscanf(f, "%d", theme_id) != 1) *theme_id = 0;
-        fclose(f);
-    } else { strcpy(player_name, "Player 1"); *theme_id = 0; }
+    GKeyFile *kf = g_key_file_new();
+    if (g_key_file_load_from_file(kf, "settings.ini", G_KEY_FILE_NONE, NULL)) {
+        gchar *name = g_key_file_get_string(kf, "Settings", "PlayerName", NULL);
+        if (name) {
+            strncpy(player_name, name, 49);
+            player_name[49] = '\0';
+            g_free(name);
+        } else {
+            strcpy(player_name, "Player 1");
+        }
+        
+        GError *err = NULL;
+        int t = g_key_file_get_integer(kf, "Settings", "ThemeID", &err);
+        if (err) {
+            *theme_id = 0;
+            g_error_free(err);
+        } else {
+            *theme_id = t;
+        }
+    } else {
+        strcpy(player_name, "Player 1");
+        *theme_id = 0;
+    }
+    g_key_file_free(kf);
 }
+
 void return_to_launcher(void) {
-    char *full_path = NULL; const char *exe_name = "launcher.exe";
+    char *full_path = NULL; 
+    const char *exe_name = "launcher.exe";
 #ifdef _WIN32
     char path[MAX_PATH]; GetModuleFileNameA(NULL, path, MAX_PATH);
     char *dir = g_path_get_dirname(path); full_path = g_build_filename(dir, exe_name, NULL); g_free(dir);
@@ -68,8 +111,18 @@ void return_to_launcher(void) {
         g_free(dir); g_free(exe_path);
     } else { full_path = g_strdup_printf("./bin/%s", exe_name); }
 #endif
-    g_spawn_command_line_async(full_path, NULL); g_free(full_path);
+    
+    GError *error = NULL;
+    if (!g_spawn_command_line_async(full_path, &error)) {
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
+            "Failed to return to launcher: %s\nPath: %s", error->message, full_path);
+        g_signal_connect(dialog, "response", G_CALLBACK(gtk_window_destroy), NULL);
+        gtk_window_present(GTK_WINDOW(dialog));
+        g_error_free(error);
+    }
+    g_free(full_path);
 }
+
 void apply_theme(int theme_id) {
     const char *theme_css = "";
     if (theme_id == 1) theme_css = "window { background-color: #11111b; } .card { background-color: #1e1e2e; color: #cdd6f4; border: 1px solid #45475a; box-shadow: 0 0 10px rgba(255,255,255,0.1); } label { color: #cdd6f4; }";
