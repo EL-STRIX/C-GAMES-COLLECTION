@@ -105,10 +105,9 @@ gboolean return_to_launcher(void) {
     
     GError *error = NULL;
     if (!g_spawn_command_line_async(full_path, &error)) {
-        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
-            "Failed to return to launcher: %s\nPath: %s", error->message, full_path);
-        g_signal_connect(dialog, "response", G_CALLBACK(gtk_window_destroy), NULL);
-        gtk_window_present(GTK_WINDOW(dialog));
+        GtkAlertDialog *dialog = gtk_alert_dialog_new("Failed to return to launcher: %s\nPath: %s", error->message, full_path);
+        gtk_alert_dialog_show(dialog, NULL);
+        g_object_unref(dialog);
         g_error_free(error);
         g_free(full_path);
         return FALSE;
@@ -240,10 +239,9 @@ static void launch_game(GtkButton *btn, gpointer user_data)
     GError *error = NULL;
     gboolean success = g_spawn_command_line_async(full_path, &error);
     if (!success) {
-        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
-            "Failed to launch game: %s\nPath: %s", error->message, full_path);
-        g_signal_connect(dialog, "response", G_CALLBACK(gtk_window_destroy), NULL);
-        gtk_window_present(GTK_WINDOW(dialog));
+        GtkAlertDialog *dialog = gtk_alert_dialog_new("Failed to launch game: %s\nPath: %s", error->message, full_path);
+        gtk_alert_dialog_show(dialog, NULL);
+        g_object_unref(dialog);
         g_error_free(error);
     } else {
         if (main_window) {
