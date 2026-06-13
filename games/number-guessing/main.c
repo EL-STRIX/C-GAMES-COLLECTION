@@ -20,8 +20,9 @@
 #endif
 
 int load_top_score(const char *game_name, char *out_player_name) {
+    g_mkdir_with_parents("data", 0755);
     char filename[100];
-    snprintf(filename, sizeof(filename), "%s_score.ini", game_name);
+    snprintf(filename, sizeof(filename), "data/%s_score.ini", game_name);
     
     GKeyFile *kf = g_key_file_new();
     if (!g_key_file_load_from_file(kf, filename, G_KEY_FILE_NONE, NULL)) {
@@ -50,8 +51,9 @@ void save_score(const char *game_name, const char *player_name, int score, int i
     int is_new_record = (top_score == -1) || (is_lower_better ? (score < top_score) : (score > top_score));
     
     if (is_new_record) {
+        g_mkdir_with_parents("data", 0755);
         char filename[100]; 
-        snprintf(filename, sizeof(filename), "%s_score.ini", game_name);
+        snprintf(filename, sizeof(filename), "data/%s_score.ini", game_name);
         GKeyFile *kf = g_key_file_new();
         g_key_file_set_string(kf, "Score", "Player", player_name);
         g_key_file_set_integer(kf, "Score", "Value", score);
@@ -62,15 +64,17 @@ void save_score(const char *game_name, const char *player_name, int score, int i
 
 void save_global_settings(const char *player_name, int theme_id) {
     GKeyFile *kf = g_key_file_new();
+    g_mkdir_with_parents("data", 0755);
     g_key_file_set_string(kf, "Settings", "PlayerName", player_name);
     g_key_file_set_integer(kf, "Settings", "ThemeID", theme_id);
-    g_key_file_save_to_file(kf, "settings.ini", NULL);
+    g_key_file_save_to_file(kf, "data/settings.ini", NULL);
     g_key_file_free(kf);
 }
 
 void load_global_settings(char *player_name, int *theme_id) {
+    g_mkdir_with_parents("data", 0755);
     GKeyFile *kf = g_key_file_new();
-    if (g_key_file_load_from_file(kf, "settings.ini", G_KEY_FILE_NONE, NULL)) {
+    if (g_key_file_load_from_file(kf, "data/settings.ini", G_KEY_FILE_NONE, NULL)) {
         gchar *name = g_key_file_get_string(kf, "Settings", "PlayerName", NULL);
         if (name) {
             strncpy(player_name, name, 49);
