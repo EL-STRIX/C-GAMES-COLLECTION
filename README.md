@@ -92,9 +92,8 @@ graph TD
 
 ```text
 C-GAMES-COLLECTION/
-├── launcher/
-│   └── main.c              # Central Arcade Launcher logic
 ├── games/
+│   ├── launcher.c          # Central Arcade Launcher logic
 │   ├── number-guessing/
 │   │   └── main.c          # Logic and UI for Number Guessing
 │   ├── rock-paper-scissors/
@@ -110,7 +109,7 @@ C-GAMES-COLLECTION/
 ```
 
 **Major Components:**
-- `launcher/` & `games/`: Each subfolder is a completely independent executable that communicates with the other binaries via the OS process tree. All files self-contain the `GKeyFile` persistence engine.
+- `games/`: Folder containing all completely independent executable source files. They communicate with the other binaries via the OS process tree. All files self-contain the `GKeyFile` persistence engine.
 - `bin/` (auto-generated): Where all compiled `.exe` files and `.ini` save files are stored.
 
 ---

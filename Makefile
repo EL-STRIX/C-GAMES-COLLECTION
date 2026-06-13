@@ -15,7 +15,7 @@ $(BIN_DIR):
 	-mkdir $(BIN_DIR)
 
 # Launcher
-$(BIN_DIR)/launcher.exe: launcher/main.c | $(BIN_DIR)
+$(BIN_DIR)/launcher.exe: games/launcher.c | $(BIN_DIR)
 	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
 
 # Number Guessing
