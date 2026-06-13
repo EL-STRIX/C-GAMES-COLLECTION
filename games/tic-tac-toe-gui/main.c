@@ -116,21 +116,29 @@ gboolean return_to_launcher(void) {
     return TRUE;
 }
 
+static GtkCssProvider *current_theme_provider = NULL;
+
 void apply_theme(int theme_id) {
+    if (current_theme_provider != NULL) {
+        gtk_style_context_remove_provider_for_display(gdk_display_get_default(), GTK_STYLE_PROVIDER(current_theme_provider));
+        g_object_unref(current_theme_provider);
+        current_theme_provider = NULL;
+    }
+
     if (theme_id == 1 || theme_id == 2) {
         g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", TRUE, NULL);
     } else {
-        g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", FALSE, NULL);
+        // Default theme is dark blue, so keep dark theme preferred
+        g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", TRUE, NULL);
     }
 
     const char *theme_css = "";
     if (theme_id == 1) theme_css = "window { background-color: #11111b; } .card { background-color: #1e1e2e; color: #cdd6f4; border: 1px solid #45475a; box-shadow: 0 0 10px rgba(255,255,255,0.1); } label, .header-title, .subtitle, .game-title, .game-desc, .name-question, .welcome-text, .result-small-text, .result-performance-text, .attempts-text, .success-text, .big-number, .tip-text, .warning-text { color: #cdd6f4; font-family: sans-serif; } button, .btn-launch, .btn-settings, .btn-blue { background-color: #89b4fa; color: #11111b; font-weight: bold; border: none; border-radius: 8px; } button label, .btn-launch label, .btn-settings label, .btn-blue label { color: #11111b; } button:hover, .btn-launch:hover, .btn-settings:hover, .btn-blue:hover { background-color: #b4befe; }";
     else if (theme_id == 2) theme_css = "window { background-color: #0d0d0d; } .card { background-color: #000000; border: 2px solid #00ff00; box-shadow: 0 0 15px rgba(0,255,0,0.3); } label, .header-title, .subtitle, .game-title, .game-desc, .name-question, .welcome-text, .result-small-text, .result-performance-text, .attempts-text, .success-text, .big-number, .tip-text, .warning-text { color: #00ff00; font-family: monospace; } button, .btn-launch, .btn-settings, .btn-blue { background-color: #002200; color: #00ff00; border: 1px solid #00ff00; font-family: monospace; border-radius: 8px; } button label, .btn-launch label, .btn-settings label, .btn-blue label { color: #00ff00; } button:hover, .btn-launch:hover, .btn-settings:hover, .btn-blue:hover { background-color: #004400; }";
     if (theme_id != 0) {
-        GtkCssProvider *provider = gtk_css_provider_new();
-        gtk_css_provider_load_from_string(provider, theme_css);
-        gtk_style_context_add_provider_for_display(gdk_display_get_default(), GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-        g_object_unref(provider);
+        current_theme_provider = gtk_css_provider_new();
+        gtk_css_provider_load_from_string(current_theme_provider, theme_css);
+        gtk_style_context_add_provider_for_display(gdk_display_get_default(), GTK_STYLE_PROVIDER(current_theme_provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     }
 }
 // --- END INJECTED ENGINE ---
@@ -165,14 +173,15 @@ GtkWidget *result_subtitle;
 GtkWidget *result_score_label;
 
 // NEW: Dedicated error label separate from the tip
-GtkWidget *lbl_start_error; 
+GtkWidget *lbl_start_error;
 
 // ============================================================
 // CSS STYLING
 // ============================================================
 
 const char *css_data =
-    ".window-bg { background-color: #cfcfcf; }"
+    "window { background-color: #1e1e2e; }"
+    "label { color: #cdd6f4; }"
     ".login-card { background-color: #ffffff; border-radius: 12px; padding: 30px; margin: 20px; box-shadow: 0px 4px 8px rgba(0,0,0,0.1); }"
     ".game-title { font-size: 16pt; font-weight: bold; color: #4a00e0; margin-bottom: 5px; }"
     ".welcome-text { font-size: 14pt; font-weight: bold; color: #2979ff; margin-bottom: 20px; }"
