@@ -231,16 +231,52 @@ static void start_game_logic(GameApp *app)
     gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "page_game");
 }
 
-// 2. Removed on_start_clicked since we bypass login.
+// 2. Called when "START" button is clicked on Login screen
+static void on_start_clicked(GtkButton *btn, GameApp *app)
+{
+    const char *name = gtk_editable_get_text(GTK_EDITABLE(app->name_entry));
+    if (g_utf8_strlen(name, -1) == 0) {
+        gtk_label_set_text(GTK_LABEL(app->name_warning_label), "Please enter your name to play!");
+        return;
+    }
+    gtk_label_set_text(GTK_LABEL(app->name_warning_label), "");
+    strncpy(app->player_name, name, sizeof(app->player_name) - 1);
+    app->player_name[sizeof(app->player_name) - 1] = '\0';
+    save_global_settings(app->player_name, -1);
+    start_game_logic(app);
+}
+
 // 5. Called when "EXIT" button is clicked
+static void confirm_exit_response(GObject *source_object, GAsyncResult *res, gpointer user_data) {
+    GtkAlertDialog *dialog = GTK_ALERT_DIALOG(source_object);
+    GError *error = NULL;
+    int response = gtk_alert_dialog_choose_finish(dialog, res, &error);
+    if (error) {
+        g_error_free(error);
+        return;
+    }
+    if (response == 1) {
+        if (return_to_launcher()) {
+            GameApp *app = (GameApp *)user_data;
+            GtkWindow *window = GTK_WINDOW(app->window);
+            GtkApplication *gtk_app = gtk_window_get_application(window);
+            g_application_quit(G_APPLICATION(gtk_app));
+        }
+    }
+}
+
 static void on_exit_clicked(GtkButton *btn, gpointer user_data)
 {
-    if (return_to_launcher()) {
-        GameApp *app = (GameApp *)user_data;
-        GtkWindow *window = GTK_WINDOW(app->window);
-        GtkApplication *gtk_app = gtk_window_get_application(window);
-        g_application_quit(G_APPLICATION(gtk_app));
-    }
+    GameApp *app = (GameApp *)user_data;
+    GtkAlertDialog *dialog = gtk_alert_dialog_new("Are you sure you want to exit the game?");
+    gtk_alert_dialog_set_detail(dialog, "Any unsaved progress will be lost.");
+    const char *buttons[] = {"Cancel", "Exit", NULL};
+    gtk_alert_dialog_set_buttons(dialog, buttons);
+    gtk_alert_dialog_set_cancel_button(dialog, 0);
+    gtk_alert_dialog_set_default_button(dialog, 0);
+    
+    gtk_alert_dialog_choose(dialog, GTK_WINDOW(app->window), NULL, confirm_exit_response, app);
+    g_object_unref(dialog);
 }
 
 // 3. Called when "SUBMIT GUESS" button is clicked
@@ -338,7 +374,43 @@ GtkWidget *create_card_box()
     return box;
 }
 
-// Removed create_welcome_page
+// Build Page 1: Login Screen
+GtkWidget *create_welcome_page(GameApp *app)
+{
+    GtkWidget *box = create_card_box();
+
+    GtkWidget *welcome_lbl = gtk_label_new("Ready to guess?");
+    gtk_widget_add_css_class(welcome_lbl, "welcome-text");
+
+    GtkWidget *q_lbl = gtk_label_new("What's your name, Challenger?");
+    gtk_widget_add_css_class(q_lbl, "name-question");
+
+    app->name_entry = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(app->name_entry), "Type your name here...");
+    gtk_widget_add_css_class(app->name_entry, "input-field");
+    gtk_widget_set_halign(app->name_entry, GTK_ALIGN_CENTER);
+
+    app->name_warning_label = gtk_label_new("");
+    gtk_widget_add_css_class(app->name_warning_label, "warning-text");
+
+    GtkWidget *start_btn = gtk_button_new_with_label("START ADVENTURE");
+    gtk_widget_add_css_class(start_btn, "btn-blue");
+    g_signal_connect(start_btn, "clicked", G_CALLBACK(on_start_clicked), app);
+
+    GtkWidget *exit_btn = gtk_button_new_with_label("Return to Menu");
+    gtk_widget_add_css_class(exit_btn, "btn-blue");
+    gtk_widget_set_margin_top(exit_btn, 10);
+    g_signal_connect(exit_btn, "clicked", G_CALLBACK(on_exit_clicked), app);
+
+    gtk_box_append(GTK_BOX(box), welcome_lbl);
+    gtk_box_append(GTK_BOX(box), q_lbl);
+    gtk_box_append(GTK_BOX(box), app->name_entry);
+    gtk_box_append(GTK_BOX(box), app->name_warning_label);
+    gtk_box_append(GTK_BOX(box), start_btn);
+    gtk_box_append(GTK_BOX(box), exit_btn);
+
+    return box;
+}
 
 // Build Page 2: Game Screen
 GtkWidget *create_game_page(GameApp *app)
@@ -449,7 +521,7 @@ static void activate(GtkApplication *app_system, gpointer user_data)
     // Setup Main Window
     app->window = gtk_application_window_new(app_system);
     gtk_window_set_title(GTK_WINDOW(app->window), "Guess The Number");
-    gtk_window_set_default_size(GTK_WINDOW(app->window), 400, 500);
+    gtk_window_set_default_size(GTK_WINDOW(app->window), 900, 700);
 
     // Load CSS Styles
     GtkCssProvider *provider = gtk_css_provider_new();
@@ -469,15 +541,21 @@ static void activate(GtkApplication *app_system, gpointer user_data)
     apply_theme(theme_id);
 
     // Create all pages
+    GtkWidget *page1 = create_welcome_page(app);
     GtkWidget *page2 = create_game_page(app);
     GtkWidget *page3 = create_result_page(app);
 
     // Add pages to the stack
+    gtk_stack_add_named(GTK_STACK(app->stack), page1, "page_welcome");
     gtk_stack_add_named(GTK_STACK(app->stack), page2, "page_game");
     gtk_stack_add_named(GTK_STACK(app->stack), page3, "page_result");
     
-    // Start the game logic immediately since we bypass login
-    start_game_logic(app);
+    // Set default player name if available
+    if (strlen(app->player_name) > 0) {
+        gtk_editable_set_text(GTK_EDITABLE(app->name_entry), app->player_name);
+    }
+
+    gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "page_welcome");
 
     // Show the stack in the window
     gtk_window_set_child(GTK_WINDOW(app->window), app->stack);

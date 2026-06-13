@@ -379,7 +379,27 @@ void on_cell_clicked(GtkWidget *widget, gpointer data)
     }
 }
 
-// Removed on_start_clicked and focus_entry_2 as we bypass login
+void on_start_clicked(GtkWidget *widget, gpointer data)
+{
+    const char *name = gtk_editable_get_text(GTK_EDITABLE(entry_p1));
+    if (g_utf8_strlen(name, -1) == 0) {
+        gtk_label_set_text(GTK_LABEL(lbl_start_error), "Please enter your name to play!");
+        return;
+    }
+    gtk_label_set_text(GTK_LABEL(lbl_start_error), "");
+    
+    strncpy(game.name1, name, sizeof(game.name1) - 1);
+    game.name1[sizeof(game.name1) - 1] = '\0';
+    save_global_settings(game.name1, -1);
+    
+    snprintf(game.name2, sizeof(game.name2), "Guest");
+
+    init_game_state();
+    reset_board_logic();
+    update_ui_board();
+    
+    gtk_stack_set_visible_child_name(GTK_STACK(stack), "game_page");
+}
 
 void on_reset_game_clicked(GtkWidget *widget, gpointer data)
 {
@@ -395,11 +415,32 @@ void on_play_again_clicked(GtkWidget *widget, gpointer data)
     gtk_stack_set_visible_child_name(GTK_STACK(stack), "game_page");
 }
 
+static void confirm_exit_response(GObject *source_object, GAsyncResult *res, gpointer user_data) {
+    GtkAlertDialog *dialog = GTK_ALERT_DIALOG(source_object);
+    GError *error = NULL;
+    int response = gtk_alert_dialog_choose_finish(dialog, res, &error);
+    if (error) {
+        g_error_free(error);
+        return;
+    }
+    if (response == 1) {
+        if (return_to_launcher()) {
+            gtk_window_close(GTK_WINDOW(window));
+        }
+    }
+}
+
 void on_exit_clicked(GtkWidget *widget, gpointer data)
 {
-    if (return_to_launcher()) {
-        gtk_window_close(GTK_WINDOW(window));
-    }
+    GtkAlertDialog *dialog = gtk_alert_dialog_new("Are you sure you want to exit the game?");
+    gtk_alert_dialog_set_detail(dialog, "Any unsaved progress will be lost.");
+    const char *buttons[] = {"Cancel", "Exit", NULL};
+    gtk_alert_dialog_set_buttons(dialog, buttons);
+    gtk_alert_dialog_set_cancel_button(dialog, 0);
+    gtk_alert_dialog_set_default_button(dialog, 0);
+    
+    gtk_alert_dialog_choose(dialog, GTK_WINDOW(window), NULL, confirm_exit_response, NULL);
+    g_object_unref(dialog);
 }
 
 // ============================================================
@@ -435,14 +476,56 @@ static void activate(GtkApplication *app, gpointer user_data)
 
     window = gtk_application_window_new(app);
     gtk_window_set_title(GTK_WINDOW(window), "Epic Tic Tac Toe Battle");
-    gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
+    gtk_window_set_default_size(GTK_WINDOW(window), 900, 700);
     gtk_widget_add_css_class(window, "window-bg");
 
     stack = gtk_stack_new();
     gtk_stack_set_transition_type(GTK_STACK(stack), GTK_STACK_TRANSITION_TYPE_CROSSFADE);
     gtk_window_set_child(GTK_WINDOW(window), stack);
 
-    // Removed PAGE 1: START SCREEN
+    // ============================================================
+    // PAGE 1: START SCREEN
+    // ============================================================
+    GtkWidget *start_page_wrapper = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(start_page_wrapper, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(start_page_wrapper, GTK_ALIGN_CENTER);
+
+    GtkWidget *start_card = create_card_box();
+    
+    GtkWidget *lbl_title = gtk_label_new("🎮 TIC TAC TOE");
+    gtk_widget_add_css_class(lbl_title, "game-title");
+    gtk_box_append(GTK_BOX(start_card), lbl_title);
+
+    GtkWidget *lbl_subtitle = gtk_label_new("Welcome to the Arena");
+    gtk_widget_add_css_class(lbl_subtitle, "welcome-text");
+    gtk_box_append(GTK_BOX(start_card), lbl_subtitle);
+
+    GtkWidget *lbl_p1 = gtk_label_new("What is your name, Challenger?");
+    gtk_widget_set_halign(lbl_p1, GTK_ALIGN_START);
+    gtk_widget_add_css_class(lbl_p1, "input-label");
+    gtk_box_append(GTK_BOX(start_card), lbl_p1);
+
+    entry_p1 = gtk_entry_new();
+    gtk_widget_add_css_class(entry_p1, "styled-entry");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_p1), "Type name here...");
+    gtk_box_append(GTK_BOX(start_card), entry_p1);
+    
+    lbl_start_error = gtk_label_new("");
+    gtk_widget_add_css_class(lbl_start_error, "error-msg");
+    gtk_box_append(GTK_BOX(start_card), lbl_start_error);
+
+    GtkWidget *btn_start = gtk_button_new_with_label("START BATTLE");
+    gtk_widget_set_name(btn_start, "start_btn"); 
+    g_signal_connect(btn_start, "clicked", G_CALLBACK(on_start_clicked), NULL);
+    gtk_box_append(GTK_BOX(start_card), btn_start);
+    
+    GtkWidget *btn_exit = gtk_button_new_with_label("Return to Menu");
+    gtk_widget_add_css_class(btn_exit, "btn-exit"); 
+    g_signal_connect(btn_exit, "clicked", G_CALLBACK(on_exit_clicked), NULL);
+    gtk_box_append(GTK_BOX(start_card), btn_exit);
+
+    gtk_box_append(GTK_BOX(start_page_wrapper), start_card);
+    gtk_stack_add_named(GTK_STACK(stack), start_page_wrapper, "start_page");
 
     // ============================================================
     // PAGE 2: GAME BOARD
@@ -551,13 +634,12 @@ static void activate(GtkApplication *app, gpointer user_data)
     load_global_settings(player_name, &theme_id);
     apply_theme(theme_id);
     
-    snprintf(game.name1, sizeof(game.name1), "%s", player_name);
-    snprintf(game.name2, sizeof(game.name2), "Guest");
+    /* Set default player name if available */
+    if (strlen(player_name) > 0) {
+        gtk_editable_set_text(GTK_EDITABLE(entry_p1), player_name);
+    }
     
-    init_game_state();
-    reset_board_logic();
-    update_ui_board();
-    gtk_stack_set_visible_child_name(GTK_STACK(stack), "game_page");
+    gtk_stack_set_visible_child_name(GTK_STACK(stack), "start_page");
 
     gtk_window_present(GTK_WINDOW(window));
 }

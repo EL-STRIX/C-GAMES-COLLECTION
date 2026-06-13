@@ -364,7 +364,21 @@ void process_round(AppData *data, int user_choice) {
     }
 }
 
-/* Removed on_start_clicked as we bypass login */
+/* Called when "START" button is clicked on Login screen */
+static void on_start_clicked(GtkButton *btn, AppData *data) {
+    const char *name = gtk_editable_get_text(GTK_EDITABLE(data->name_entry));
+    if (g_utf8_strlen(name, -1) == 0) {
+        gtk_label_set_text(GTK_LABEL(data->name_error_label), "Please enter your name to play!");
+        return;
+    }
+    gtk_label_set_text(GTK_LABEL(data->name_error_label), "");
+    strncpy(data->player_name, name, sizeof(data->player_name) - 1);
+    data->player_name[sizeof(data->player_name) - 1] = '\0';
+    save_global_settings(data->player_name, -1);
+    
+    start_new_game(data);
+    gtk_stack_set_visible_child_name(GTK_STACK(data->stack), "game_screen");
+}
 
 /* Simple wrappers connecting each choice button to process_round() */
 void on_snake_clicked(GtkButton *btn, gpointer user_data) { process_round((AppData*)user_data, CHOICE_snake); }
@@ -373,14 +387,36 @@ void on_water_clicked(GtkButton *btn, gpointer user_data) { process_round((AppDa
 void on_next_round_clicked(GtkButton *btn, gpointer user_data) { start_next_round_ui((AppData*)user_data); }
 void on_play_again_clicked(GtkButton *btn, gpointer user_data) { start_new_game((AppData*)user_data); }
 
+static void confirm_exit_response(GObject *source_object, GAsyncResult *res, gpointer user_data) {
+    GtkAlertDialog *dialog = GTK_ALERT_DIALOG(source_object);
+    GError *error = NULL;
+    int response = gtk_alert_dialog_choose_finish(dialog, res, &error);
+    if (error) {
+        g_error_free(error);
+        return;
+    }
+    if (response == 1) {
+        if (return_to_launcher()) {
+            AppData *data = (AppData *)user_data;
+            GtkWindow *window = GTK_WINDOW(data->window);
+            GtkApplication *app = gtk_window_get_application(window);
+            g_application_quit(G_APPLICATION(app));
+        }
+    }
+}
+
 /* Exit Callback - quits the application cleanly */
 void on_exit_clicked(GtkButton *btn, gpointer user_data) {
-    if (return_to_launcher()) {
-        AppData *data = (AppData *)user_data;
-        GtkWindow *window = GTK_WINDOW(data->window);
-        GtkApplication *app = gtk_window_get_application(window);
-        g_application_quit(G_APPLICATION(app)); /* Added cast here */
-    }
+    AppData *data = (AppData *)user_data;
+    GtkAlertDialog *dialog = gtk_alert_dialog_new("Are you sure you want to exit the game?");
+    gtk_alert_dialog_set_detail(dialog, "Any unsaved progress will be lost.");
+    const char *buttons[] = {"Cancel", "Exit", NULL};
+    gtk_alert_dialog_set_buttons(dialog, buttons);
+    gtk_alert_dialog_set_cancel_button(dialog, 0);
+    gtk_alert_dialog_set_default_button(dialog, 0);
+    
+    gtk_alert_dialog_choose(dialog, GTK_WINDOW(data->window), NULL, confirm_exit_response, data);
+    g_object_unref(dialog);
 }
 
 /* --- CSS Styling --- */
@@ -466,7 +502,53 @@ GtkWidget* create_choice_button(const char *emoji, const char *label_text, GCall
     return btn;
 }
 
-/* Removed create_name_screen */
+/* 1. Login Screen */
+GtkWidget* create_login_screen(AppData *data) {
+    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 20);
+    gtk_widget_set_valign(vbox, GTK_ALIGN_CENTER);
+    gtk_widget_set_halign(vbox, GTK_ALIGN_CENTER);
+    gtk_widget_set_vexpand(vbox, TRUE);
+    gtk_widget_set_hexpand(vbox, TRUE);
+
+    GtkWidget *card = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+    gtk_widget_add_css_class(card, "login-card");
+    gtk_widget_set_size_request(card, 350, -1);
+    gtk_box_append(GTK_BOX(vbox), card);
+
+    GtkWidget *title_lbl = gtk_label_new("🎮 SNAKE GUN WATER");
+    gtk_widget_add_css_class(title_lbl, "game-title");
+    gtk_box_append(GTK_BOX(card), title_lbl);
+
+    GtkWidget *welcome_lbl = gtk_label_new("Welcome to the Arena");
+    gtk_widget_add_css_class(welcome_lbl, "welcome-text");
+    gtk_box_append(GTK_BOX(card), welcome_lbl);
+
+    GtkWidget *input_lbl = gtk_label_new("What is your name, Challenger?");
+    gtk_widget_add_css_class(input_lbl, "input-label");
+    gtk_widget_set_halign(input_lbl, GTK_ALIGN_START);
+    gtk_box_append(GTK_BOX(card), input_lbl);
+
+    data->name_entry = gtk_entry_new();
+    gtk_widget_add_css_class(data->name_entry, "styled-entry");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(data->name_entry), "Type name here...");
+    gtk_box_append(GTK_BOX(card), data->name_entry);
+
+    data->name_error_label = gtk_label_new("");
+    gtk_widget_add_css_class(data->name_error_label, "error");
+    gtk_box_append(GTK_BOX(card), data->name_error_label);
+
+    GtkWidget *start_btn = gtk_button_new_with_label("START BATTLE");
+    gtk_widget_set_name(start_btn, "start_btn");
+    g_signal_connect(start_btn, "clicked", G_CALLBACK(on_start_clicked), data);
+    gtk_box_append(GTK_BOX(card), start_btn);
+    
+    GtkWidget *exit_btn = gtk_button_new_with_label("Return to Menu");
+    gtk_widget_add_css_class(exit_btn, "btn-exit");
+    g_signal_connect(exit_btn, "clicked", G_CALLBACK(on_exit_clicked), data);
+    gtk_box_append(GTK_BOX(card), exit_btn);
+
+    return vbox;
+}
 
 /* 2. Game Screen */
 /* Main gameplay screen: shows rounds, scores, and snake-gun-water buttons. */
@@ -594,14 +676,14 @@ void activate(GtkApplication *app, gpointer user_data) {
     srand((unsigned int)time(NULL)); /* seed RNG for computer choice */
 
     GtkWidget *window = gtk_application_window_new(app);
-    gtk_widget_set_size_request(window, 800, 600);
+    gtk_window_set_default_size(GTK_WINDOW(window), 900, 700);
     
     /* Store the window in AppData so the Exit button can use it */
     data->window = window;
 
     GtkWidget *header = gtk_header_bar_new();
     gtk_window_set_titlebar(GTK_WINDOW(window), header);
-    gtk_window_set_title(GTK_WINDOW(window), "Epic snake gun water Battle");
+    gtk_window_set_title(GTK_WINDOW(window), "Epic Snake Gun Water Battle");
 
     GtkWidget *main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_add_css_class(main_box, "window-bg");
@@ -616,6 +698,7 @@ void activate(GtkApplication *app, gpointer user_data) {
     gtk_box_append(GTK_BOX(main_box), data->stack);
 
     /* add the three screens to the stack */
+    gtk_stack_add_named(GTK_STACK(data->stack), create_login_screen(data), "login_screen");
     gtk_stack_add_named(GTK_STACK(data->stack), create_game_screen(data), "game_screen");
     gtk_stack_add_named(GTK_STACK(data->stack), create_result_screen(data), "result_screen");
 
@@ -624,6 +707,13 @@ void activate(GtkApplication *app, gpointer user_data) {
     int theme_id;
     load_global_settings(data->player_name, &theme_id);
     apply_theme(theme_id);
+
+    /* Set default player name if available */
+    if (strlen(data->player_name) > 0) {
+        gtk_editable_set_text(GTK_EDITABLE(data->name_entry), data->player_name);
+    }
+
+    gtk_stack_set_visible_child_name(GTK_STACK(data->stack), "login_screen");
 
     gtk_window_present(GTK_WINDOW(window));
 
