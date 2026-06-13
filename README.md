@@ -239,7 +239,7 @@ Contributions are welcome! Please follow this workflow:
 
 ## 📝 License
 
-License information not found in repository. Please contact the maintainer for usage rights.
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
