@@ -47,4 +47,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: C-Games-Collection-Windows
-        path: bin/
+        path: bin
