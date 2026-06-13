@@ -43,8 +43,14 @@ jobs:
         # cp /mingw64/bin/*.dll bin/
         echo "Build complete. DLL packaging would go here."
         
+    - name: Debug Output Directory
+      run: |
+        pwd
+        ls -la
+        ls -la bin/ || echo "bin/ not found!"
+        
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: C-Games-Collection-Windows
-        path: bin
+        path: ${{ github.workspace }}/bin
