@@ -154,6 +154,7 @@ void apply_theme(int theme_id) {
 // --- END INJECTED ENGINE ---
 
 const char *css_data =
+    "* { font-family: \"Segoe UI Emoji\", \"Noto Color Emoji\", sans-serif; }"
     "window { background-color: #cbcbcb; }"
     "label { color: #1e293b; }"
     "button { all: unset; border-radius: 8px; padding: 10px; }"

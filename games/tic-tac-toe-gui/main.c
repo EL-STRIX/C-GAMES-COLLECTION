@@ -180,6 +180,7 @@ GtkWidget *lbl_start_error;
 // ============================================================
 
 const char *css_data =
+    "* { font-family: \"Segoe UI Emoji\", \"Noto Color Emoji\", sans-serif; }"
     "window { background-color: #1e1e2e; }"
     "label { color: #cdd6f4; }"
     ".login-card { background-color: #ffffff; border-radius: 12px; padding: 30px; margin: 20px; box-shadow: 0px 4px 8px rgba(0,0,0,0.1); }"

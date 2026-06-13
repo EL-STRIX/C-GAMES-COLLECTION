@@ -426,6 +426,7 @@ void load_css(void) {
     GdkDisplay *display = gdk_display_get_default();
 
     const char *css =
+        "* { font-family: \"Segoe UI Emoji\", \"Noto Color Emoji\", sans-serif; }"
         /* Main background - Grey */
         ".window-bg { background-color: #cfcfcf; }"
         

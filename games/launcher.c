@@ -149,6 +149,7 @@ void apply_theme(int theme_id) {
 #endif
 
 const char *css_data =
+    "* { font-family: \"Segoe UI Emoji\", \"Noto Color Emoji\", sans-serif; }"
     "window { background-color: #1e1e2e; }"
     "label { color: #cdd6f4; }"
     ".header-title { font-size: 32px; font-weight: 900; color: #cdd6f4; margin-top: 20px; margin-bottom: 10px; }"
@@ -363,11 +364,11 @@ static void activate(GtkApplication *app, gpointer user_data)
     
     // Game 3
     GtkWidget *g3 = create_game_entry("🐍🔫💧", "Snake Gun Water", "A fun variation of RPS with new rules and emojis.", "snake-gun-water.exe");
-    gtk_grid_attach(GTK_GRID(grid), g3, 2, 0, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), g3, 0, 1, 1, 1);
     
     // Game 4
     GtkWidget *g4 = create_game_entry("⚔️", "Epic Tic Tac Toe", "An enhanced battle version of Tic Tac Toe.", "tic-tac-toe-gui.exe");
-    gtk_grid_attach(GTK_GRID(grid), g4, 0, 1, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), g4, 1, 1, 1, 1);
     
     // Champions Board
     GtkWidget *champ_frame = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
