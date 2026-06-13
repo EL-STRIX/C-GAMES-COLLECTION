@@ -240,12 +240,15 @@ static void start_game_logic(GameApp *app)
 static void on_start_clicked(GtkButton *btn, GameApp *app)
 {
     const char *name = gtk_editable_get_text(GTK_EDITABLE(app->name_entry));
-    if (g_utf8_strlen(name, -1) == 0) {
+    char *trimmed = g_strstrip(g_strdup(name));
+    if (g_utf8_strlen(trimmed, -1) == 0) {
         gtk_label_set_text(GTK_LABEL(app->name_warning_label), "Please enter your name to play!");
+        g_free(trimmed);
         return;
     }
     gtk_label_set_text(GTK_LABEL(app->name_warning_label), "");
-    strncpy(app->player_name, name, sizeof(app->player_name) - 1);
+    strncpy(app->player_name, trimmed, sizeof(app->player_name) - 1);
+    g_free(trimmed);
     app->player_name[sizeof(app->player_name) - 1] = '\0';
     save_global_settings(app->player_name, -1);
     start_game_logic(app);
@@ -270,18 +273,25 @@ static void confirm_exit_response(GObject *source_object, GAsyncResult *res, gpo
     }
 }
 
-static void on_exit_clicked(GtkButton *btn, gpointer user_data)
+static void on_header_back_clicked(GtkButton *btn, gpointer user_data)
 {
     GameApp *app = (GameApp *)user_data;
-    GtkAlertDialog *dialog = gtk_alert_dialog_new("Are you sure you want to exit the game?");
-    gtk_alert_dialog_set_detail(dialog, "Any unsaved progress will be lost.");
-    const char *buttons[] = {"Cancel", "Exit", NULL};
-    gtk_alert_dialog_set_buttons(dialog, buttons);
-    gtk_alert_dialog_set_cancel_button(dialog, 0);
-    gtk_alert_dialog_set_default_button(dialog, 0);
-    
-    gtk_alert_dialog_choose(dialog, GTK_WINDOW(app->window), NULL, confirm_exit_response, app);
-    g_object_unref(dialog);
+    const char *visible_child = gtk_stack_get_visible_child_name(GTK_STACK(app->stack));
+    if (g_strcmp0(visible_child, "page_game") == 0) {
+        GtkAlertDialog *dialog = gtk_alert_dialog_new("Are you sure you want to return to the main menu?");
+        gtk_alert_dialog_set_detail(dialog, "Any unsaved progress will be lost.");
+        const char *buttons[] = {"Cancel", "Return to Menu", NULL};
+        gtk_alert_dialog_set_buttons(dialog, buttons);
+        gtk_alert_dialog_set_cancel_button(dialog, 0);
+        gtk_alert_dialog_set_default_button(dialog, 0);
+        gtk_alert_dialog_choose(dialog, GTK_WINDOW(app->window), NULL, confirm_exit_response, app);
+        g_object_unref(dialog);
+    } else {
+        if (return_to_launcher()) {
+            GtkApplication *gtk_app = gtk_window_get_application(GTK_WINDOW(app->window));
+            g_application_quit(G_APPLICATION(gtk_app));
+        }
+    }
 }
 
 // 3. Called when "SUBMIT GUESS" button is clicked
@@ -402,17 +412,11 @@ GtkWidget *create_welcome_page(GameApp *app)
     gtk_widget_add_css_class(start_btn, "btn-blue");
     g_signal_connect(start_btn, "clicked", G_CALLBACK(on_start_clicked), app);
 
-    GtkWidget *exit_btn = gtk_button_new_with_label("Return to Menu");
-    gtk_widget_add_css_class(exit_btn, "btn-blue");
-    gtk_widget_set_margin_top(exit_btn, 10);
-    g_signal_connect(exit_btn, "clicked", G_CALLBACK(on_exit_clicked), app);
-
     gtk_box_append(GTK_BOX(box), welcome_lbl);
     gtk_box_append(GTK_BOX(box), q_lbl);
     gtk_box_append(GTK_BOX(box), app->name_entry);
     gtk_box_append(GTK_BOX(box), app->name_warning_label);
     gtk_box_append(GTK_BOX(box), start_btn);
-    gtk_box_append(GTK_BOX(box), exit_btn);
 
     return box;
 }
@@ -495,12 +499,7 @@ GtkWidget *create_result_page(GameApp *app)
     g_signal_connect(play_btn, "clicked", G_CALLBACK(on_play_again_clicked), app);
     g_signal_connect(play_btn, "activate", G_CALLBACK(on_play_again_clicked), app);
 
-    GtkWidget *exit_btn = gtk_button_new_with_label("Return to Menu");
-    gtk_widget_add_css_class(exit_btn, "btn-blue");
-    g_signal_connect(exit_btn, "clicked", G_CALLBACK(on_exit_clicked), app);
-
     gtk_box_append(GTK_BOX(btn_box), play_btn);
-    gtk_box_append(GTK_BOX(btn_box), exit_btn);
 
     gtk_box_append(GTK_BOX(box), app->congrats_label);
     gtk_box_append(GTK_BOX(box), txt1);
@@ -525,8 +524,15 @@ static void activate(GtkApplication *app_system, gpointer user_data)
 
     // Setup Main Window
     app->window = gtk_application_window_new(app_system);
-    gtk_window_set_title(GTK_WINDOW(app->window), "Guess The Number");
     gtk_window_set_default_size(GTK_WINDOW(app->window), 900, 700);
+
+    GtkWidget *header = gtk_header_bar_new();
+    gtk_window_set_titlebar(GTK_WINDOW(app->window), header);
+    gtk_window_set_title(GTK_WINDOW(app->window), "Guess The Number");
+    
+    GtkWidget *btn_back = gtk_button_new_with_label("Back to Main Menu");
+    gtk_header_bar_pack_start(GTK_HEADER_BAR(header), btn_back);
+    g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), app);
 
     // Load CSS Styles
     GtkCssProvider *provider = gtk_css_provider_new();

@@ -367,15 +367,17 @@ void process_round(AppData *data, int user_choice) {
     }
 }
 
-/* Called when "START" button is clicked on Login screen */
 static void on_start_clicked(GtkButton *btn, AppData *data) {
     const char *name = gtk_editable_get_text(GTK_EDITABLE(data->name_entry));
-    if (g_utf8_strlen(name, -1) == 0) {
+    char *trimmed = g_strstrip(g_strdup(name));
+    if (g_utf8_strlen(trimmed, -1) == 0) {
         gtk_label_set_text(GTK_LABEL(data->name_error_label), "Please enter your name to play!");
+        g_free(trimmed);
         return;
     }
     gtk_label_set_text(GTK_LABEL(data->name_error_label), "");
-    strncpy(data->player_name, name, sizeof(data->player_name) - 1);
+    strncpy(data->player_name, trimmed, sizeof(data->player_name) - 1);
+    g_free(trimmed);
     data->player_name[sizeof(data->player_name) - 1] = '\0';
     save_global_settings(data->player_name, -1);
     
@@ -408,18 +410,25 @@ static void confirm_exit_response(GObject *source_object, GAsyncResult *res, gpo
     }
 }
 
-/* Exit Callback - quits the application cleanly */
-void on_exit_clicked(GtkButton *btn, gpointer user_data) {
+/* Back Button Callback - returns to menu with confirmation if playing */
+void on_header_back_clicked(GtkButton *btn, gpointer user_data) {
     AppData *data = (AppData *)user_data;
-    GtkAlertDialog *dialog = gtk_alert_dialog_new("Are you sure you want to exit the game?");
-    gtk_alert_dialog_set_detail(dialog, "Any unsaved progress will be lost.");
-    const char *buttons[] = {"Cancel", "Exit", NULL};
-    gtk_alert_dialog_set_buttons(dialog, buttons);
-    gtk_alert_dialog_set_cancel_button(dialog, 0);
-    gtk_alert_dialog_set_default_button(dialog, 0);
-    
-    gtk_alert_dialog_choose(dialog, GTK_WINDOW(data->window), NULL, confirm_exit_response, data);
-    g_object_unref(dialog);
+    const char *visible_child = gtk_stack_get_visible_child_name(GTK_STACK(data->stack));
+    if (g_strcmp0(visible_child, "game_screen") == 0) {
+        GtkAlertDialog *dialog = gtk_alert_dialog_new("Are you sure you want to return to the main menu?");
+        gtk_alert_dialog_set_detail(dialog, "Any unsaved progress will be lost.");
+        const char *buttons[] = {"Cancel", "Return to Menu", NULL};
+        gtk_alert_dialog_set_buttons(dialog, buttons);
+        gtk_alert_dialog_set_cancel_button(dialog, 0);
+        gtk_alert_dialog_set_default_button(dialog, 0);
+        gtk_alert_dialog_choose(dialog, GTK_WINDOW(data->window), NULL, confirm_exit_response, data);
+        g_object_unref(dialog);
+    } else {
+        if (return_to_launcher()) {
+            GtkApplication *app = gtk_window_get_application(GTK_WINDOW(data->window));
+            g_application_quit(G_APPLICATION(app));
+        }
+    }
 }
 
 /* --- CSS Styling --- */
@@ -545,11 +554,6 @@ GtkWidget* create_login_screen(AppData *data) {
     gtk_widget_set_name(start_btn, "start_btn");
     g_signal_connect(start_btn, "clicked", G_CALLBACK(on_start_clicked), data);
     gtk_box_append(GTK_BOX(card), start_btn);
-    
-    GtkWidget *exit_btn = gtk_button_new_with_label("Return to Menu");
-    gtk_widget_add_css_class(exit_btn, "btn-exit");
-    g_signal_connect(exit_btn, "clicked", G_CALLBACK(on_exit_clicked), data);
-    gtk_box_append(GTK_BOX(card), exit_btn);
 
     return vbox;
 }
@@ -649,18 +653,12 @@ GtkWidget* create_result_screen(AppData *data) {
     gtk_widget_set_margin_top(button_box, 15);
 
     /* 1. Play Again Button */
+    /* 1. Play Again Button */
     data->play_again_btn = gtk_button_new_with_label("Rematch?");
     gtk_widget_set_name(data->play_again_btn, "start_btn");
     gtk_widget_set_hexpand(data->play_again_btn, TRUE);
     g_signal_connect(data->play_again_btn, "clicked", G_CALLBACK(on_play_again_clicked), data);
     gtk_box_append(GTK_BOX(button_box), data->play_again_btn);
-
-    /* 2. Exit Button */
-    GtkWidget *exit_btn = gtk_button_new_with_label("Return to Menu");
-    gtk_widget_add_css_class(exit_btn, "btn-exit");
-    gtk_widget_set_hexpand(exit_btn, TRUE);
-    g_signal_connect(exit_btn, "clicked", G_CALLBACK(on_exit_clicked), data);
-    gtk_box_append(GTK_BOX(button_box), exit_btn);
 
     /* Add the button box to the card */
     gtk_box_append(GTK_BOX(card), button_box);
@@ -687,6 +685,10 @@ void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *header = gtk_header_bar_new();
     gtk_window_set_titlebar(GTK_WINDOW(window), header);
     gtk_window_set_title(GTK_WINDOW(window), "Epic Rock Paper Scissors Battle");
+    
+    GtkWidget *btn_back = gtk_button_new_with_label("Back to Main Menu");
+    gtk_header_bar_pack_start(GTK_HEADER_BAR(header), btn_back);
+    g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), data);
 
     GtkWidget *main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_add_css_class(main_box, "window-bg");

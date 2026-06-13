@@ -387,13 +387,16 @@ void on_cell_clicked(GtkWidget *widget, gpointer data)
 void on_start_clicked(GtkWidget *widget, gpointer data)
 {
     const char *name = gtk_editable_get_text(GTK_EDITABLE(entry_p1));
-    if (g_utf8_strlen(name, -1) == 0) {
+    char *trimmed = g_strstrip(g_strdup(name));
+    if (g_utf8_strlen(trimmed, -1) == 0) {
         gtk_label_set_text(GTK_LABEL(lbl_start_error), "Please enter your name to play!");
+        g_free(trimmed);
         return;
     }
     gtk_label_set_text(GTK_LABEL(lbl_start_error), "");
     
-    strncpy(game.name1, name, sizeof(game.name1) - 1);
+    strncpy(game.name1, trimmed, sizeof(game.name1) - 1);
+    g_free(trimmed);
     game.name1[sizeof(game.name1) - 1] = '\0';
     save_global_settings(game.name1, -1);
     
@@ -435,17 +438,23 @@ static void confirm_exit_response(GObject *source_object, GAsyncResult *res, gpo
     }
 }
 
-void on_exit_clicked(GtkWidget *widget, gpointer data)
+void on_header_back_clicked(GtkButton *btn, gpointer user_data)
 {
-    GtkAlertDialog *dialog = gtk_alert_dialog_new("Are you sure you want to exit the game?");
-    gtk_alert_dialog_set_detail(dialog, "Any unsaved progress will be lost.");
-    const char *buttons[] = {"Cancel", "Exit", NULL};
-    gtk_alert_dialog_set_buttons(dialog, buttons);
-    gtk_alert_dialog_set_cancel_button(dialog, 0);
-    gtk_alert_dialog_set_default_button(dialog, 0);
-    
-    gtk_alert_dialog_choose(dialog, GTK_WINDOW(window), NULL, confirm_exit_response, NULL);
-    g_object_unref(dialog);
+    const char *visible_child = gtk_stack_get_visible_child_name(GTK_STACK(stack));
+    if (g_strcmp0(visible_child, "game_page") == 0) {
+        GtkAlertDialog *dialog = gtk_alert_dialog_new("Are you sure you want to return to the main menu?");
+        gtk_alert_dialog_set_detail(dialog, "Any unsaved progress will be lost.");
+        const char *buttons[] = {"Cancel", "Return to Menu", NULL};
+        gtk_alert_dialog_set_buttons(dialog, buttons);
+        gtk_alert_dialog_set_cancel_button(dialog, 0);
+        gtk_alert_dialog_set_default_button(dialog, 0);
+        gtk_alert_dialog_choose(dialog, GTK_WINDOW(window), NULL, confirm_exit_response, NULL);
+        g_object_unref(dialog);
+    } else {
+        if (return_to_launcher()) {
+            gtk_window_close(GTK_WINDOW(window));
+        }
+    }
 }
 
 // ============================================================
@@ -480,9 +489,16 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_style_context_add_provider_for_display(gdk_display_get_default(), GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
     window = gtk_application_window_new(app);
-    gtk_window_set_title(GTK_WINDOW(window), "Epic Tic Tac Toe Battle");
     gtk_window_set_default_size(GTK_WINDOW(window), 900, 700);
     gtk_widget_add_css_class(window, "window-bg");
+
+    GtkWidget *header = gtk_header_bar_new();
+    gtk_window_set_titlebar(GTK_WINDOW(window), header);
+    gtk_window_set_title(GTK_WINDOW(window), "Epic Tic Tac Toe Battle");
+    
+    GtkWidget *btn_back = gtk_button_new_with_label("Back to Main Menu");
+    gtk_header_bar_pack_start(GTK_HEADER_BAR(header), btn_back);
+    g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), NULL);
 
     stack = gtk_stack_new();
     gtk_stack_set_transition_type(GTK_STACK(stack), GTK_STACK_TRANSITION_TYPE_CROSSFADE);
@@ -523,11 +539,6 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_widget_set_name(btn_start, "start_btn"); 
     g_signal_connect(btn_start, "clicked", G_CALLBACK(on_start_clicked), NULL);
     gtk_box_append(GTK_BOX(start_card), btn_start);
-    
-    GtkWidget *btn_exit = gtk_button_new_with_label("Return to Menu");
-    gtk_widget_add_css_class(btn_exit, "btn-exit"); 
-    g_signal_connect(btn_exit, "clicked", G_CALLBACK(on_exit_clicked), NULL);
-    gtk_box_append(GTK_BOX(start_card), btn_exit);
 
     gtk_box_append(GTK_BOX(start_page_wrapper), start_card);
     gtk_stack_add_named(GTK_STACK(stack), start_page_wrapper, "start_page");
@@ -618,12 +629,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_widget_set_name(btn_rematch, "start_btn"); 
     g_signal_connect(btn_rematch, "clicked", G_CALLBACK(on_play_again_clicked), NULL);
 
-    GtkWidget *btn_end = gtk_button_new_with_label("Return to Menu");
-    gtk_widget_add_css_class(btn_end, "btn-exit"); 
-    g_signal_connect(btn_end, "clicked", G_CALLBACK(on_exit_clicked), NULL);
-
     gtk_box_append(GTK_BOX(box_actions), btn_rematch);
-    gtk_box_append(GTK_BOX(box_actions), btn_end);
 
     gtk_box_append(GTK_BOX(result_card), result_title);
     gtk_box_append(GTK_BOX(result_card), result_subtitle);
