@@ -7,8 +7,7 @@ TARGETS = $(BIN_DIR)/launcher.exe \
           $(BIN_DIR)/number-guessing.exe \
           $(BIN_DIR)/rock-paper-scissors.exe \
           $(BIN_DIR)/snake-gun-water.exe \
-          $(BIN_DIR)/tic-tac-toe-gui.exe \
-          $(BIN_DIR)/test_persistence.exe
+          $(BIN_DIR)/tic-tac-toe-gui.exe
 
 $(BIN_DIR):
 	-mkdir $(BIN_DIR)

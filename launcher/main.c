@@ -152,6 +152,8 @@ const char *css_data =
     ".champ-title { font-size: 22px; font-weight: bold; color: #f9e2af; margin-bottom: 10px; }"
     ".champ-item { font-size: 16px; color: #cdd6f4; }";
 
+GtkWidget *main_window = NULL;
+
 static void on_save_settings(GtkButton *btn, gpointer user_data) {
     GtkWidget **widgets = (GtkWidget **)user_data;
     GtkEntryBuffer *buf = gtk_entry_get_buffer(GTK_ENTRY(widgets[0]));
@@ -229,15 +231,24 @@ static void launch_game(GtkButton *btn, gpointer user_data)
         g_free(dir);
         g_free(exe_path);
     } else {
-        full_path = g_strdup_printf("./bin/%s", exe_name);
+        char *cwd = g_get_current_dir();
+        full_path = g_build_filename(cwd, exe_name, NULL);
+        g_free(cwd);
     }
 #endif
 
     GError *error = NULL;
     gboolean success = g_spawn_command_line_async(full_path, &error);
     if (!success) {
-        g_print("Error launching %s: %s\n", full_path, error->message);
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
+            "Failed to launch game: %s\nPath: %s", error->message, full_path);
+        g_signal_connect(dialog, "response", G_CALLBACK(gtk_window_destroy), NULL);
+        gtk_window_present(GTK_WINDOW(dialog));
         g_error_free(error);
+    } else {
+        if (main_window) {
+            gtk_window_close(GTK_WINDOW(main_window));
+        }
     }
     g_free(full_path);
 }
@@ -288,6 +299,7 @@ static void activate(GtkApplication *app, gpointer user_data)
         GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
     GtkWidget *window = gtk_application_window_new(app);
+    main_window = window;
     gtk_window_set_title(GTK_WINDOW(window), "C Games Collection - Launcher");
     gtk_window_set_default_size(GTK_WINDOW(window), 900, 600);
     

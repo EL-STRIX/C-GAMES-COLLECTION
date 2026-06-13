@@ -43,7 +43,7 @@ Provides a foundational template for building GTK4 desktop applications, demonst
 * **Central Launcher**: A master menu to seamlessly navigate between games.
 * **Modern GUI**: Completely graphical interfaces replacing traditional CLI implementations.
 * **CSS Styling & Themes**: Beautifully styled components, cards, hover effects, and live theme switching (e.g., Hacker Mode) via GTK4 CSS providers.
-* **Page Navigation**: Smooth screen transitions (Welcome -> Game -> Result) using `GtkStack`.
+* **Page Navigation**: Smooth screen transitions (Game -> Result) using `GtkStack`.
 * **Robust Persistence**: Cross-session state management using GLib's `GKeyFile` INI parser for saving high scores and global player profiles without data corruption risks.
 
 ---
