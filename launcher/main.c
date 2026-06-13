@@ -115,12 +115,8 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_grid_attach(GTK_GRID(grid), g3, 2, 0, 1, 1);
     
     // Game 4
-    GtkWidget *g4 = create_game_entry("❌⭕", "Tic Tac Toe (Classic)", "The traditional 2-player grid game with a clean UI.", "tic-tac-toe-cli.exe");
+    GtkWidget *g4 = create_game_entry("⚔️", "Epic Tic Tac Toe", "An enhanced battle version of Tic Tac Toe.", "tic-tac-toe-gui.exe");
     gtk_grid_attach(GTK_GRID(grid), g4, 0, 1, 1, 1);
-    
-    // Game 5
-    GtkWidget *g5 = create_game_entry("⚔️", "Epic Tic Tac Toe", "An enhanced battle version of Tic Tac Toe.", "tic-tac-toe-gui.exe");
-    gtk_grid_attach(GTK_GRID(grid), g5, 1, 1, 1, 1);
     
     gtk_box_append(GTK_BOX(main_vbox), grid);
     

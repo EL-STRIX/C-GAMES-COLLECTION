@@ -98,9 +98,6 @@ C-GAMES-COLLECTION/
 │   ├── snake-gun-water/
 │   │   ├── main.c          # Logic and UI for Snake Gun Water
 │   │   └── main.exe        # Compiled executable
-│   ├── tic-tac-toe-cli/
-│   │   ├── main.c          # GTK4 Implementation of Tic Tac Toe
-│   │   └── main.exe        # Compiled executable
 │   └── tic-tac-toe-gui/
 │       ├── main.c          # Enhanced GTK4 Tic Tac Toe with UX improvements
 │       └── main.exe        # Compiled executable
