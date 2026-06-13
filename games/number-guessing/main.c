@@ -12,6 +12,7 @@
 #include <time.h>    // Used to set the random seed based on time
 #include <string.h>  // Used for text/string handling
 #include "../../common/persistence.h"
+#include "../../common/audio.h"
 
 const char *css_data =
     "window { background-color: #cbcbcb; }"
@@ -113,9 +114,10 @@ static void on_start_clicked(GtkButton *btn, GameApp *app)
 }
 
 // 3. Called when "SUBMIT GUESS" button is clicked
-static void on_submit_guess(GtkButton *btn, GameApp *app)
+static void on_submit_guess(GtkButton *btn, gpointer user_data)
 {
-    // Get the number from the spinner
+    play_sound("assets/click.wav");
+    GameApp *app = (GameApp *)user_data; 
     int guess = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(app->guess_spin));
 
     // Check valid range (1-100)
@@ -148,6 +150,7 @@ static void on_submit_guess(GtkButton *btn, GameApp *app)
     else
     {
         // --- WINNER! ---
+        play_sound("assets/win.wav");
         
         save_score("number_guessing", app->player_name, app->attempts, 1);
         char best_player[50];
@@ -404,13 +407,11 @@ static void activate(GtkApplication *app_system, gpointer user_data)
 // --- PROGRAM ENTRY POINT ---
 int main(int argc, char **argv)
 {
-    GtkApplication *app;
-    int status;
-
-    app = gtk_application_new("com.example.numberguess", G_APPLICATION_DEFAULT_FLAGS);
+    init_audio();
+    GtkApplication *app = gtk_application_new("org.sujay.numberguess", G_APPLICATION_DEFAULT_FLAGS);
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
-    status = g_application_run(G_APPLICATION(app), argc, argv);
+    int status = g_application_run(G_APPLICATION(app), argc, argv);
     g_object_unref(app);
-
+    uninit_audio();
     return status;
 }

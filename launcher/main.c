@@ -1,5 +1,12 @@
 #include <gtk/gtk.h>
 #include <stdlib.h>
+#include <string.h>
+#include "../common/persistence.h"
+#include "../common/audio.h"
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 const char *css_data =
     "window { background-color: #1e1e2e; }"
@@ -11,28 +18,42 @@ const char *css_data =
     ".game-desc { font-size: 14px; color: #bac2de; margin-top: 5px; }"
     ".btn-launch { background-color: #89b4fa; color: #11111b; font-weight: bold; padding: 10px 20px; border-radius: 8px; margin-top: 15px; }"
     ".btn-launch:hover { background-color: #b4befe; }"
-    ".btn-launch:active { background-color: #74c7ec; }";
+    ".btn-launch:active { background-color: #74c7ec; }"
+    ".champions-panel { background-color: #181825; border-radius: 15px; padding: 20px; margin-top: 30px; border: 2px solid #313244; }"
+    ".champ-title { font-size: 22px; font-weight: bold; color: #f9e2af; margin-bottom: 10px; }"
+    ".champ-item { font-size: 16px; color: #cdd6f4; }";
 
 static void launch_game(GtkButton *btn, gpointer user_data)
 {
+    play_sound("assets/click.wav");
     const char *exe_name = (const char *)user_data;
-    
-    // We try to launch it assuming it's in the same directory (Windows behavior)
-    // or relative to the root if ran from the project root.
-    GError *error = NULL;
-    
-    // First attempt: just the executable name (works on Windows if in same dir)
-    gboolean success = g_spawn_command_line_async(exe_name, &error);
-    if (!success) {
-        g_print("Error launching %s: %s\n", exe_name, error->message);
-        g_error_free(error);
-        error = NULL;
-        
-        // Second attempt: prefix with ./bin/ (if ran from project root)
-        char *path2 = g_strdup_printf("./bin/%s", exe_name);
-        g_spawn_command_line_async(path2, NULL);
-        g_free(path2);
+    char *full_path = NULL;
+
+#ifdef _WIN32
+    char path[MAX_PATH];
+    GetModuleFileNameA(NULL, path, MAX_PATH);
+    char *dir = g_path_get_dirname(path);
+    full_path = g_build_filename(dir, exe_name, NULL);
+    g_free(dir);
+#else
+    char *exe_path = g_file_read_link("/proc/self/exe", NULL);
+    if (exe_path) {
+        char *dir = g_path_get_dirname(exe_path);
+        full_path = g_build_filename(dir, exe_name, NULL);
+        g_free(dir);
+        g_free(exe_path);
+    } else {
+        full_path = g_strdup_printf("./bin/%s", exe_name);
     }
+#endif
+
+    GError *error = NULL;
+    gboolean success = g_spawn_command_line_async(full_path, &error);
+    if (!success) {
+        g_print("Error launching %s: %s\n", full_path, error->message);
+        g_error_free(error);
+    }
+    g_free(full_path);
 }
 
 GtkWidget* create_game_entry(const char *icon, const char *title, const char *desc, const char *exe_name)
@@ -118,7 +139,38 @@ static void activate(GtkApplication *app, gpointer user_data)
     GtkWidget *g4 = create_game_entry("⚔️", "Epic Tic Tac Toe", "An enhanced battle version of Tic Tac Toe.", "tic-tac-toe-gui.exe");
     gtk_grid_attach(GTK_GRID(grid), g4, 0, 1, 1, 1);
     
+    // Champions Board
+    GtkWidget *champ_frame = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+    gtk_widget_add_css_class(champ_frame, "champions-panel");
+    gtk_widget_set_halign(champ_frame, GTK_ALIGN_CENTER);
+    gtk_widget_set_size_request(champ_frame, 500, -1);
+    
+    GtkWidget *champ_label = gtk_label_new("🏆 HALL OF FAME 🏆");
+    gtk_widget_add_css_class(champ_label, "champ-title");
+    gtk_box_append(GTK_BOX(champ_frame), champ_label);
+    
+    // Load top scores
+    struct { const char *id; const char *name; const char *fmt; } games[] = {
+        {"number_guessing", "Number Guessing", "%s: %s (%d guesses)"},
+        {"rps", "Rock Paper Scissors", "%s: %s (%d wins)"},
+        {"sgw", "Snake Gun Water", "%s: %s (%d wins)"},
+        {"ttt_gui", "Epic Tic Tac Toe", "%s: %s (%d wins)"}
+    };
+    
+    for (int i = 0; i < 4; i++) {
+        char player[50];
+        int score = load_top_score(games[i].id, player);
+        if (score != -1) {
+            char txt[100];
+            snprintf(txt, sizeof(txt), games[i].fmt, games[i].name, player, score);
+            GtkWidget *l = gtk_label_new(txt);
+            gtk_widget_add_css_class(l, "champ-item");
+            gtk_box_append(GTK_BOX(champ_frame), l);
+        }
+    }
+    
     gtk_box_append(GTK_BOX(main_vbox), grid);
+    gtk_box_append(GTK_BOX(main_vbox), champ_frame);
     
     // Create a scrollable window just in case
     GtkWidget *scrolled = gtk_scrolled_window_new();
@@ -130,9 +182,11 @@ static void activate(GtkApplication *app, gpointer user_data)
 
 int main(int argc, char **argv)
 {
+    init_audio();
     GtkApplication *app = gtk_application_new("org.sujay.gameslauncher", G_APPLICATION_DEFAULT_FLAGS);
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
     int status = g_application_run(G_APPLICATION(app), argc, argv);
     g_object_unref(app);
+    uninit_audio();
     return status;
 }

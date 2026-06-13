@@ -1,6 +1,7 @@
 #include <gtk/gtk.h>
 #include <string.h>
 #include "../../common/persistence.h"
+#include "../../common/audio.h"
 
 // ============================================================
 // GAME STATE
@@ -223,12 +224,15 @@ void on_cell_clicked(GtkWidget *widget, gpointer data)
 
     if (game.board[r][c] == 'X' || game.board[r][c] == 'O') return;
 
+    play_sound("assets/click.wav");
     game.board[r][c] = (game.current_player == 1) ? 'X' : 'O';
 
     if (check_winner()) {
+        play_sound("assets/win.wav");
         update_ui_board();
         handle_round_end(game.current_player);
     } else if (check_draw()) {
+        play_sound("assets/draw.wav");
         update_ui_board();
         handle_round_end(0);
     } else {
@@ -503,13 +507,11 @@ static void activate(GtkApplication *app, gpointer user_data)
 
 int main(int argc, char **argv)
 {
-    GtkApplication *app;
-    int status;
-
-    app = gtk_application_new("org.sujay.tictactoe", G_APPLICATION_DEFAULT_FLAGS);
+    init_audio();
+    GtkApplication *app = gtk_application_new("org.sujay.tictactoe", G_APPLICATION_DEFAULT_FLAGS);
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
-    status = g_application_run(G_APPLICATION(app), argc, argv);
+    int status = g_application_run(G_APPLICATION(app), argc, argv);
     g_object_unref(app);
-
+    uninit_audio();
     return status;
 }
