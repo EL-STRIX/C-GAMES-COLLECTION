@@ -9,10 +9,10 @@ TARGETS = $(BIN_DIR)/launcher.exe \
           $(BIN_DIR)/snake-gun-water.exe \
           $(BIN_DIR)/tic-tac-toe-gui.exe
 
+all: $(TARGETS)
+
 $(BIN_DIR):
 	-mkdir $(BIN_DIR)
-
-all: $(TARGETS)
 
 # Launcher
 $(BIN_DIR)/launcher.exe: launcher/main.c | $(BIN_DIR)
