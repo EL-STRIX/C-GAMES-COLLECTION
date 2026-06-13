@@ -32,7 +32,7 @@ $(BIN_DIR)/snake-gun-water.exe: games/snake-gun-water/main.c common/persistence.
 
 
 # Tic Tac Toe GUI
-$(BIN_DIR)/tic-tac-toe-gui.exe: games/tic-tac-toe-gui/main.c common/persistence.c common/audio.c
+$(BIN_DIR)/tic-tac-toe-gui.exe: games/tic-tac-toe-gui/main.c common/persistence.c
 	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
 
 clean:

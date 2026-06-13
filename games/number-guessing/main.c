@@ -90,26 +90,15 @@ static void start_game_logic(GameApp *app)
     gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "page_game");
 }
 
-// 2. Called when "START" button is clicked
-static void on_start_clicked(GtkButton *btn, GameApp *app)
+// 2. Removed on_start_clicked since we bypass login.
+// 5. Called when "EXIT" button is clicked
+static void on_exit_clicked(GtkButton *btn, gpointer user_data)
 {
-    // Get the text inside the name entry box
-    const char *name = gtk_editable_get_text(GTK_EDITABLE(app->name_entry));
-
-    // Check if the name is empty
-    if (strlen(name) == 0)
-    {
-        gtk_label_set_text(GTK_LABEL(app->name_warning_label),
-                           "Whoops! I need a name to cheer for. Please enter one!");
-        gtk_widget_set_visible(app->name_warning_label, TRUE); // Show error
-        return;
-    }
-
-    // Name is good: Hide error, save name, start game
-    gtk_widget_set_visible(app->name_warning_label, FALSE);
-    strncpy(app->player_name, name, 99);
-
-    start_game_logic(app);
+    return_to_launcher();
+    GameApp *app = (GameApp *)user_data;
+    GtkWindow *window = GTK_WINDOW(app->window);
+    GtkApplication *gtk_app = gtk_window_get_application(window);
+    g_application_quit(gtk_app);
 }
 
 // 3. Called when "SUBMIT GUESS" button is clicked
@@ -212,55 +201,7 @@ GtkWidget *create_card_box()
     return box;
 }
 
-// Build Page 1: Welcome Screen
-GtkWidget *create_welcome_page(GameApp *app)
-{
-    GtkWidget *box = create_card_box();
-
-    GtkWidget *header = gtk_label_new("🎮 NUMBER GUESSING GAME");
-    gtk_widget_add_css_class(header, "header-title");
-
-    GtkWidget *welcome = gtk_label_new("Welcome!");
-    gtk_widget_add_css_class(welcome, "welcome-text");
-
-    GtkWidget *instruction = gtk_label_new("What should I call you, challenger?");
-    gtk_widget_add_css_class(instruction, "name-question");
-
-    // Name Input Field
-    app->name_entry = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(app->name_entry), "Enter your legendary name...");
-    gtk_widget_add_css_class(app->name_entry, "input-field");
-    g_signal_connect(app->name_entry, "activate", G_CALLBACK(on_start_clicked), app);
-
-    // Warning Label (Hidden by default)
-    app->name_warning_label = gtk_label_new("");
-    gtk_widget_add_css_class(app->name_warning_label, "warning-text");
-    gtk_widget_set_visible(app->name_warning_label, FALSE);
-
-    // Start Button
-    GtkWidget *start_btn = gtk_button_new_with_label("START");
-    gtk_widget_add_css_class(start_btn, "btn-blue");
-    g_signal_connect(start_btn, "clicked", G_CALLBACK(on_start_clicked), app);
-
-    GtkWidget *tip = gtk_label_new("💡 Tip: Hey hero… don’t forget to tell me who you are!");
-    gtk_widget_add_css_class(tip, "tip-text");
-
-    // Add everything to the box
-    gtk_box_append(GTK_BOX(box), header);
-    gtk_box_append(GTK_BOX(box), welcome);
-    gtk_box_append(GTK_BOX(box), instruction);
-    gtk_box_append(GTK_BOX(box), app->name_entry);
-    gtk_box_append(GTK_BOX(box), start_btn);
-    gtk_box_append(GTK_BOX(box), app->name_warning_label);
-    gtk_box_append(GTK_BOX(box), tip);
-
-    // Add developer footer at the very bottom
-    GtkWidget *dev_footer = gtk_label_new("Developed by SUJAY PAUL");
-    gtk_widget_add_css_class(dev_footer, "dev-footer");
-    gtk_box_append(GTK_BOX(box), dev_footer);
-
-    return box;
-}
+// Removed create_welcome_page
 
 // Build Page 2: Game Screen
 GtkWidget *create_game_page(GameApp *app)
@@ -340,7 +281,7 @@ GtkWidget *create_result_page(GameApp *app)
     g_signal_connect(play_btn, "clicked", G_CALLBACK(on_play_again_clicked), app);
     g_signal_connect(play_btn, "activate", G_CALLBACK(on_play_again_clicked), app);
 
-    GtkWidget *exit_btn = gtk_button_new_with_label("EXIT GAME");
+    GtkWidget *exit_btn = gtk_button_new_with_label("Return to Menu");
     gtk_widget_add_css_class(exit_btn, "btn-blue");
     g_signal_connect(exit_btn, "clicked", G_CALLBACK(on_exit_clicked), app);
 
@@ -386,15 +327,20 @@ static void activate(GtkApplication *app_system, gpointer user_data)
     gtk_stack_set_transition_type(GTK_STACK(app->stack),
                                   GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
 
+    int theme_id;
+    load_global_settings(app->player_name, &theme_id);
+    apply_theme(theme_id);
+
     // Create all pages
-    GtkWidget *page1 = create_welcome_page(app);
     GtkWidget *page2 = create_game_page(app);
     GtkWidget *page3 = create_result_page(app);
 
     // Add pages to the stack
-    gtk_stack_add_named(GTK_STACK(app->stack), page1, "page_welcome");
     gtk_stack_add_named(GTK_STACK(app->stack), page2, "page_game");
     gtk_stack_add_named(GTK_STACK(app->stack), page3, "page_result");
+    
+    // Start the game logic immediately since we bypass login
+    start_game_logic(app);
 
     // Show the stack in the window
     gtk_window_set_child(GTK_WINDOW(app->window), app->stack);

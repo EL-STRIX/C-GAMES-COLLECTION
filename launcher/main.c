@@ -18,9 +18,70 @@ const char *css_data =
     ".btn-launch { background-color: #89b4fa; color: #11111b; font-weight: bold; padding: 10px 20px; border-radius: 8px; margin-top: 15px; }"
     ".btn-launch:hover { background-color: #b4befe; }"
     ".btn-launch:active { background-color: #74c7ec; }"
+    ".btn-settings { background-color: #313244; color: #cdd6f4; font-weight: bold; padding: 10px; border-radius: 8px; margin: 10px; }"
+    ".btn-settings:hover { background-color: #45475a; }"
+    ".btn-settings:active { background-color: #585b70; }"
     ".champions-panel { background-color: #181825; border-radius: 15px; padding: 20px; margin-top: 30px; border: 2px solid #313244; }"
     ".champ-title { font-size: 22px; font-weight: bold; color: #f9e2af; margin-bottom: 10px; }"
     ".champ-item { font-size: 16px; color: #cdd6f4; }";
+
+static void on_save_settings(GtkButton *btn, gpointer user_data) {
+    GtkWidget **widgets = (GtkWidget **)user_data;
+    GtkEntryBuffer *buf = gtk_entry_get_buffer(GTK_ENTRY(widgets[0]));
+    const char *name = gtk_entry_buffer_get_text(buf);
+    int theme_id = gtk_drop_down_get_selected(GTK_DROP_DOWN(widgets[1]));
+    
+    save_global_settings(name, theme_id);
+    gtk_window_destroy(GTK_WINDOW(widgets[2]));
+    g_free(widgets);
+    
+    // Automatically apply theme to launcher if changed
+    apply_theme(theme_id);
+}
+
+static void open_settings_dialog(GtkButton *btn, gpointer user_data) {
+    GtkWindow *parent = GTK_WINDOW(user_data);
+    GtkWidget *dialog = gtk_window_new();
+    gtk_window_set_transient_for(GTK_WINDOW(dialog), parent);
+    gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
+    gtk_window_set_title(GTK_WINDOW(dialog), "Global Settings");
+    gtk_window_set_default_size(GTK_WINDOW(dialog), 300, 200);
+    
+    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+    gtk_widget_set_margin_start(box, 20); gtk_widget_set_margin_end(box, 20);
+    gtk_widget_set_margin_top(box, 20); gtk_widget_set_margin_bottom(box, 20);
+    
+    char name[50];
+    int theme_id;
+    load_global_settings(name, &theme_id);
+    
+    GtkWidget *lbl_name = gtk_label_new("Global Player Name:");
+    GtkWidget *entry_name = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(entry_name), name);
+    
+    GtkWidget *lbl_theme = gtk_label_new("Global Theme:");
+    const char *themes[] = {"Default (Blue)", "Dark Mode", "Hacker", NULL};
+    GtkWidget *dropdown = gtk_drop_down_new_from_strings(themes);
+    gtk_drop_down_set_selected(GTK_DROP_DOWN(dropdown), theme_id);
+    
+    GtkWidget *save_btn = gtk_button_new_with_label("Save & Close");
+    gtk_widget_add_css_class(save_btn, "btn-launch");
+    
+    GtkWidget **widgets = g_new(GtkWidget*, 3);
+    widgets[0] = entry_name;
+    widgets[1] = dropdown;
+    widgets[2] = dialog;
+    g_signal_connect(save_btn, "clicked", G_CALLBACK(on_save_settings), widgets);
+    
+    gtk_box_append(GTK_BOX(box), lbl_name);
+    gtk_box_append(GTK_BOX(box), entry_name);
+    gtk_box_append(GTK_BOX(box), lbl_theme);
+    gtk_box_append(GTK_BOX(box), dropdown);
+    gtk_box_append(GTK_BOX(box), save_btn);
+    
+    gtk_window_set_child(GTK_WINDOW(dialog), box);
+    gtk_window_present(GTK_WINDOW(dialog));
+}
 
 static void launch_game(GtkButton *btn, gpointer user_data)
 {
@@ -103,16 +164,33 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_window_set_title(GTK_WINDOW(window), "C Games Collection - Launcher");
     gtk_window_set_default_size(GTK_WINDOW(window), 900, 600);
     
+    // Apply Global Theme
+    char dummy_name[50];
+    int theme_id;
+    load_global_settings(dummy_name, &theme_id);
+    apply_theme(theme_id);
+    
     GtkWidget *main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_widget_set_halign(main_vbox, GTK_ALIGN_CENTER);
     
+    GtkWidget *header_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    
     GtkWidget *title = gtk_label_new("🎮 C GAMES COLLECTION");
     gtk_widget_add_css_class(title, "header-title");
+    gtk_widget_set_hexpand(title, TRUE);
+    
+    GtkWidget *btn_settings = gtk_button_new_with_label("⚙️ Settings");
+    gtk_widget_add_css_class(btn_settings, "btn-settings");
+    gtk_widget_set_valign(btn_settings, GTK_ALIGN_CENTER);
+    g_signal_connect(btn_settings, "clicked", G_CALLBACK(open_settings_dialog), window);
+    
+    gtk_box_append(GTK_BOX(header_box), title);
+    gtk_box_append(GTK_BOX(header_box), btn_settings);
     
     GtkWidget *subtitle = gtk_label_new("Select a game from the library to begin your adventure.");
     gtk_widget_add_css_class(subtitle, "subtitle");
     
-    gtk_box_append(GTK_BOX(main_vbox), title);
+    gtk_box_append(GTK_BOX(main_vbox), header_box);
     gtk_box_append(GTK_BOX(main_vbox), subtitle);
     
     // Grid for games

@@ -237,40 +237,7 @@ void on_cell_clicked(GtkWidget *widget, gpointer data)
     }
 }
 
-// Helper: Focus on the second entry field
-void focus_entry_2(GtkWidget *widget, gpointer data) {
-    gtk_widget_grab_focus(entry_p2);
-}
-
-void on_start_clicked(GtkWidget *widget, gpointer data)
-{
-    const char *n1 = gtk_editable_get_text(GTK_EDITABLE(entry_p1));
-    const char *n2 = gtk_editable_get_text(GTK_EDITABLE(entry_p2));
-
-    // UPDATED VALIDATION LOGIC
-    if (strlen(n1) == 0) {
-        gtk_label_set_text(GTK_LABEL(lbl_start_error), "IDENTIFY YOURSELF! Name is required. 🛡️");
-        gtk_widget_grab_focus(entry_p1); // Focus back to P1
-        return;
-    }
-
-    if (strlen(n2) == 0) {
-        gtk_label_set_text(GTK_LABEL(lbl_start_error), "CHALLENGER MISSING! Don't be shy. ⚔️");
-        gtk_widget_grab_focus(entry_p2); // Focus back to P2
-        return;
-    }
-
-    // Clear error if success
-    gtk_label_set_text(GTK_LABEL(lbl_start_error), "");
-
-    strncpy(game.name1, n1, 49);
-    strncpy(game.name2, n2, 49);
-
-    init_game_state();
-    reset_board_logic();
-    update_ui_board();
-    gtk_stack_set_visible_child_name(GTK_STACK(stack), "game_page");
-}
+// Removed on_start_clicked and focus_entry_2 as we bypass login
 
 void on_reset_game_clicked(GtkWidget *widget, gpointer data)
 {
@@ -288,6 +255,7 @@ void on_play_again_clicked(GtkWidget *widget, gpointer data)
 
 void on_exit_clicked(GtkWidget *widget, gpointer data)
 {
+    return_to_launcher();
     gtk_window_close(GTK_WINDOW(window));
 }
 
@@ -331,70 +299,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_stack_set_transition_type(GTK_STACK(stack), GTK_STACK_TRANSITION_TYPE_CROSSFADE);
     gtk_window_set_child(GTK_WINDOW(window), stack);
 
-    // ============================================================
-    // PAGE 1: START SCREEN
-    // ============================================================
-    GtkWidget *start_page_wrapper = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    gtk_widget_set_halign(start_page_wrapper, GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(start_page_wrapper, GTK_ALIGN_CENTER);
-
-    GtkWidget *start_card = create_card_box();
-
-    GtkWidget *lbl_icon = gtk_label_new("🎮 TIC TAC TOE");
-    gtk_widget_add_css_class(lbl_icon, "game-title"); 
-
-    GtkWidget *lbl_welcome = gtk_label_new("Welcome!");
-    gtk_widget_add_css_class(lbl_welcome, "welcome-text"); 
-
-    GtkWidget *lbl_prompt = gtk_label_new("Select your fighter:");
-    gtk_widget_add_css_class(lbl_prompt, "input-label");
-
-    entry_p1 = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_p1), "User_Alpha...");
-    gtk_widget_add_css_class(entry_p1, "styled-entry");
-    
-    // BETTER UX: Pressing Enter on P1 jumps to P2
-    g_signal_connect(entry_p1, "activate", G_CALLBACK(focus_entry_2), NULL);
-
-    entry_p2 = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_p2), "User_Beta...");
-    gtk_widget_add_css_class(entry_p2, "styled-entry");
-    
-    // Pressing Enter on P2 starts the game
-    g_signal_connect(entry_p2, "activate", G_CALLBACK(on_start_clicked), NULL);
-
-    GtkWidget *btn_start = gtk_button_new_with_label("LOCK IN ⚔️");
-    gtk_widget_set_name(btn_start, "start_btn"); 
-    g_signal_connect(btn_start, "clicked", G_CALLBACK(on_start_clicked), NULL);
-
-    // --- ERROR MESSAGE (Initially Empty) ---
-    // This is placed RIGHT UNDER the button
-    lbl_start_error = gtk_label_new("");
-    gtk_widget_add_css_class(lbl_start_error, "error-msg");
-
-    // Tip Label (Bottom)
-    GtkWidget *lbl_tip_start = gtk_label_new("💡 Hint: Use your brain. It helps.");
-    gtk_widget_add_css_class(lbl_tip_start, "footer-tip");
-
-    gtk_box_append(GTK_BOX(start_card), lbl_icon);
-    gtk_box_append(GTK_BOX(start_card), lbl_welcome);
-    gtk_box_append(GTK_BOX(start_card), lbl_prompt);
-    
-    gtk_box_append(GTK_BOX(start_card), entry_p1);
-    gtk_box_append(GTK_BOX(start_card), entry_p2);
-    
-    gtk_box_append(GTK_BOX(start_card), btn_start);
-    
-    // Append Error Label Here
-    gtk_box_append(GTK_BOX(start_card), lbl_start_error);
-    
-    // Append Tip Label Here
-    gtk_box_append(GTK_BOX(start_card), lbl_tip_start);
-    
-    add_footer(start_card);
-
-    gtk_box_append(GTK_BOX(start_page_wrapper), start_card);
-    gtk_stack_add_named(GTK_STACK(stack), start_page_wrapper, "start_page");
+    // Removed PAGE 1: START SCREEN
 
     // ============================================================
     // PAGE 2: GAME BOARD
@@ -482,7 +387,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_widget_set_name(btn_rematch, "start_btn"); 
     g_signal_connect(btn_rematch, "clicked", G_CALLBACK(on_play_again_clicked), NULL);
 
-    GtkWidget *btn_end = gtk_button_new_with_label("End Battle");
+    GtkWidget *btn_end = gtk_button_new_with_label("Return to Menu");
     gtk_widget_add_css_class(btn_end, "btn-exit"); 
     g_signal_connect(btn_end, "clicked", G_CALLBACK(on_exit_clicked), NULL);
 
@@ -497,6 +402,19 @@ static void activate(GtkApplication *app, gpointer user_data)
 
     gtk_box_append(GTK_BOX(result_page_wrapper), result_card);
     gtk_stack_add_named(GTK_STACK(stack), result_page_wrapper, "result_page");
+    
+    int theme_id;
+    char player_name[50];
+    load_global_settings(player_name, &theme_id);
+    apply_theme(theme_id);
+    
+    strncpy(game.name1, player_name, 49);
+    strncpy(game.name2, "Guest", 49);
+    
+    init_game_state();
+    reset_board_logic();
+    update_ui_board();
+    gtk_stack_set_visible_child_name(GTK_STACK(stack), "game_page");
 
     gtk_window_present(GTK_WINDOW(window));
 }

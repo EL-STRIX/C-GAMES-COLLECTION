@@ -223,26 +223,7 @@ void process_round(AppData *data, int user_choice) {
     }
 }
 
-/* --- Callbacks --- */
-/* Called when user clicks "Let's Battle!" on the name screen */
-void on_start_clicked(GtkButton *btn, gpointer user_data) {
-    AppData *data = (AppData *)user_data;
-    char *name = NULL;
-    g_object_get(G_OBJECT(data->name_entry), "text", &name, NULL);
-
-    /* validate non-empty name */
-    if (name == NULL || strlen(name) == 0) {
-        gtk_label_set_text(GTK_LABEL(data->name_error_label), "Hold on! Every hero needs a name!");
-        gtk_widget_set_visible(data->name_error_label, TRUE);
-        if (name) g_free(name);
-        return;
-    }
-    /* copy safe into AppData and hide error */
-    g_strlcpy(data->player_name, name, sizeof(data->player_name));
-    gtk_widget_set_visible(data->name_error_label, FALSE);
-    g_free(name);
-    start_new_game(data);
-}
+/* Removed on_start_clicked as we bypass login */
 
 /* Simple wrappers connecting each choice button to process_round() */
 void on_rock_clicked(GtkButton *btn, gpointer user_data) { process_round((AppData*)user_data, CHOICE_ROCK); }
@@ -253,6 +234,7 @@ void on_play_again_clicked(GtkButton *btn, gpointer user_data) { start_new_game(
 
 /* Exit Callback - quits the application cleanly */
 void on_exit_clicked(GtkButton *btn, gpointer user_data) {
+    return_to_launcher();
     AppData *data = (AppData *)user_data;
     GtkWindow *window = GTK_WINDOW(data->window);
     GtkApplication *app = gtk_window_get_application(window);
@@ -342,59 +324,7 @@ GtkWidget* create_choice_button(const char *emoji, const char *label_text, GCall
     return btn;
 }
 
-/* 1. Login/Name Screen */
-/* This screen collects the player's name before entering the game. */
-GtkWidget* create_name_screen(AppData *data) {
-    GtkWidget *center_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    gtk_widget_set_valign(center_box, GTK_ALIGN_CENTER);
-    gtk_widget_set_halign(center_box, GTK_ALIGN_CENTER);
-    gtk_widget_set_vexpand(center_box, TRUE);
-    gtk_widget_set_hexpand(center_box, TRUE);
-
-    GtkWidget *card = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-    gtk_widget_add_css_class(card, "login-card");
-    gtk_widget_set_size_request(card, 350, -1);
-    gtk_box_append(GTK_BOX(center_box), card);
-
-    GtkWidget *title_lbl = gtk_label_new("🎮 ROCK PAPER SCISSORS");
-    gtk_widget_add_css_class(title_lbl, "game-title");
-    gtk_box_append(GTK_BOX(card), title_lbl);
-
-    GtkWidget *welcome_lbl = gtk_label_new("Welcome!");
-    gtk_widget_add_css_class(welcome_lbl, "welcome-text");
-    gtk_box_append(GTK_BOX(card), welcome_lbl);
-
-    GtkWidget *q_lbl = gtk_label_new("Who dares to challenge the computer?");
-    gtk_widget_add_css_class(q_lbl, "input-label");
-    gtk_widget_set_halign(q_lbl, GTK_ALIGN_START);
-    gtk_box_append(GTK_BOX(card), q_lbl);
-
-    data->name_entry = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(data->name_entry), "Enter your warrior name...");
-    gtk_widget_add_css_class(data->name_entry, "styled-entry");
-    gtk_box_append(GTK_BOX(card), data->name_entry);
-
-    GtkWidget *btn = gtk_button_new_with_label("Let's Battle!");
-    gtk_widget_set_name(btn, "start_btn");
-    g_signal_connect(btn, "clicked", G_CALLBACK(on_start_clicked), data);
-    g_signal_connect(data->name_entry, "activate", G_CALLBACK(on_start_clicked), data);
-    gtk_box_append(GTK_BOX(card), btn);
-
-    data->name_error_label = gtk_label_new("");
-    gtk_widget_add_css_class(data->name_error_label, "error");
-    gtk_box_append(GTK_BOX(card), data->name_error_label);
-
-    GtkWidget *tip_lbl = gtk_label_new("💡 Tip: Hey hero... don't forget to tell me who you are!");
-    gtk_widget_add_css_class(tip_lbl, "footer-tip");
-    gtk_box_append(GTK_BOX(card), tip_lbl);
-
-    GtkWidget *credit_lbl = gtk_label_new("Developed by SUJAY PAUL");
-    gtk_widget_add_css_class(credit_lbl, "footer-credit");
-    gtk_box_append(GTK_BOX(card), credit_lbl);
-
-    return center_box;
-}
-
+/* Removed create_name_screen */
 /* 2. Game Screen */
 /* Main gameplay screen: shows rounds, scores, and rock-paper-scissors buttons. */
 GtkWidget* create_game_screen(AppData *data) {
@@ -498,7 +428,7 @@ GtkWidget* create_result_screen(AppData *data) {
     gtk_box_append(GTK_BOX(button_box), data->play_again_btn);
 
     /* 2. Exit Button */
-    GtkWidget *exit_btn = gtk_button_new_with_label("End Battle");
+    GtkWidget *exit_btn = gtk_button_new_with_label("Return to Menu");
     gtk_widget_add_css_class(exit_btn, "btn-exit");
     gtk_widget_set_hexpand(exit_btn, TRUE);
     g_signal_connect(exit_btn, "clicked", G_CALLBACK(on_exit_clicked), data);
@@ -543,16 +473,19 @@ void activate(GtkApplication *app, gpointer user_data) {
     gtk_box_append(GTK_BOX(main_box), data->stack);
 
     /* add the three screens to the stack */
-    gtk_stack_add_named(GTK_STACK(data->stack), create_name_screen(data), "name_screen");
     gtk_stack_add_named(GTK_STACK(data->stack), create_game_screen(data), "game_screen");
     gtk_stack_add_named(GTK_STACK(data->stack), create_result_screen(data), "result_screen");
 
     load_css(); /* apply app CSS */
+    
+    int theme_id;
+    load_global_settings(data->player_name, &theme_id);
+    apply_theme(theme_id);
 
     gtk_window_present(GTK_WINDOW(window));
 
     gtk_widget_set_visible(data->next_round_btn, FALSE);
-    gtk_stack_set_visible_child_name(GTK_STACK(data->stack), "name_screen");
+    start_new_game(data);
 }
 
 int main(int argc, char **argv) {
