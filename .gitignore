@@ -1,0 +1,21 @@
+# Compiled Object files
+*.o
+*.obj
+
+# Compiled Executables
+*.exe
+*.out
+*.app
+bin/
+
+# Temporary and IDE files
+.vscode/
+.idea/
+*.suo
+*.sln
+*.user
+*.log
+
+# Data persistence files
+*.dat
+*.db

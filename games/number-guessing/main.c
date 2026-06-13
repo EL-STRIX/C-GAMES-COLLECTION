@@ -11,6 +11,7 @@
 #include <stdlib.h>  // Used for random numbers (rand)
 #include <time.h>    // Used to set the random seed based on time
 #include <string.h>  // Used for text/string handling
+#include "../../common/persistence.h"
 
 const char *css_data =
     "window { background-color: #cbcbcb; }"
@@ -147,12 +148,21 @@ static void on_submit_guess(GtkButton *btn, GameApp *app)
     else
     {
         // --- WINNER! ---
+        
+        save_score("number_guessing", app->player_name, app->attempts, 1);
+        char best_player[50];
+        int best_score = load_top_score("number_guessing", best_player);
 
         // Prepare result strings
-        char congrats[200], numbuf[64], attempts_final[64];
+        char congrats[200], numbuf[64], attempts_final[128];
         snprintf(congrats, sizeof(congrats), "Bullseye, %s!", app->player_name);
         snprintf(numbuf, sizeof(numbuf), "The secret number was %d!", app->secret_number);
-        snprintf(attempts_final, sizeof(attempts_final), "You cracked it in %d guesses!", app->attempts);
+        
+        if (best_score != -1) {
+            snprintf(attempts_final, sizeof(attempts_final), "You cracked it in %d guesses!\nAll-Time Best: %s (%d guesses)", app->attempts, best_player, best_score);
+        } else {
+            snprintf(attempts_final, sizeof(attempts_final), "You cracked it in %d guesses!", app->attempts);
+        }
 
         // Update Result Page Labels
         gtk_label_set_text(GTK_LABEL(app->congrats_label), congrats);

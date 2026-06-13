@@ -1,5 +1,6 @@
 #include <gtk/gtk.h>
 #include <string.h>
+#include "../../common/persistence.h"
 
 // ============================================================
 // GAME STATE
@@ -202,8 +203,14 @@ void show_result_screen()
     gtk_label_set_text(GTK_LABEL(result_subtitle), result_txt);
 
     // 3. Set Final Score
-    char score_txt[100];
-    snprintf(score_txt, 100, "Final Score: %d - %d", game.score1, game.score2);
+    char best_player[50];
+    int best_score = load_top_score("ttt_cli", best_player);
+    char score_txt[200];
+    if (best_score != -1) {
+        snprintf(score_txt, 200, "Final Score: %d - %d\nAll-Time Best: %s (%d wins)", game.score1, game.score2, best_player, best_score);
+    } else {
+        snprintf(score_txt, 200, "Final Score: %d - %d", game.score1, game.score2);
+    }
     gtk_label_set_text(GTK_LABEL(result_score_label), score_txt);
 
     gtk_stack_set_visible_child_name(GTK_STACK(stack), "result_page");
@@ -212,10 +219,13 @@ void show_result_screen()
 void handle_round_end(int winner_id)
 {
     game.game_over = 1;
-    if (winner_id == 1)
+    if (winner_id == 1) {
         game.score1++;
-    else if (winner_id == 2)
+        save_score("ttt_cli", game.name1, game.score1, 0);
+    } else if (winner_id == 2) {
         game.score2++;
+        save_score("ttt_cli", game.name2, game.score2, 0);
+    }
 
     game.round_winners[game.current_round - 1] = winner_id;
 

@@ -14,6 +14,7 @@
 #include <string.h>
 #include <time.h>
 #include <gtk/gtk.h>
+#include "../../common/persistence.h"
 
 /* --- Game Constants --- */
 #define CHOICE_snake 1
@@ -100,7 +101,17 @@ gboolean on_show_final_results(gpointer user_data) {
         gtk_widget_add_css_class(data->final_outcome_label, "warning");
     }
 
-    score_text = g_strdup_printf("Final Score: %d - %d", data->player_score, data->computer_score);
+    if (data->player_score > data->computer_score) {
+        save_score("sgw", data->player_name, data->player_score, 0);
+    }
+    char best_player[50];
+    int best_score = load_top_score("sgw", best_player);
+
+    if (best_score != -1) {
+        score_text = g_strdup_printf("Final Score: %d - %d\nAll-Time Best: %s (%d wins)", data->player_score, data->computer_score, best_player, best_score);
+    } else {
+        score_text = g_strdup_printf("Final Score: %d - %d", data->player_score, data->computer_score);
+    }
 
     /* update UI labels and switch to result screen */
     gtk_label_set_text(GTK_LABEL(data->final_outcome_label), outcome_text);
