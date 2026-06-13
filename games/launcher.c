@@ -104,7 +104,8 @@ gboolean return_to_launcher(void) {
 #endif
     
     GError *error = NULL;
-    if (!g_spawn_command_line_async(full_path, &error)) {
+    char *argv[] = { full_path, NULL };
+    if (!g_spawn_async(NULL, argv, NULL, G_SPAWN_DEFAULT, NULL, NULL, NULL, &error)) {
         GtkAlertDialog *dialog = gtk_alert_dialog_new("Failed to return to launcher: %s\nPath: %s", error->message, full_path);
         gtk_alert_dialog_show(dialog, NULL);
         g_object_unref(dialog);
@@ -117,9 +118,15 @@ gboolean return_to_launcher(void) {
 }
 
 void apply_theme(int theme_id) {
+    if (theme_id == 1 || theme_id == 2) {
+        g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", TRUE, NULL);
+    } else {
+        g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", FALSE, NULL);
+    }
+
     const char *theme_css = "";
-    if (theme_id == 1) theme_css = "window { background-color: #11111b; } .card { background-color: #1e1e2e; color: #cdd6f4; border: 1px solid #45475a; box-shadow: 0 0 10px rgba(255,255,255,0.1); } label { color: #cdd6f4; }";
-    else if (theme_id == 2) theme_css = "window { background-color: #0d0d0d; } .card { background-color: #000000; border: 2px solid #00ff00; box-shadow: 0 0 15px rgba(0,255,0,0.3); } label { color: #00ff00; font-family: monospace; } button { background-color: #002200; color: #00ff00; border: 1px solid #00ff00; }";
+    if (theme_id == 1) theme_css = "window { background-color: #11111b; } .card { background-color: #1e1e2e; color: #cdd6f4; border: 1px solid #45475a; box-shadow: 0 0 10px rgba(255,255,255,0.1); } label, .header-title, .subtitle, .game-title, .game-desc, .name-question, .welcome-text, .result-small-text, .result-performance-text, .attempts-text, .success-text, .big-number, .tip-text, .warning-text { color: #cdd6f4; font-family: sans-serif; }";
+    else if (theme_id == 2) theme_css = "window { background-color: #0d0d0d; } .card { background-color: #000000; border: 2px solid #00ff00; box-shadow: 0 0 15px rgba(0,255,0,0.3); } label, .header-title, .subtitle, .game-title, .game-desc, .name-question, .welcome-text, .result-small-text, .result-performance-text, .attempts-text, .success-text, .big-number, .tip-text, .warning-text { color: #00ff00; font-family: monospace; } button, .btn-launch, .btn-settings, .btn-blue { background-color: #002200; color: #00ff00; border: 1px solid #00ff00; font-family: monospace; } button:hover, .btn-launch:hover, .btn-settings:hover, .btn-blue:hover { background-color: #004400; }";
     if (theme_id != 0) {
         GtkCssProvider *provider = gtk_css_provider_new();
         gtk_css_provider_load_from_string(provider, theme_css);
@@ -137,8 +144,8 @@ const char *css_data =
     "window { background-color: #1e1e2e; }"
     ".header-title { font-size: 32px; font-weight: 900; color: #cdd6f4; margin-top: 20px; margin-bottom: 10px; }"
     ".subtitle { font-size: 16px; color: #a6adc8; margin-bottom: 30px; }"
-    ".game-card { background-color: #313244; border-radius: 15px; padding: 20px; margin: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: all 0.2s ease; }"
-    ".game-card:hover { background-color: #45475a; }"
+    ".card { background-color: #313244; border-radius: 15px; padding: 20px; margin: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: all 0.2s ease; }"
+    ".card:hover { background-color: #45475a; }"
     ".game-title { font-size: 20px; font-weight: bold; color: #89b4fa; }"
     ".game-desc { font-size: 14px; color: #bac2de; margin-top: 5px; }"
     ".btn-launch { background-color: #89b4fa; color: #11111b; font-weight: bold; padding: 10px 20px; border-radius: 8px; margin-top: 15px; }"
@@ -237,7 +244,8 @@ static void launch_game(GtkButton *btn, gpointer user_data)
 #endif
 
     GError *error = NULL;
-    gboolean success = g_spawn_command_line_async(full_path, &error);
+    char *argv[] = { full_path, NULL };
+    gboolean success = g_spawn_async(NULL, argv, NULL, G_SPAWN_DEFAULT, NULL, NULL, NULL, &error);
     if (!success) {
         GtkAlertDialog *dialog = gtk_alert_dialog_new("Failed to launch game: %s\nPath: %s", error->message, full_path);
         gtk_alert_dialog_show(dialog, NULL);
@@ -254,7 +262,7 @@ static void launch_game(GtkButton *btn, gpointer user_data)
 GtkWidget* create_game_entry(const char *icon, const char *title, const char *desc, const char *exe_name)
 {
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-    gtk_widget_add_css_class(box, "game-card");
+    gtk_widget_add_css_class(box, "card");
     gtk_widget_set_size_request(box, 250, -1);
     
     GtkWidget *lbl_icon = gtk_label_new(icon);

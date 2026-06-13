@@ -102,7 +102,8 @@ gboolean return_to_launcher(void) {
 #endif
     
     GError *error = NULL;
-    if (!g_spawn_command_line_async(full_path, &error)) {
+    char *argv[] = { full_path, NULL };
+    if (!g_spawn_async(NULL, argv, NULL, G_SPAWN_DEFAULT, NULL, NULL, NULL, &error)) {
         GtkAlertDialog *dialog = gtk_alert_dialog_new("Failed to return to launcher: %s\nPath: %s", error->message, full_path);
         gtk_alert_dialog_show(dialog, NULL);
         g_object_unref(dialog);
