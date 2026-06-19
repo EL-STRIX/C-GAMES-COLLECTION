@@ -138,7 +138,7 @@ void apply_theme(int theme_id) {
     }
 
     const char *theme_css = "";
-    if (theme_id == 1) theme_css = "window { background-color: #11111b; } .card { background-color: #1e1e2e; color: #ffffff; border: 1px solid #45475a; box-shadow: 0 0 10px rgba(255,255,255,0.1); } label, .header-title, .subtitle, .game-title, .game-desc, .name-question, .welcome-text, .result-small-text, .result-performance-text, .attempts-text, .success-text, .big-number, .tip-text, .warning-text { color: #ffffff; font-family: 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif; } button, .btn-launch, .btn-settings, .btn-blue { background-color: #313244; color: #ffffff; font-weight: bold; border: 1px solid #45475a; border-radius: 8px; } button label, .btn-launch label, .btn-settings label, .btn-blue label { color: #ffffff; } button:hover, .btn-launch:hover, .btn-settings:hover, .btn-blue:hover { background-color: #45475a; }";
+    if (theme_id == 1) theme_css = "headerbar { min-height: 60px; background-color: #1e1e2e; color: #cdd6f4; border-bottom: 1px solid #11111b; } .header-title { font-size: 20pt; font-weight: 900; color: #ffffff; letter-spacing: 1px; } windowcontrols button { min-width: 40px; min-height: 40px; border-radius: 5px; } /* Main Background */ .window-bg { background-color: #11111b; } .card { background-color: #1e1e2e; color: #ffffff; border: 1px solid #45475a; box-shadow: 0 0 10px rgba(255,255,255,0.1); } label, .header-title, .subtitle, .game-title, .game-desc, .name-question, .welcome-text, .result-small-text, .result-performance-text, .attempts-text, .success-text, .big-number, .tip-text, .warning-text { color: #ffffff; font-family: 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif; } button, .btn-launch, .btn-settings, .btn-blue { background-color: #313244; color: #ffffff; font-weight: bold; border: 1px solid #45475a; border-radius: 8px; } button label, .btn-launch label, .btn-settings label, .btn-blue label { color: #ffffff; } button:hover, .btn-launch:hover, .btn-settings:hover, .btn-blue:hover { background-color: #45475a; }";
     else if (theme_id == 2) theme_css = "window { background-color: #0d0d0d; } .card { background-color: #000000; border: 2px solid #00ff00; box-shadow: 0 0 15px rgba(0,255,0,0.3); } label, .header-title, .subtitle, .game-title, .game-desc, .name-question, .welcome-text, .result-small-text, .result-performance-text, .attempts-text, .success-text, .big-number, .tip-text, .warning-text { color: #00ff00; font-family: 'Segoe UI Emoji', 'Noto Color Emoji', monospace; } button, .btn-launch, .btn-settings, .btn-blue { background-color: #002200; color: #00ff00; border: 1px solid #00ff00; font-family: 'Segoe UI Emoji', 'Noto Color Emoji', monospace; border-radius: 8px; } button label, .btn-launch label, .btn-settings label, .btn-blue label { color: #00ff00; } button:hover, .btn-launch:hover, .btn-settings:hover, .btn-blue:hover { background-color: #004400; }";
     if (theme_id != 0) {
         current_theme_provider = gtk_css_provider_new();
@@ -155,6 +155,8 @@ void apply_theme(int theme_id) {
 const char *css_data =
     "* { font-family: \"Segoe UI Emoji\", \"Noto Color Emoji\", sans-serif; }"
     "window { background-color: #1e1e2e; }"
+    "headerbar { min-height: 60px; background-color: #11111b; color: #cdd6f4; border-bottom: 1px solid #000000; }"
+    "windowcontrols button { min-width: 40px; min-height: 40px; border-radius: 5px; }"
     "label { color: #cdd6f4; }"
     ".header-title { font-size: 32px; font-weight: 900; color: #cdd6f4; margin-top: 20px; margin-bottom: 10px; }"
     ".subtitle { font-size: 16px; color: #a6adc8; margin-bottom: 30px; }"
@@ -324,10 +326,13 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_window_set_default_size(GTK_WINDOW(window), 900, 700);
     gtk_window_maximize(GTK_WINDOW(window));
     
-    // Apply Global Theme
-    char dummy_name[50];
-    int theme_id;
-    load_global_settings(dummy_name, &theme_id);
+    GtkWidget *header = gtk_header_bar_new();
+    gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), TRUE);
+    gtk_window_set_titlebar(GTK_WINDOW(window), header);
+
+    GtkWidget *title_lbl = gtk_label_new("C Games Collection - Launcher");
+    gtk_widget_add_css_class(title_lbl, "header-title");
+    gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), title_lbl);
     apply_theme(theme_id);
     
     GtkWidget *main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);

@@ -159,6 +159,9 @@ void apply_theme(int theme_id) {
 
 const char *css_data =
     "* { font-family: \"Segoe UI Emoji\", \"Noto Color Emoji\", sans-serif; }"
+    "headerbar { min-height: 60px; background-color: #1e1e2e; color: #cdd6f4; border-bottom: 1px solid #11111b; }"
+    ".header-title { font-size: 20pt; font-weight: 900; color: #ffffff; letter-spacing: 1px; }"
+    "windowcontrols button { min-width: 40px; min-height: 40px; border-radius: 5px; }"
     "window { background-color: #cbcbcb; }"
     "label { color: #1e293b; }"
     "button { all: unset; border-radius: 8px; padding: 10px; }"
@@ -530,7 +533,10 @@ static void activate(GtkApplication *app_system, gpointer user_data)
     GtkWidget *header = gtk_header_bar_new();
     gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), TRUE);
     gtk_window_set_titlebar(GTK_WINDOW(app->window), header);
-    gtk_window_set_title(GTK_WINDOW(app->window), "Guess The Number");
+
+    GtkWidget *title_lbl = gtk_label_new("Guess The Number");
+    gtk_widget_add_css_class(title_lbl, "header-title");
+    gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), title_lbl);
 
     // Load CSS Styles
     GtkCssProvider *provider = gtk_css_provider_new();
@@ -575,7 +581,7 @@ static void activate(GtkApplication *app_system, gpointer user_data)
     gtk_overlay_set_child(GTK_OVERLAY(overlay), app->stack);
 
     GtkWidget *global_btn_back = gtk_button_new_with_label("🔙 Return to Main Menu");
-    gtk_widget_set_halign(global_btn_back, GTK_ALIGN_END);
+    gtk_widget_set_halign(global_btn_back, GTK_ALIGN_START);
     gtk_widget_set_valign(global_btn_back, GTK_ALIGN_START);
     gtk_widget_set_margin_top(global_btn_back, 15);
     gtk_widget_set_margin_end(global_btn_back, 15);

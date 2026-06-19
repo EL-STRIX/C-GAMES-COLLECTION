@@ -187,6 +187,9 @@ const char *css_data =
     "* { font-family: \"Segoe UI Emoji\", \"Noto Color Emoji\", sans-serif; }"
     "window { background-color: #cbcbcb; }"
     "label { color: #1e293b; }"
+    "headerbar { min-height: 60px; background-color: #1e1e2e; color: #cdd6f4; border-bottom: 1px solid #11111b; }"
+    ".header-title { font-size: 20pt; font-weight: 900; color: #ffffff; letter-spacing: 1px; }"
+    "windowcontrols button { min-width: 40px; min-height: 40px; border-radius: 5px; }"
     ".login-card { background-color: #ffffff; border-radius: 12px; padding: 30px; margin: 20px; box-shadow: 0px 4px 8px rgba(0,0,0,0.1); }"
     ".game-title { font-size: 16pt; font-weight: bold; color: #4a00e0; margin-bottom: 5px; }"
     ".welcome-text { font-size: 14pt; font-weight: bold; color: #2979ff; margin-bottom: 20px; }"
@@ -496,7 +499,10 @@ static void activate(GtkApplication *app, gpointer user_data)
     GtkWidget *header = gtk_header_bar_new();
     gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), TRUE);
     gtk_window_set_titlebar(GTK_WINDOW(window), header);
-    gtk_window_set_title(GTK_WINDOW(window), "Epic Tic Tac Toe Battle");
+    
+    GtkWidget *title_lbl = gtk_label_new("Epic Tic Tac Toe Battle");
+    gtk_widget_add_css_class(title_lbl, "header-title");
+    gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), title_lbl);
 
     stack = gtk_stack_new();
     gtk_stack_set_transition_type(GTK_STACK(stack), GTK_STACK_TRANSITION_TYPE_CROSSFADE);
@@ -505,7 +511,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_overlay_set_child(GTK_OVERLAY(overlay), stack);
 
     GtkWidget *global_btn_back = gtk_button_new_with_label("🔙 Return to Main Menu");
-    gtk_widget_set_halign(global_btn_back, GTK_ALIGN_END);
+    gtk_widget_set_halign(global_btn_back, GTK_ALIGN_START);
     gtk_widget_set_valign(global_btn_back, GTK_ALIGN_START);
     gtk_widget_set_margin_top(global_btn_back, 15);
     gtk_widget_set_margin_end(global_btn_back, 15);
