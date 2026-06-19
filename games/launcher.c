@@ -314,6 +314,11 @@ static void activate(GtkApplication *app, gpointer user_data)
     GtkWidget *title_lbl = gtk_label_new("C Games Collection - Launcher");
     gtk_widget_add_css_class(title_lbl, "header-title");
     gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), title_lbl);
+    
+    // Apply Global Theme
+    char dummy_name[50];
+    int theme_id;
+    load_global_settings(dummy_name, &theme_id);
     apply_theme(theme_id);
     
     GtkWidget *main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
