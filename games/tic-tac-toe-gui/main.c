@@ -490,6 +490,7 @@ static void activate(GtkApplication *app, gpointer user_data)
 
     window = gtk_application_window_new(app);
     gtk_window_set_default_size(GTK_WINDOW(window), 900, 700);
+    gtk_window_fullscreen(GTK_WINDOW(window));
     gtk_widget_add_css_class(window, "window-bg");
 
     GtkWidget *header = gtk_header_bar_new();

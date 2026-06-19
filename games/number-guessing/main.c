@@ -540,6 +540,7 @@ static void activate(GtkApplication *app_system, gpointer user_data)
     // Setup Main Window
     app->window = gtk_application_window_new(app_system);
     gtk_window_set_default_size(GTK_WINDOW(app->window), 900, 700);
+    gtk_window_fullscreen(GTK_WINDOW(app->window));
 
     GtkWidget *header = gtk_header_bar_new();
     gtk_window_set_titlebar(GTK_WINDOW(app->window), header);
