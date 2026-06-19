@@ -185,8 +185,8 @@ GtkWidget *lbl_start_error;
 
 const char *css_data =
     "* { font-family: \"Segoe UI Emoji\", \"Noto Color Emoji\", sans-serif; }"
-    "window { background-color: #1e1e2e; }"
-    "label { color: #cdd6f4; }"
+    "window { background-color: #cbcbcb; }"
+    "label { color: #1e293b; }"
     ".login-card { background-color: #ffffff; border-radius: 12px; padding: 30px; margin: 20px; box-shadow: 0px 4px 8px rgba(0,0,0,0.1); }"
     ".game-title { font-size: 16pt; font-weight: bold; color: #4a00e0; margin-bottom: 5px; }"
     ".welcome-text { font-size: 14pt; font-weight: bold; color: #2979ff; margin-bottom: 20px; }"
