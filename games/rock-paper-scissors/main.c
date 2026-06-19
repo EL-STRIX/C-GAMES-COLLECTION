@@ -711,7 +711,7 @@ void activate(GtkApplication *app, gpointer user_data) {
     
     int theme_id;
     load_global_settings(data->player_name, &theme_id);
-    apply_theme(theme_id);
+    // apply_theme(theme_id);
     
     /* Set default player name if available */
     if (strlen(data->player_name) > 0) {

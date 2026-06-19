@@ -549,7 +549,7 @@ static void activate(GtkApplication *app_system, gpointer user_data)
 
     int theme_id;
     load_global_settings(app->player_name, &theme_id);
-    apply_theme(theme_id);
+    // apply_theme(theme_id);
 
     // Create all pages
     GtkWidget *page1 = create_welcome_page(app);
