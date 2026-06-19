@@ -90,34 +90,6 @@ void load_global_settings(char *player_name, int *theme_id) {
 }
 
 gboolean return_to_launcher(void) {
-    char *full_path = NULL; 
-    const char *exe_name = "launcher.exe";
-#ifdef _WIN32
-    char path[MAX_PATH]; GetModuleFileNameA(NULL, path, MAX_PATH);
-    char *dir = g_path_get_dirname(path); full_path = g_build_filename(dir, exe_name, NULL); g_free(dir);
-#else
-    char *exe_path = g_file_read_link("/proc/self/exe", NULL);
-    if (exe_path) {
-        char *dir = g_path_get_dirname(exe_path); full_path = g_build_filename(dir, exe_name, NULL);
-        g_free(dir); g_free(exe_path);
-    } else { 
-        char *cwd = g_get_current_dir();
-        full_path = g_build_filename(cwd, exe_name, NULL); 
-        g_free(cwd);
-    }
-#endif
-    
-    GError *error = NULL;
-    char *argv[] = { full_path, NULL };
-    if (!g_spawn_async(NULL, argv, NULL, G_SPAWN_DEFAULT, NULL, NULL, NULL, &error)) {
-        GtkAlertDialog *dialog = gtk_alert_dialog_new("Failed to return to launcher: %s\nPath: %s", error->message, full_path);
-        gtk_alert_dialog_show(dialog, NULL);
-        g_object_unref(dialog);
-        g_error_free(error);
-        g_free(full_path);
-        return FALSE;
-    }
-    g_free(full_path);
     return TRUE;
 }
 
@@ -234,6 +206,13 @@ static void open_settings_dialog(GtkButton *btn, gpointer user_data) {
     gtk_window_present(GTK_WINDOW(dialog));
 }
 
+static void on_child_exit(GPid pid, gint status, gpointer user_data) {
+    g_spawn_close_pid(pid);
+    if (main_window) {
+        gtk_widget_set_visible(main_window, TRUE);
+    }
+}
+
 static void launch_game(GtkButton *btn, gpointer user_data)
 {
     const char *exe_name = (const char *)user_data;
@@ -261,7 +240,8 @@ static void launch_game(GtkButton *btn, gpointer user_data)
 
     GError *error = NULL;
     char *argv[] = { full_path, NULL };
-    gboolean success = g_spawn_async(NULL, argv, NULL, G_SPAWN_DEFAULT, NULL, NULL, NULL, &error);
+    GPid pid;
+    gboolean success = g_spawn_async(NULL, argv, NULL, G_SPAWN_DO_NOT_REAP_CHILD, NULL, NULL, &pid, &error);
     if (!success) {
         GtkAlertDialog *dialog = gtk_alert_dialog_new("Failed to launch game: %s\nPath: %s", error->message, full_path);
         gtk_alert_dialog_show(dialog, NULL);
@@ -269,8 +249,9 @@ static void launch_game(GtkButton *btn, gpointer user_data)
         g_error_free(error);
     } else {
         if (main_window) {
-            gtk_window_close(GTK_WINDOW(main_window));
+            gtk_widget_set_visible(main_window, FALSE);
         }
+        g_child_watch_add(pid, on_child_exit, NULL);
     }
     g_free(full_path);
 }
