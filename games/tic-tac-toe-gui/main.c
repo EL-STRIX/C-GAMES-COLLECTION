@@ -537,7 +537,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_box_append(GTK_BOX(start_card), btn_start);
 
     GtkWidget *btn_back = gtk_button_new_with_label("Return to Main Menu");
-    gtk_widget_set_name(btn_back, "start_btn"); 
+    gtk_widget_add_css_class(btn_back, "btn-exit"); 
     g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), NULL);
     gtk_box_append(GTK_BOX(start_card), btn_back);
 
@@ -594,7 +594,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_widget_add_css_class(lbl_tip_game, "footer-tip");
 
     btn_back = gtk_button_new_with_label("Return to Main Menu");
-    gtk_widget_set_name(btn_back, "start_btn"); 
+    gtk_widget_add_css_class(btn_back, "btn-exit"); 
     g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), NULL);
 
     gtk_box_append(GTK_BOX(game_card), box_scores);
@@ -636,7 +636,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     g_signal_connect(btn_rematch, "clicked", G_CALLBACK(on_play_again_clicked), NULL);
 
     btn_back = gtk_button_new_with_label("Return to Main Menu");
-    gtk_widget_set_name(btn_back, "start_btn"); 
+    gtk_widget_add_css_class(btn_back, "btn-exit"); 
     g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), NULL);
 
     gtk_box_append(GTK_BOX(box_actions), btn_rematch);

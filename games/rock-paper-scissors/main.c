@@ -556,7 +556,7 @@ GtkWidget* create_login_screen(AppData *data) {
     gtk_box_append(GTK_BOX(card), start_btn);
 
     GtkWidget *btn_back = gtk_button_new_with_label("Return to Main Menu");
-    gtk_widget_set_name(btn_back, "start_btn"); // Reuse styling
+    gtk_widget_add_css_class(btn_back, "btn-exit"); // Reuse styling
     g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), data);
     gtk_box_append(GTK_BOX(card), btn_back);
 
@@ -620,7 +620,7 @@ GtkWidget* create_game_screen(AppData *data) {
     gtk_box_append(GTK_BOX(card), data->next_round_btn);
 
     GtkWidget *btn_back = gtk_button_new_with_label("Return to Main Menu");
-    gtk_widget_set_name(btn_back, "start_btn");
+    gtk_widget_add_css_class(btn_back, "btn-exit");
     g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), data);
     gtk_box_append(GTK_BOX(card), btn_back);
 
@@ -670,7 +670,7 @@ GtkWidget* create_result_screen(AppData *data) {
     gtk_box_append(GTK_BOX(button_box), data->play_again_btn);
 
     GtkWidget *btn_back = gtk_button_new_with_label("Return to Main Menu");
-    gtk_widget_set_name(btn_back, "start_btn");
+    gtk_widget_add_css_class(btn_back, "btn-exit");
     gtk_widget_set_hexpand(btn_back, TRUE);
     g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), data);
     gtk_box_append(GTK_BOX(button_box), btn_back);
