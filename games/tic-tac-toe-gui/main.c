@@ -593,7 +593,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_widget_set_margin_top(lbl_tip_game, 15);
     gtk_widget_add_css_class(lbl_tip_game, "footer-tip");
 
-    GtkWidget *btn_back = gtk_button_new_with_label("Return to Main Menu");
+    btn_back = gtk_button_new_with_label("Return to Main Menu");
     gtk_widget_set_name(btn_back, "start_btn"); 
     g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), NULL);
 
@@ -635,7 +635,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_widget_set_name(btn_rematch, "start_btn"); 
     g_signal_connect(btn_rematch, "clicked", G_CALLBACK(on_play_again_clicked), NULL);
 
-    GtkWidget *btn_back = gtk_button_new_with_label("Return to Main Menu");
+    btn_back = gtk_button_new_with_label("Return to Main Menu");
     gtk_widget_set_name(btn_back, "start_btn"); 
     g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), NULL);
 
