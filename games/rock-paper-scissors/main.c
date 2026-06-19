@@ -555,6 +555,11 @@ GtkWidget* create_login_screen(AppData *data) {
     g_signal_connect(start_btn, "clicked", G_CALLBACK(on_start_clicked), data);
     gtk_box_append(GTK_BOX(card), start_btn);
 
+    GtkWidget *btn_back = gtk_button_new_with_label("Return to Main Menu");
+    gtk_widget_set_name(btn_back, "start_btn"); // Reuse styling
+    g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), data);
+    gtk_box_append(GTK_BOX(card), btn_back);
+
     return vbox;
 }
 /* 2. Game Screen */
@@ -614,6 +619,11 @@ GtkWidget* create_game_screen(AppData *data) {
     g_signal_connect(data->next_round_btn, "clicked", G_CALLBACK(on_next_round_clicked), data);
     gtk_box_append(GTK_BOX(card), data->next_round_btn);
 
+    GtkWidget *btn_back = gtk_button_new_with_label("Return to Main Menu");
+    gtk_widget_set_name(btn_back, "start_btn");
+    g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), data);
+    gtk_box_append(GTK_BOX(card), btn_back);
+
     GtkWidget *credit_lbl = gtk_label_new("Developed by SUJAY PAUL");
     gtk_widget_add_css_class(credit_lbl, "footer-credit");
     gtk_box_append(GTK_BOX(card), credit_lbl);
@@ -653,12 +663,17 @@ GtkWidget* create_result_screen(AppData *data) {
     gtk_widget_set_margin_top(button_box, 15);
 
     /* 1. Play Again Button */
-    /* 1. Play Again Button */
     data->play_again_btn = gtk_button_new_with_label("Rematch?");
     gtk_widget_set_name(data->play_again_btn, "start_btn");
     gtk_widget_set_hexpand(data->play_again_btn, TRUE);
     g_signal_connect(data->play_again_btn, "clicked", G_CALLBACK(on_play_again_clicked), data);
     gtk_box_append(GTK_BOX(button_box), data->play_again_btn);
+
+    GtkWidget *btn_back = gtk_button_new_with_label("Return to Main Menu");
+    gtk_widget_set_name(btn_back, "start_btn");
+    gtk_widget_set_hexpand(btn_back, TRUE);
+    g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), data);
+    gtk_box_append(GTK_BOX(button_box), btn_back);
 
     /* Add the button box to the card */
     gtk_box_append(GTK_BOX(card), button_box);
@@ -685,10 +700,6 @@ void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *header = gtk_header_bar_new();
     gtk_window_set_titlebar(GTK_WINDOW(window), header);
     gtk_window_set_title(GTK_WINDOW(window), "Epic Rock Paper Scissors Battle");
-    
-    GtkWidget *btn_back = gtk_button_new_with_label("Back to Main Menu");
-    gtk_header_bar_pack_start(GTK_HEADER_BAR(header), btn_back);
-    g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), data);
 
     GtkWidget *main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_add_css_class(main_box, "window-bg");

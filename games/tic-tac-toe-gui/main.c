@@ -495,10 +495,6 @@ static void activate(GtkApplication *app, gpointer user_data)
     GtkWidget *header = gtk_header_bar_new();
     gtk_window_set_titlebar(GTK_WINDOW(window), header);
     gtk_window_set_title(GTK_WINDOW(window), "Epic Tic Tac Toe Battle");
-    
-    GtkWidget *btn_back = gtk_button_new_with_label("Back to Main Menu");
-    gtk_header_bar_pack_start(GTK_HEADER_BAR(header), btn_back);
-    g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), NULL);
 
     stack = gtk_stack_new();
     gtk_stack_set_transition_type(GTK_STACK(stack), GTK_STACK_TRANSITION_TYPE_CROSSFADE);
@@ -539,6 +535,11 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_widget_set_name(btn_start, "start_btn"); 
     g_signal_connect(btn_start, "clicked", G_CALLBACK(on_start_clicked), NULL);
     gtk_box_append(GTK_BOX(start_card), btn_start);
+
+    GtkWidget *btn_back = gtk_button_new_with_label("Return to Main Menu");
+    gtk_widget_set_name(btn_back, "start_btn"); 
+    g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), NULL);
+    gtk_box_append(GTK_BOX(start_card), btn_back);
 
     gtk_box_append(GTK_BOX(start_page_wrapper), start_card);
     gtk_stack_add_named(GTK_STACK(stack), start_page_wrapper, "start_page");
@@ -592,9 +593,14 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_widget_set_margin_top(lbl_tip_game, 15);
     gtk_widget_add_css_class(lbl_tip_game, "footer-tip");
 
+    GtkWidget *btn_back = gtk_button_new_with_label("Return to Main Menu");
+    gtk_widget_set_name(btn_back, "start_btn"); 
+    g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), NULL);
+
     gtk_box_append(GTK_BOX(game_card), box_scores);
     gtk_box_append(GTK_BOX(game_card), grid);
     gtk_box_append(GTK_BOX(game_card), btn_reset);
+    gtk_box_append(GTK_BOX(game_card), btn_back);
     gtk_box_append(GTK_BOX(game_card), lbl_tip_game);
     
     add_footer(game_card); 
@@ -629,7 +635,12 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_widget_set_name(btn_rematch, "start_btn"); 
     g_signal_connect(btn_rematch, "clicked", G_CALLBACK(on_play_again_clicked), NULL);
 
+    GtkWidget *btn_back = gtk_button_new_with_label("Return to Main Menu");
+    gtk_widget_set_name(btn_back, "start_btn"); 
+    g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), NULL);
+
     gtk_box_append(GTK_BOX(box_actions), btn_rematch);
+    gtk_box_append(GTK_BOX(box_actions), btn_back);
 
     gtk_box_append(GTK_BOX(result_card), result_title);
     gtk_box_append(GTK_BOX(result_card), result_subtitle);

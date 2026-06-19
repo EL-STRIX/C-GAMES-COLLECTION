@@ -412,11 +412,16 @@ GtkWidget *create_welcome_page(GameApp *app)
     gtk_widget_add_css_class(start_btn, "btn-blue");
     g_signal_connect(start_btn, "clicked", G_CALLBACK(on_start_clicked), app);
 
+    GtkWidget *btn_back = gtk_button_new_with_label("Back to Main Menu");
+    gtk_widget_add_css_class(btn_back, "btn-blue");
+    g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), app);
+    
     gtk_box_append(GTK_BOX(box), welcome_lbl);
     gtk_box_append(GTK_BOX(box), q_lbl);
     gtk_box_append(GTK_BOX(box), app->name_entry);
     gtk_box_append(GTK_BOX(box), app->name_warning_label);
     gtk_box_append(GTK_BOX(box), start_btn);
+    gtk_box_append(GTK_BOX(box), btn_back);
 
     return box;
 }
@@ -454,6 +459,10 @@ GtkWidget *create_game_page(GameApp *app)
     gtk_box_append(GTK_BOX(app->feedback_revealer), app->feedback_label);
     gtk_widget_set_visible(app->feedback_revealer, FALSE); // Start hidden
 
+    GtkWidget *btn_back = gtk_button_new_with_label("Back to Main Menu");
+    gtk_widget_add_css_class(btn_back, "btn-blue");
+    g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), app);
+
     gtk_box_append(GTK_BOX(box), header);
     gtk_box_append(GTK_BOX(box), app->greeting_label);
     gtk_box_append(GTK_BOX(box), instruct);
@@ -461,6 +470,7 @@ GtkWidget *create_game_page(GameApp *app)
     gtk_box_append(GTK_BOX(box), submit_btn);
     gtk_box_append(GTK_BOX(box), app->attempts_label);
     gtk_box_append(GTK_BOX(box), app->feedback_revealer);
+    gtk_box_append(GTK_BOX(box), btn_back);
 
     // Add developer footer at the very bottom
     GtkWidget *dev_footer = gtk_label_new("Developed by SUJAY PAUL");
@@ -499,7 +509,12 @@ GtkWidget *create_result_page(GameApp *app)
     g_signal_connect(play_btn, "clicked", G_CALLBACK(on_play_again_clicked), app);
     g_signal_connect(play_btn, "activate", G_CALLBACK(on_play_again_clicked), app);
 
+    GtkWidget *btn_back = gtk_button_new_with_label("Back to Main Menu");
+    gtk_widget_add_css_class(btn_back, "btn-blue");
+    g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), app);
+
     gtk_box_append(GTK_BOX(btn_box), play_btn);
+    gtk_box_append(GTK_BOX(btn_box), btn_back);
 
     gtk_box_append(GTK_BOX(box), app->congrats_label);
     gtk_box_append(GTK_BOX(box), txt1);
@@ -529,10 +544,6 @@ static void activate(GtkApplication *app_system, gpointer user_data)
     GtkWidget *header = gtk_header_bar_new();
     gtk_window_set_titlebar(GTK_WINDOW(app->window), header);
     gtk_window_set_title(GTK_WINDOW(app->window), "Guess The Number");
-    
-    GtkWidget *btn_back = gtk_button_new_with_label("Back to Main Menu");
-    gtk_header_bar_pack_start(GTK_HEADER_BAR(header), btn_back);
-    g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), app);
 
     // Load CSS Styles
     GtkCssProvider *provider = gtk_css_provider_new();
