@@ -106,26 +106,8 @@ gboolean return_to_launcher(void) {
 static GtkCssProvider *current_theme_provider = NULL;
 
 void apply_theme(int theme_id) {
-    if (current_theme_provider != NULL) {
-        gtk_style_context_remove_provider_for_display(gdk_display_get_default(), GTK_STYLE_PROVIDER(current_theme_provider));
-        g_object_unref(current_theme_provider);
-        current_theme_provider = NULL;
-    }
-
-    if (theme_id == 1 || theme_id == 2) {
-        g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", TRUE, NULL);
-    } else {
-        g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", FALSE, NULL);
-    }
-
-    const char *theme_css = "";
-    if (theme_id == 1) theme_css = "window { background-color: #11111b; } .card { background-color: #1e1e2e; color: #ffffff; border: 1px solid #45475a; box-shadow: 0 0 10px rgba(255,255,255,0.1); } label, .header-title, .subtitle, .game-title, .game-desc, .name-question, .welcome-text, .result-small-text, .result-performance-text, .attempts-text, .success-text, .big-number, .tip-text, .warning-text { color: #ffffff; font-family: 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif; } button, .btn-launch, .btn-settings, .btn-blue { background-color: #313244; color: #ffffff; font-weight: bold; border: 1px solid #45475a; border-radius: 8px; } button label, .btn-launch label, .btn-settings label, .btn-blue label { color: #ffffff; } button:hover, .btn-launch:hover, .btn-settings:hover, .btn-blue:hover { background-color: #45475a; }";
-    else if (theme_id == 2) theme_css = "window { background-color: #0d0d0d; } .card { background-color: #000000; border: 2px solid #00ff00; box-shadow: 0 0 15px rgba(0,255,0,0.3); } label, .header-title, .subtitle, .game-title, .game-desc, .name-question, .welcome-text, .result-small-text, .result-performance-text, .attempts-text, .success-text, .big-number, .tip-text, .warning-text { color: #00ff00; font-family: 'Segoe UI Emoji', 'Noto Color Emoji', monospace; } button, .btn-launch, .btn-settings, .btn-blue { background-color: #002200; color: #00ff00; border: 1px solid #00ff00; font-family: 'Segoe UI Emoji', 'Noto Color Emoji', monospace; border-radius: 8px; } button label, .btn-launch label, .btn-settings label, .btn-blue label { color: #00ff00; } button:hover, .btn-launch:hover, .btn-settings:hover, .btn-blue:hover { background-color: #004400; }";
-    if (theme_id != 0) {
-        current_theme_provider = gtk_css_provider_new();
-        gtk_css_provider_load_from_string(current_theme_provider, theme_css);
-        gtk_style_context_add_provider_for_display(gdk_display_get_default(), GTK_STYLE_PROVIDER(current_theme_provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-    }
+    // Disabled as per user request to keep game pages strictly white/blue regardless of launcher theme.
+    // The launcher can be dark/hacker, but the game screens stay professional white/blue.
 }
 // --- END INJECTED ENGINE ---
 
@@ -134,26 +116,30 @@ const char *css_data =
     "headerbar { min-height: 60px; background-color: #1e1e2e; color: #cdd6f4; border-bottom: 1px solid #11111b; }"
     ".header-title { font-size: 20pt; font-weight: 900; color: #ffffff; letter-spacing: 1px; }"
     "windowcontrols button { min-width: 40px; min-height: 40px; border-radius: 5px; }"
-    "window { background-color: #cbcbcb; }"
-    "label { color: #1e293b; }"
-    "button { all: unset; border-radius: 8px; padding: 10px; }"
-    ".card { background-color: white; border-radius: 15px; padding: 20px; margin: 25px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }"
-    ".header-title { font-size: 25px; font-weight: bold; color: #5208ff; margin-bottom: 10px; }"
-    ".name-question { font-size: 18px; font-weight: 500; color: #444; margin-bottom: 15px; }"
-    ".welcome-text { font-size: 26px; font-weight: 800; color: #279cf5; margin-bottom: 20px; }"
-    ".input-field { font-size: 18px; padding: 10px; margin-bottom: 20px; border-radius: 8px; }"
-    ".guess-cheer-text { font-size: 18px; font-weight: 600; color: #444; }"
-    ".btn-blue { background-color: #1e40af; color: white; font-weight: bold; padding: 10px; border-radius: 8px; }"
-    ".btn-blue:hover { background-color: #3b82f6; }"
-    ".feedback-box { background-color: #fee2e2; color: #991b1b; border-radius: 8px; padding: 10px; margin-top: 15px; font-weight: bold; }"
-    ".success-text { font-size: 20px; font-weight: bold; color: #1e293b; }"
-    ".big-number { font-size: 25px; font-weight: 900; color: #22c55e; margin: 10px; }"
-    ".tip-text { color: #666; font-size: 15px; margin-top: 20px; }"
-    ".warning-text { color: #ff3333; font-weight: 700; font-size: 15px; margin-top: 5px; }"
-    ".attempts-text { color: #0f3edd; font-size: 20px; font-weight: 700; }"
-    ".result-small-text { font-size: 20px; font-weight: 600; color: #444; }"
-    ".result-performance-text { font-size: 22px; font-weight: 700; color: rgba(9, 94, 223, 0.47); margin-top: 10px; }"
-    ".dev-footer { font-size: 14px; color: #666; font-weight: 600; }";
+    "window { background-color: #f0f4f8; }"
+    "label { color: #0f172a; }"
+    "button { all: unset; border-radius: 12px; padding: 12px 24px; transition: all 0.2s ease; }"
+    ".card { background-color: #ffffff; border-radius: 20px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }"
+    ".game-title { font-size: 24pt; font-weight: 900; color: #2563eb; margin-bottom: 10px; }"
+    ".name-question { font-size: 14pt; font-weight: 500; color: #475569; margin-bottom: 20px; }"
+    ".welcome-text { font-size: 18pt; font-weight: 800; color: #2563eb; margin-bottom: 20px; }"
+    ".input-field { font-size: 14pt; padding: 12px; border: 2px solid #cbd5e1; border-radius: 10px; }"
+    ".input-field:focus { border-color: #2563eb; }"
+    ".guess-cheer-text { font-size: 14pt; font-weight: 600; color: #475569; }"
+    ".btn-blue { background-color: #2563eb; color: #ffffff; font-weight: bold; font-size: 14pt; border-radius: 12px; }"
+    ".btn-blue:hover { background-color: #3b82f6; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }"
+    ".btn-blue:active { background-color: #1d4ed8; }"
+    ".btn-exit { background-color: #ef4444; color: #ffffff; font-weight: bold; font-size: 12pt; border-radius: 10px; padding: 10px 20px; }"
+    ".btn-exit:hover { background-color: #f87171; box-shadow: 0 4px 12px rgba(239,68,68,0.3); }"
+    ".feedback-box { background-color: #fee2e2; color: #b91c1c; border-radius: 12px; padding: 15px; margin-top: 20px; font-weight: bold; font-size: 14pt; }"
+    ".success-text { font-size: 16pt; font-weight: bold; color: #0f172a; }"
+    ".big-number { font-size: 40pt; font-weight: 900; color: #22c55e; margin: 20px; text-shadow: 0 4px 12px rgba(34,197,94,0.2); }"
+    ".tip-text { color: #64748b; font-size: 12pt; margin-top: 20px; }"
+    ".warning-text { color: #ef4444; font-weight: 700; font-size: 12pt; margin-top: 10px; }"
+    ".attempts-text { color: #2563eb; font-size: 16pt; font-weight: 800; }"
+    ".result-small-text { font-size: 16pt; font-weight: 600; color: #475569; }"
+    ".result-performance-text { font-size: 18pt; font-weight: 800; color: #3b82f6; margin-top: 15px; }"
+    ".dev-footer { font-size: 10pt; color: #94a3b8; font-weight: 600; margin-top: 20px; }";
 
 // --- GAME DATA ---
 // This structure holds all the information our game needs to run.
@@ -354,10 +340,10 @@ static void on_play_again_clicked(GtkButton *btn, GameApp *app)
 // --- UI BUILDER FUNCTIONS ---
 
 // Helper: Creates a standard white card container
-GtkWidget *create_card_box()
+GtkWidget *create_card_box(void)
 {
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 15);
-    gtk_widget_add_css_class(box, "card"); // Use .card CSS class
+    gtk_widget_add_css_class(box, "card");
     gtk_widget_set_halign(box, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(box, GTK_ALIGN_CENTER);
     gtk_widget_set_size_request(box, 320, -1);
@@ -451,7 +437,7 @@ GtkWidget *create_result_page(GameApp *app)
     GtkWidget *box = create_card_box();
 
     app->congrats_label = gtk_label_new("CONGRATULATIONS!");
-    gtk_widget_add_css_class(app->congrats_label, "header-title");
+    gtk_widget_add_css_class(app->congrats_label, "game-title");
 
     GtkWidget *txt1 = gtk_label_new("You guessed the number:");
     gtk_widget_add_css_class(txt1, "result-small-text");

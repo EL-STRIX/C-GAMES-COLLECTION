@@ -95,27 +95,7 @@ gboolean return_to_launcher(void) {
 static GtkCssProvider *current_theme_provider = NULL;
 
 void apply_theme(int theme_id) {
-    if (current_theme_provider != NULL) {
-        gtk_style_context_remove_provider_for_display(gdk_display_get_default(), GTK_STYLE_PROVIDER(current_theme_provider));
-        g_object_unref(current_theme_provider);
-        current_theme_provider = NULL;
-    }
-
-    if (theme_id == 1 || theme_id == 2) {
-        g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", TRUE, NULL);
-    } else {
-        // Default theme is dark blue, so keep dark theme preferred
-        g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", TRUE, NULL);
-    }
-
-    const char *theme_css = "";
-    if (theme_id == 1) theme_css = "window { background-color: #11111b; } .card { background-color: #1e1e2e; color: #ffffff; border: 1px solid #45475a; box-shadow: 0 0 10px rgba(255,255,255,0.1); } label, .header-title, .subtitle, .game-title, .game-desc, .name-question, .welcome-text, .result-small-text, .result-performance-text, .attempts-text, .success-text, .big-number, .tip-text, .warning-text { color: #ffffff; font-family: 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif; } button, .btn-launch, .btn-settings, .btn-blue { background-color: #313244; color: #ffffff; font-weight: bold; border: 1px solid #45475a; border-radius: 8px; } button label, .btn-launch label, .btn-settings label, .btn-blue label { color: #ffffff; } button:hover, .btn-launch:hover, .btn-settings:hover, .btn-blue:hover { background-color: #45475a; }";
-    else if (theme_id == 2) theme_css = "window { background-color: #0d0d0d; } .card { background-color: #000000; border: 2px solid #00ff00; box-shadow: 0 0 15px rgba(0,255,0,0.3); } label, .header-title, .subtitle, .game-title, .game-desc, .name-question, .welcome-text, .result-small-text, .result-performance-text, .attempts-text, .success-text, .big-number, .tip-text, .warning-text { color: #00ff00; font-family: 'Segoe UI Emoji', 'Noto Color Emoji', monospace; } button, .btn-launch, .btn-settings, .btn-blue { background-color: #002200; color: #00ff00; border: 1px solid #00ff00; font-family: 'Segoe UI Emoji', 'Noto Color Emoji', monospace; border-radius: 8px; } button label, .btn-launch label, .btn-settings label, .btn-blue label { color: #00ff00; } button:hover, .btn-launch:hover, .btn-settings:hover, .btn-blue:hover { background-color: #004400; }";
-    if (theme_id != 0) {
-        current_theme_provider = gtk_css_provider_new();
-        gtk_css_provider_load_from_string(current_theme_provider, theme_css);
-        gtk_style_context_add_provider_for_display(gdk_display_get_default(), GTK_STYLE_PROVIDER(current_theme_provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-    }
+    // Disabled as per user request to keep game pages strictly white/blue regardless of launcher theme.
 }
 // --- END INJECTED ENGINE ---
 
@@ -157,40 +137,36 @@ GtkWidget *lbl_start_error;
 
 const char *css_data =
     "* { font-family: \"Segoe UI Emoji\", \"Noto Color Emoji\", sans-serif; }"
-    "window { background-color: #cbcbcb; }"
-    "label { color: #1e293b; }"
+    "window { background-color: #f0f4f8; }"
+    "label { color: #0f172a; }"
     "headerbar { min-height: 60px; background-color: #1e1e2e; color: #cdd6f4; border-bottom: 1px solid #11111b; }"
     ".header-title { font-size: 20pt; font-weight: 900; color: #ffffff; letter-spacing: 1px; }"
     "windowcontrols button { min-width: 40px; min-height: 40px; border-radius: 5px; }"
-    ".login-card { background-color: #ffffff; border-radius: 12px; padding: 30px; margin: 20px; box-shadow: 0px 4px 8px rgba(0,0,0,0.1); }"
-    ".game-title { font-size: 16pt; font-weight: bold; color: #4a00e0; margin-bottom: 5px; }"
-    ".welcome-text { font-size: 14pt; font-weight: bold; color: #2979ff; margin-bottom: 20px; }"
-    ".input-label { font-size: 11pt; color: #555555; margin-bottom: 5px; }"
-    ".round-header { font-size: 18pt; font-weight: bold; color: #6200ea; margin-bottom: 5px; }"
-    ".score-info { font-size: 10pt; color: #666666; margin-bottom: 15px; }"
-    ".styled-entry { background: #ffffff; border: 1px solid #aaa; border-radius: 4px; padding: 10px; color: #000; }"
-    ".styled-entry:focus { border: 2px solid #2962ff; }"
-    "#start_btn { background-color: #1a237e; background-image: none; color: white; font-weight: bold; border-radius: 5px; padding: 10px; margin-top: 15px; }"
-    "#start_btn:hover { background-color: #2a3ed1; }"
-    "#start_btn:active { background-color: #1123eb; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }"
-    "#start_btn:focus { border: 2px solid #534bae; }"
-    ".btn-exit { background-color: #d50000; background-image: none; color: white; font-weight: bold; font-size: 16px; border-radius: 5px; padding: 10px; margin-top: 15px; }"
-    ".btn-exit:hover { background-color: #b71c1c; }"
-    ".btn-exit:active { background-color: #d50000; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }"
-    ".btn-exit:focus { border: 2px solid #ff5131; }"
-    ".footer-tip { font-size: 9pt; color: #888888; margin-top: 15px; }"
-    ".footer-credit { font-size: 8pt; color: #555555; margin-top: 5px; font-weight: bold; }"
-    ".success { color: #00c853; font-weight: bold; font-size: 14pt; }"
-    ".error { color: #d50000; font-weight: bold; font-size: 11pt; }"
-    ".warning { color: #ffab00; font-weight: bold; font-size: 14pt; }"
-    ".grid-button { font-size: 36px; font-weight: 900; min-width: 70px; min-height: 70px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; color: #333; }"
-    ".grid-button:hover { background-color: #e9ecef; }"
-    ".player-x { color: #2979ff; }"
-    ".player-o { color: #d50000; }"
-    
-    /* NEW CSS for the specific error label under button */
-    ".error-msg { color: #d50000; font-size: 10pt; font-weight: bold; margin-top: 5px; margin-bottom: 0px; }"
-    ;
+    "button { all: unset; border-radius: 12px; padding: 12px 24px; transition: all 0.2s ease; }"
+    ".login-card, .game-card, .result-card, .card { background-color: #ffffff; border-radius: 20px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }"
+    ".game-title { font-size: 24pt; font-weight: 900; color: #2563eb; margin-bottom: 10px; }"
+    ".welcome-text { font-size: 18pt; font-weight: 800; color: #2563eb; margin-bottom: 20px; }"
+    ".input-label { font-size: 11pt; color: #475569; margin-bottom: 5px; }"
+    ".round-header { font-size: 18pt; font-weight: bold; color: #2563eb; margin-bottom: 5px; }"
+    ".score-info { font-size: 12pt; font-weight: 600; color: #475569; margin-bottom: 15px; }"
+    ".styled-entry { font-size: 14pt; padding: 12px; border: 2px solid #cbd5e1; border-radius: 10px; background: #ffffff; color: #000; }"
+    ".styled-entry:focus { border-color: #2563eb; }"
+    "#start_btn, .btn-blue { background-color: #2563eb; color: #ffffff; font-weight: bold; font-size: 14pt; border-radius: 12px; margin-top: 15px; }"
+    "#start_btn:hover, .btn-blue:hover { background-color: #3b82f6; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }"
+    "#start_btn:active, .btn-blue:active { background-color: #1d4ed8; }"
+    ".btn-exit { background-color: #ef4444; color: #ffffff; font-weight: bold; font-size: 12pt; border-radius: 10px; padding: 10px 20px; margin-top: 15px; }"
+    ".btn-exit:hover { background-color: #f87171; box-shadow: 0 4px 12px rgba(239,68,68,0.3); }"
+    ".btn-exit:active { background-color: #dc2626; }"
+    ".footer-tip { font-size: 10pt; color: #94a3b8; margin-top: 20px; }"
+    ".footer-credit { font-size: 10pt; color: #94a3b8; font-weight: 600; margin-top: 10px; }"
+    ".success { color: #22c55e; font-weight: 900; font-size: 18pt; text-shadow: 0 2px 10px rgba(34,197,94,0.2); }"
+    ".error { color: #ef4444; font-weight: 900; font-size: 18pt; text-shadow: 0 2px 10px rgba(239,68,68,0.2); }"
+    ".warning { color: #eab308; font-weight: 900; font-size: 18pt; text-shadow: 0 2px 10px rgba(234,179,8,0.2); }"
+    ".grid-button { font-size: 40pt; font-weight: 900; min-width: 90px; min-height: 90px; background-color: #f8fafc; border: 2px solid #e2e8f0; border-radius: 16px; transition: all 0.2s ease; }"
+    ".grid-button:hover { background-color: #f1f5f9; border-color: #cbd5e1; box-shadow: 0 8px 24px rgba(0,0,0,0.05); transform: translateY(-2px); }"
+    ".player-x { color: #2563eb; }"
+    ".player-o { color: #ef4444; }"
+    ".error-msg { color: #dc2626; font-size: 12pt; font-weight: bold; margin-top: 10px; margin-bottom: 0px; }";
 
 // ============================================================
 // GAME LOGIC
@@ -438,7 +414,7 @@ void on_header_back_clicked(GtkButton *btn, gpointer user_data)
 
 GtkWidget *create_card_box()
 {
-    GtkWidget *card = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+    GtkWidget *card = gtk_box_new(GTK_ORIENTATION_VERTICAL, 15);
     gtk_widget_add_css_class(card, "login-card"); 
     gtk_widget_set_halign(card, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(card, GTK_ALIGN_CENTER);
