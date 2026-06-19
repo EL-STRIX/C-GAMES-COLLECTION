@@ -412,16 +412,11 @@ GtkWidget *create_welcome_page(GameApp *app)
     gtk_widget_add_css_class(start_btn, "btn-blue");
     g_signal_connect(start_btn, "clicked", G_CALLBACK(on_start_clicked), app);
 
-    GtkWidget *btn_back = gtk_button_new_with_label("Back to Main Menu");
-    gtk_widget_add_css_class(btn_back, "btn-blue");
-    g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), app);
-    
     gtk_box_append(GTK_BOX(box), welcome_lbl);
     gtk_box_append(GTK_BOX(box), q_lbl);
     gtk_box_append(GTK_BOX(box), app->name_entry);
     gtk_box_append(GTK_BOX(box), app->name_warning_label);
     gtk_box_append(GTK_BOX(box), start_btn);
-    gtk_box_append(GTK_BOX(box), btn_back);
 
     return box;
 }
@@ -459,10 +454,6 @@ GtkWidget *create_game_page(GameApp *app)
     gtk_box_append(GTK_BOX(app->feedback_revealer), app->feedback_label);
     gtk_widget_set_visible(app->feedback_revealer, FALSE); // Start hidden
 
-    GtkWidget *btn_back = gtk_button_new_with_label("Back to Main Menu");
-    gtk_widget_add_css_class(btn_back, "btn-blue");
-    g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), app);
-
     gtk_box_append(GTK_BOX(box), header);
     gtk_box_append(GTK_BOX(box), app->greeting_label);
     gtk_box_append(GTK_BOX(box), instruct);
@@ -470,7 +461,6 @@ GtkWidget *create_game_page(GameApp *app)
     gtk_box_append(GTK_BOX(box), submit_btn);
     gtk_box_append(GTK_BOX(box), app->attempts_label);
     gtk_box_append(GTK_BOX(box), app->feedback_revealer);
-    gtk_box_append(GTK_BOX(box), btn_back);
 
     // Add developer footer at the very bottom
     GtkWidget *dev_footer = gtk_label_new("Developed by SUJAY PAUL");
@@ -509,12 +499,7 @@ GtkWidget *create_result_page(GameApp *app)
     g_signal_connect(play_btn, "clicked", G_CALLBACK(on_play_again_clicked), app);
     g_signal_connect(play_btn, "activate", G_CALLBACK(on_play_again_clicked), app);
 
-    GtkWidget *btn_back = gtk_button_new_with_label("Back to Main Menu");
-    gtk_widget_add_css_class(btn_back, "btn-blue");
-    g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), app);
-
     gtk_box_append(GTK_BOX(btn_box), play_btn);
-    gtk_box_append(GTK_BOX(btn_box), btn_back);
 
     gtk_box_append(GTK_BOX(box), app->congrats_label);
     gtk_box_append(GTK_BOX(box), txt1);
@@ -540,9 +525,10 @@ static void activate(GtkApplication *app_system, gpointer user_data)
     // Setup Main Window
     app->window = gtk_application_window_new(app_system);
     gtk_window_set_default_size(GTK_WINDOW(app->window), 900, 700);
-    gtk_window_fullscreen(GTK_WINDOW(app->window));
+    gtk_window_maximize(GTK_WINDOW(app->window));
 
     GtkWidget *header = gtk_header_bar_new();
+    gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), TRUE);
     gtk_window_set_titlebar(GTK_WINDOW(app->window), header);
     gtk_window_set_title(GTK_WINDOW(app->window), "Guess The Number");
 
@@ -584,8 +570,22 @@ static void activate(GtkApplication *app_system, gpointer user_data)
         gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "page_welcome");
     }
 
-    // Show the stack in the window
-    gtk_window_set_child(GTK_WINDOW(app->window), app->stack);
+    // Global Overlay for the "Return to Main Menu" button
+    GtkWidget *overlay = gtk_overlay_new();
+    gtk_overlay_set_child(GTK_OVERLAY(overlay), app->stack);
+
+    GtkWidget *global_btn_back = gtk_button_new_with_label("🔙 Return to Main Menu");
+    gtk_widget_set_halign(global_btn_back, GTK_ALIGN_END);
+    gtk_widget_set_valign(global_btn_back, GTK_ALIGN_START);
+    gtk_widget_set_margin_top(global_btn_back, 15);
+    gtk_widget_set_margin_end(global_btn_back, 15);
+    gtk_widget_add_css_class(global_btn_back, "btn-blue");
+    g_signal_connect(global_btn_back, "clicked", G_CALLBACK(on_header_back_clicked), app);
+
+    gtk_overlay_add_overlay(GTK_OVERLAY(overlay), global_btn_back);
+
+    // Show the overlay in the window
+    gtk_window_set_child(GTK_WINDOW(app->window), overlay);
     gtk_window_present(GTK_WINDOW(app->window));
 }
 

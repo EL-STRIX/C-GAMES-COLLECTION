@@ -555,11 +555,6 @@ GtkWidget* create_login_screen(AppData *data) {
     g_signal_connect(start_btn, "clicked", G_CALLBACK(on_start_clicked), data);
     gtk_box_append(GTK_BOX(card), start_btn);
 
-    GtkWidget *btn_back = gtk_button_new_with_label("Return to Main Menu");
-    gtk_widget_add_css_class(btn_back, "btn-exit"); // Reuse styling
-    g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), data);
-    gtk_box_append(GTK_BOX(card), btn_back);
-
     return vbox;
 }
 /* 2. Game Screen */
@@ -619,11 +614,6 @@ GtkWidget* create_game_screen(AppData *data) {
     g_signal_connect(data->next_round_btn, "clicked", G_CALLBACK(on_next_round_clicked), data);
     gtk_box_append(GTK_BOX(card), data->next_round_btn);
 
-    GtkWidget *btn_back = gtk_button_new_with_label("Return to Main Menu");
-    gtk_widget_add_css_class(btn_back, "btn-exit");
-    g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), data);
-    gtk_box_append(GTK_BOX(card), btn_back);
-
     GtkWidget *credit_lbl = gtk_label_new("Developed by SUJAY PAUL");
     gtk_widget_add_css_class(credit_lbl, "footer-credit");
     gtk_box_append(GTK_BOX(card), credit_lbl);
@@ -669,12 +659,6 @@ GtkWidget* create_result_screen(AppData *data) {
     g_signal_connect(data->play_again_btn, "clicked", G_CALLBACK(on_play_again_clicked), data);
     gtk_box_append(GTK_BOX(button_box), data->play_again_btn);
 
-    GtkWidget *btn_back = gtk_button_new_with_label("Return to Main Menu");
-    gtk_widget_add_css_class(btn_back, "btn-exit");
-    gtk_widget_set_hexpand(btn_back, TRUE);
-    g_signal_connect(btn_back, "clicked", G_CALLBACK(on_header_back_clicked), data);
-    gtk_box_append(GTK_BOX(button_box), btn_back);
-
     /* Add the button box to the card */
     gtk_box_append(GTK_BOX(card), button_box);
     /* -------------------------------------- */
@@ -693,18 +677,33 @@ void activate(GtkApplication *app, gpointer user_data) {
 
     GtkWidget *window = gtk_application_window_new(app);
     gtk_window_set_default_size(GTK_WINDOW(window), 900, 700);
-    gtk_window_fullscreen(GTK_WINDOW(window));
+    gtk_window_maximize(GTK_WINDOW(window));
     
     /* Store the window in AppData so the Exit button can use it */
     data->window = window;
 
     GtkWidget *header = gtk_header_bar_new();
+    gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), TRUE);
     gtk_window_set_titlebar(GTK_WINDOW(window), header);
     gtk_window_set_title(GTK_WINDOW(window), "Epic Rock Paper Scissors Battle");
 
     GtkWidget *main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_add_css_class(main_box, "window-bg");
-    gtk_window_set_child(GTK_WINDOW(window), main_box);
+    // Global Overlay for the "Return to Main Menu" button
+    GtkWidget *overlay = gtk_overlay_new();
+    gtk_overlay_set_child(GTK_OVERLAY(overlay), main_box);
+
+    GtkWidget *global_btn_back = gtk_button_new_with_label("🔙 Return to Main Menu");
+    gtk_widget_set_halign(global_btn_back, GTK_ALIGN_END);
+    gtk_widget_set_valign(global_btn_back, GTK_ALIGN_START);
+    gtk_widget_set_margin_top(global_btn_back, 15);
+    gtk_widget_set_margin_end(global_btn_back, 15);
+    gtk_widget_add_css_class(global_btn_back, "btn-exit");
+    g_signal_connect(global_btn_back, "clicked", G_CALLBACK(on_header_back_clicked), data);
+
+    gtk_overlay_add_overlay(GTK_OVERLAY(overlay), global_btn_back);
+
+    gtk_window_set_child(GTK_WINDOW(window), overlay);
 
     data->stack = gtk_stack_new();
     gtk_stack_set_transition_type(GTK_STACK(data->stack), GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);

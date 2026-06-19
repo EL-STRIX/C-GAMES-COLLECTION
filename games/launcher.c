@@ -322,7 +322,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     main_window = window;
     gtk_window_set_title(GTK_WINDOW(window), "C Games Collection - Launcher");
     gtk_window_set_default_size(GTK_WINDOW(window), 900, 700);
-    gtk_window_fullscreen(GTK_WINDOW(window));
+    gtk_window_maximize(GTK_WINDOW(window));
     
     // Apply Global Theme
     char dummy_name[50];
