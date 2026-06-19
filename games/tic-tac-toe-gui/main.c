@@ -650,7 +650,15 @@ static void activate(GtkApplication *app, gpointer user_data)
         gtk_editable_set_text(GTK_EDITABLE(entry_p1), player_name);
     }
     
-    gtk_stack_set_visible_child_name(GTK_STACK(stack), "start_page");
+    if (strlen(player_name) > 0 && strcmp(player_name, "Player 1") != 0) {
+        strncpy(game.name1, player_name, sizeof(game.name1) - 1);
+        game.name1[sizeof(game.name1) - 1] = '\0';
+        snprintf(game.name2, sizeof(game.name2), "Guest");
+        init_game_state();
+        gtk_stack_set_visible_child_name(GTK_STACK(stack), "game_page");
+    } else {
+        gtk_stack_set_visible_child_name(GTK_STACK(stack), "start_page");
+    }
 
     gtk_window_present(GTK_WINDOW(window));
 }

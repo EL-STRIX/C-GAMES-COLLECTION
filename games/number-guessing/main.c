@@ -566,7 +566,11 @@ static void activate(GtkApplication *app_system, gpointer user_data)
         gtk_editable_set_text(GTK_EDITABLE(app->name_entry), app->player_name);
     }
 
-    gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "page_welcome");
+    if (strlen(app->player_name) > 0 && strcmp(app->player_name, "Player 1") != 0) {
+        start_game_logic(app);
+    } else {
+        gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "page_welcome");
+    }
 
     // Show the stack in the window
     gtk_window_set_child(GTK_WINDOW(app->window), app->stack);

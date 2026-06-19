@@ -718,11 +718,16 @@ void activate(GtkApplication *app, gpointer user_data) {
         gtk_editable_set_text(GTK_EDITABLE(data->name_entry), data->player_name);
     }
 
-    gtk_stack_set_visible_child_name(GTK_STACK(data->stack), "login_screen");
+    gtk_widget_set_visible(data->next_round_btn, FALSE);
+
+    if (strlen(data->player_name) > 0 && strcmp(data->player_name, "Player 1") != 0) {
+        start_new_game(data);
+        gtk_stack_set_visible_child_name(GTK_STACK(data->stack), "game_screen");
+    } else {
+        gtk_stack_set_visible_child_name(GTK_STACK(data->stack), "login_screen");
+    }
 
     gtk_window_present(GTK_WINDOW(window));
-
-    gtk_widget_set_visible(data->next_round_btn, FALSE);
 }
 
 int main(int argc, char **argv) {
