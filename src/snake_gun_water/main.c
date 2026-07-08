@@ -86,6 +86,7 @@ void update_round_display(AppData *data) {
 
 /* Timer callback to compute and show final results -- runs in main loop */
 gboolean on_show_final_results(gpointer user_data) {
+    (void)user_data;
     AppData *data = (AppData *)user_data;
     char *outcome_text;
     char *score_text;
@@ -260,11 +261,11 @@ static void on_start_clicked(GtkButton *btn, AppData *data) {
 }
 
 /* Simple wrappers connecting each choice button to process_round() */
-void on_snake_clicked(GtkButton *btn, gpointer user_data) { process_round((AppData*)user_data, CHOICE_SNAKE); }
-void on_gun_clicked(GtkButton *btn, gpointer user_data) { process_round((AppData*)user_data, CHOICE_GUN); }
-void on_water_clicked(GtkButton *btn, gpointer user_data) { process_round((AppData*)user_data, CHOICE_WATER); }
-void on_next_round_clicked(GtkButton *btn, gpointer user_data) { start_next_round_ui((AppData*)user_data); }
-void on_play_again_clicked(GtkButton *btn, gpointer user_data) { start_new_game((AppData*)user_data); }
+void on_snake_clicked(GtkButton *btn, gpointer user_data) { (void)btn; process_round((AppData*)user_data, CHOICE_SNAKE); }
+void on_gun_clicked(GtkButton *btn, gpointer user_data) { (void)btn; process_round((AppData*)user_data, CHOICE_GUN); }
+void on_water_clicked(GtkButton *btn, gpointer user_data) { (void)btn; process_round((AppData*)user_data, CHOICE_WATER); }
+void on_next_round_clicked(GtkButton *btn, gpointer user_data) { (void)btn; start_next_round_ui((AppData*)user_data); }
+void on_play_again_clicked(GtkButton *btn, gpointer user_data) { (void)btn; start_new_game((AppData*)user_data); }
 
 static void confirm_exit_response(GObject *source_object, GAsyncResult *res, gpointer user_data) {
     GtkAlertDialog *dialog = GTK_ALERT_DIALOG(source_object);
@@ -286,6 +287,7 @@ static void confirm_exit_response(GObject *source_object, GAsyncResult *res, gpo
 
 /* Back Button Callback - returns to menu with confirmation if playing */
 void on_header_back_clicked(GtkButton *btn, gpointer user_data) {
+    (void)btn;
     AppData *data = (AppData *)user_data;
     const char *visible_child = gtk_stack_get_visible_child_name(GTK_STACK(data->stack));
     if (g_strcmp0(visible_child, "game_screen") == 0) {
@@ -493,6 +495,7 @@ GtkWidget* create_result_screen(AppData *data) {
 }
 
 void activate(GtkApplication *app, gpointer user_data) {
+    (void)user_data;
     (void)user_data;
     AppData *data = g_slice_new0(AppData);
     srand((unsigned int)time(NULL)); /* seed RNG for computer choice */

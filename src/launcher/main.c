@@ -33,6 +33,7 @@ void apply_theme(int theme_id) {
 GtkWidget *main_window = NULL;
 
 static void on_save_settings(GtkButton *btn, gpointer user_data) {
+    (void)btn;
     GtkWidget **widgets = (GtkWidget **)user_data;
     GtkEntryBuffer *buf = gtk_entry_get_buffer(GTK_ENTRY(widgets[0]));
     const char *name = gtk_entry_buffer_get_text(buf);
@@ -47,6 +48,7 @@ static void on_save_settings(GtkButton *btn, gpointer user_data) {
 }
 
 static void open_settings_dialog(GtkButton *btn, gpointer user_data) {
+    (void)btn;
     GtkWindow *parent = GTK_WINDOW(user_data);
     GtkWidget *dialog = gtk_window_new();
     gtk_window_set_transient_for(GTK_WINDOW(dialog), parent);
@@ -91,6 +93,8 @@ static void open_settings_dialog(GtkButton *btn, gpointer user_data) {
 }
 
 static void on_child_exit(GPid pid, gint status, gpointer user_data) {
+    (void)status;
+    (void)user_data;
     g_spawn_close_pid(pid);
     if (main_window) {
         gtk_widget_set_visible(main_window, TRUE);
@@ -99,6 +103,7 @@ static void on_child_exit(GPid pid, gint status, gpointer user_data) {
 
 static void launch_game(GtkButton *btn, gpointer user_data)
 {
+    (void)btn;
     const char *exe_name = (const char *)user_data;
     char *full_path = NULL;
 
@@ -181,6 +186,7 @@ GtkWidget* create_game_entry(const char *icon, const char *title, const char *de
 
 static void activate(GtkApplication *app, gpointer user_data)
 {
+    (void)user_data;
     // Since apply_theme handles CSS loading dynamically for launcher, we don't need css_data provider here.
     // Apply theme sets the provider.
     // But if theme is 0, apply_theme loads 'launcher.css', so we just call apply_theme(theme_id).

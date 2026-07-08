@@ -114,6 +114,7 @@ static void confirm_exit_response(GObject *source_object, GAsyncResult *res, gpo
 
 static void on_header_back_clicked(GtkButton *btn, gpointer user_data)
 {
+    (void)btn;
     GameApp *app = (GameApp *)user_data;
     const char *visible_child = gtk_stack_get_visible_child_name(GTK_STACK(app->stack));
     if (g_strcmp0(visible_child, "page_game") == 0) {
@@ -136,6 +137,7 @@ static void on_header_back_clicked(GtkButton *btn, gpointer user_data)
 // 3. Called when "SUBMIT GUESS" button is clicked
 static void on_submit_guess(GtkButton *btn, gpointer user_data)
 {
+    (void)btn;
     GameApp *app = (GameApp *)user_data; 
     int guess = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(app->guess_spin));
 
@@ -359,6 +361,7 @@ GtkWidget *create_result_page(GameApp *app)
 // This runs when the app launches
 static void activate(GtkApplication *app_system, gpointer user_data)
 {
+    (void)user_data;
     GameApp *app = g_new0(GameApp, 1); // Create data structure
 
     // Setup Main Window

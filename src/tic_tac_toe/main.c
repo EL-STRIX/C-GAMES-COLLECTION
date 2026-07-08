@@ -250,6 +250,7 @@ void on_play_again_clicked(GtkWidget *widget, gpointer data)
 }
 
 static void confirm_exit_response(GObject *source_object, GAsyncResult *res, gpointer user_data) {
+    AppData *app = (AppData *)user_data;
     GtkAlertDialog *dialog = GTK_ALERT_DIALOG(source_object);
     GError *error = NULL;
     int response = gtk_alert_dialog_choose_finish(dialog, res, &error);
@@ -266,6 +267,8 @@ static void confirm_exit_response(GObject *source_object, GAsyncResult *res, gpo
 
 void on_header_back_clicked(GtkButton *btn, gpointer user_data)
 {
+    (void)btn;
+    AppData *app = (AppData *)user_data;
     const char *visible_child = gtk_stack_get_visible_child_name(GTK_STACK(app->stack));
     if (g_strcmp0(visible_child, "game_page") == 0) {
         GtkAlertDialog *dialog = gtk_alert_dialog_new("Are you sure you want to return to the main menu?");
@@ -274,7 +277,7 @@ void on_header_back_clicked(GtkButton *btn, gpointer user_data)
         gtk_alert_dialog_set_buttons(dialog, btn_labels);
         gtk_alert_dialog_set_cancel_button(dialog, 0);
         gtk_alert_dialog_set_default_button(dialog, 0);
-        gtk_alert_dialog_choose(dialog, GTK_WINDOW(app->window), NULL, confirm_exit_response, NULL);
+        gtk_alert_dialog_choose(dialog, GTK_WINDOW(app->window), NULL, confirm_exit_response, app);
         g_object_unref(dialog);
     } else {
         if (return_to_launcher()) {
@@ -310,6 +313,7 @@ void add_footer(GtkWidget *box)
 
 static void activate(GtkApplication *gtk_app, gpointer user_data)
 {
+    (void)user_data;
     AppData *app = g_new0(AppData, 1);
     load_css_from_file("theme_white_blue.css");
 
