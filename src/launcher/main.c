@@ -298,8 +298,22 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_window_present(GTK_WINDOW(window));
 }
 
+static GLogWriterOutput log_writer_func(GLogLevelFlags log_level, const GLogField *fields, gsize n_fields, gpointer user_data) {
+    (void)user_data;
+    for (gsize i = 0; i < n_fields; i++) {
+        if (g_strcmp0(fields[i].key, "GLIB_DOMAIN") == 0) {
+            const char *domain = (const char *)fields[i].value;
+            if ((g_strcmp0(domain, "Pango") == 0 || g_strcmp0(domain, "Gtk") == 0) && (log_level == G_LOG_LEVEL_WARNING)) {
+                return G_LOG_WRITER_HANDLED; // Ignore these warnings
+            }
+        }
+    }
+    return g_log_writer_default(log_level, fields, n_fields, user_data);
+}
+
 int main(int argc, char **argv)
 {
+    g_log_set_writer_func(log_writer_func, NULL, NULL);
     GtkApplication *app = gtk_application_new("org.sujay.gameslauncher", G_APPLICATION_NON_UNIQUE);
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
     int status = g_application_run(G_APPLICATION(app), argc, argv);
