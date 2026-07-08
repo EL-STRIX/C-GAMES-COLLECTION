@@ -1,97 +1,11 @@
 #include <gtk/gtk.h>
 #include <stdlib.h>
 #include <string.h>
-// --- PERSISTENCE & THEME ENGINE INJECTED ---
-#include <stdio.h>
-#include <string.h>
-#include <gtk/gtk.h>
+#include "../common/persistence.h"
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
-
-int load_top_score(const char *game_name, char *out_player_name) {
-    g_mkdir_with_parents("data", 0755);
-    char filename[100];
-    snprintf(filename, sizeof(filename), "data/%s_score.ini", game_name);
-    
-    GKeyFile *kf = g_key_file_new();
-    if (!g_key_file_load_from_file(kf, filename, G_KEY_FILE_NONE, NULL)) {
-        if (out_player_name) strcpy(out_player_name, "None");
-        g_key_file_free(kf);
-        return -1;
-    }
-    
-    int score = g_key_file_get_integer(kf, "Score", "Value", NULL);
-    gchar *name = g_key_file_get_string(kf, "Score", "Player", NULL);
-    if (name && out_player_name) {
-        strncpy(out_player_name, name, 49);
-        out_player_name[49] = '\0';
-    } else if (out_player_name) {
-        strcpy(out_player_name, "Unknown");
-    }
-    
-    g_free(name);
-    g_key_file_free(kf);
-    return score;
-}
-
-void save_score(const char *game_name, const char *player_name, int score, int is_lower_better) {
-    char top_player[50]; 
-    int top_score = load_top_score(game_name, top_player);
-    int is_new_record = (top_score == -1) || (is_lower_better ? (score < top_score) : (score > top_score));
-    
-    if (is_new_record) {
-        g_mkdir_with_parents("data", 0755);
-        char filename[100]; 
-        snprintf(filename, sizeof(filename), "data/%s_score.ini", game_name);
-        GKeyFile *kf = g_key_file_new();
-        g_key_file_set_string(kf, "Score", "Player", player_name);
-        g_key_file_set_integer(kf, "Score", "Value", score);
-        g_key_file_save_to_file(kf, filename, NULL);
-        g_key_file_free(kf);
-    }
-}
-
-void save_global_settings(const char *player_name, int theme_id) {
-    GKeyFile *kf = g_key_file_new();
-    g_mkdir_with_parents("data", 0755);
-    g_key_file_set_string(kf, "Settings", "PlayerName", player_name);
-    g_key_file_set_integer(kf, "Settings", "ThemeID", theme_id);
-    g_key_file_save_to_file(kf, "data/settings.ini", NULL);
-    g_key_file_free(kf);
-}
-
-void load_global_settings(char *player_name, int *theme_id) {
-    g_mkdir_with_parents("data", 0755);
-    GKeyFile *kf = g_key_file_new();
-    if (g_key_file_load_from_file(kf, "data/settings.ini", G_KEY_FILE_NONE, NULL)) {
-        gchar *name = g_key_file_get_string(kf, "Settings", "PlayerName", NULL);
-        if (name) {
-            strncpy(player_name, name, 49);
-            player_name[49] = '\0';
-            g_free(name);
-        } else {
-            strcpy(player_name, "Player 1");
-        }
-        
-        GError *err = NULL;
-        int t = g_key_file_get_integer(kf, "Settings", "ThemeID", &err);
-        if (err) {
-            *theme_id = 0;
-            g_error_free(err);
-        } else {
-            *theme_id = t;
-        }
-    } else {
-        strcpy(player_name, "Player 1");
-        *theme_id = 0;
-    }
-    g_key_file_free(kf);
-}
-
-gboolean return_to_launcher(void) {
-    return TRUE;
-}
 
 static GtkCssProvider *current_theme_provider = NULL;
 
@@ -105,46 +19,18 @@ void apply_theme(int theme_id) {
     if (theme_id == 1 || theme_id == 2) {
         g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", TRUE, NULL);
     } else {
-        // Default theme is dark blue, so keep dark theme preferred
         g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", TRUE, NULL);
     }
 
-    const char *theme_css = "";
-    if (theme_id == 1) theme_css = "headerbar { min-height: 60px; background-color: #1e1e2e; color: #cdd6f4; border-bottom: 1px solid #11111b; } .header-title { font-size: 20pt; font-weight: 900; color: #ffffff; letter-spacing: 1px; } windowcontrols button { min-width: 40px; min-height: 40px; border-radius: 5px; } /* Main Background */ .window-bg { background-color: #11111b; } .card { background-color: #1e1e2e; color: #ffffff; border: 1px solid #45475a; box-shadow: 0 0 10px rgba(255,255,255,0.1); } label, .header-title, .subtitle, .game-title, .game-desc, .name-question, .welcome-text, .result-small-text, .result-performance-text, .attempts-text, .success-text, .big-number, .tip-text, .warning-text { color: #ffffff; font-family: 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif; } button, .btn-launch, .btn-settings, .btn-blue { background-color: #313244; color: #ffffff; font-weight: bold; border: 1px solid #45475a; border-radius: 8px; } button label, .btn-launch label, .btn-settings label, .btn-blue label { color: #ffffff; } button:hover, .btn-launch:hover, .btn-settings:hover, .btn-blue:hover { background-color: #45475a; }";
-    else if (theme_id == 2) theme_css = "window { background-color: #0d0d0d; } .card { background-color: #000000; border: 2px solid #00ff00; box-shadow: 0 0 15px rgba(0,255,0,0.3); } label, .header-title, .subtitle, .game-title, .game-desc, .name-question, .welcome-text, .result-small-text, .result-performance-text, .attempts-text, .success-text, .big-number, .tip-text, .warning-text { color: #00ff00; font-family: 'Segoe UI Emoji', 'Noto Color Emoji', monospace; } button, .btn-launch, .btn-settings, .btn-blue { background-color: #002200; color: #00ff00; border: 1px solid #00ff00; font-family: 'Segoe UI Emoji', 'Noto Color Emoji', monospace; border-radius: 8px; } button label, .btn-launch label, .btn-settings label, .btn-blue label { color: #00ff00; } button:hover, .btn-launch:hover, .btn-settings:hover, .btn-blue:hover { background-color: #004400; }";
-    if (theme_id != 0) {
-        current_theme_provider = gtk_css_provider_new();
-        gtk_css_provider_load_from_string(current_theme_provider, theme_css);
-        gtk_style_context_add_provider_for_display(gdk_display_get_default(), GTK_STYLE_PROVIDER(current_theme_provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-    }
+    const char *css_filename = "launcher.css"; // Default
+    if (theme_id == 1) css_filename = "theme_dark.css";
+    else if (theme_id == 2) css_filename = "theme_hacker.css";
+    
+    // We can load CSS by filename
+    load_css_from_file(css_filename);
 }
-// --- END INJECTED ENGINE ---
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
-const char *css_data =
-    "* { font-family: \"Segoe UI Emoji\", \"Noto Color Emoji\", sans-serif; }"
-    "window { background-color: #1e1e2e; }"
-    "headerbar { min-height: 60px; background-color: #11111b; color: #cdd6f4; border-bottom: 1px solid #000000; }"
-    "windowcontrols button { min-width: 40px; min-height: 40px; border-radius: 5px; }"
-    "label { color: #cdd6f4; }"
-    ".header-title { font-size: 32px; font-weight: 900; color: #cdd6f4; margin-top: 20px; margin-bottom: 10px; }"
-    ".subtitle { font-size: 16px; color: #a6adc8; margin-bottom: 30px; }"
-    ".card { background-color: #313244; border-radius: 15px; padding: 20px; margin: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: all 0.2s ease; }"
-    ".card:hover { background-color: #45475a; }"
-    ".game-title { font-size: 20px; font-weight: bold; color: #89b4fa; }"
-    ".game-desc { font-size: 14px; color: #bac2de; margin-top: 5px; }"
-    ".btn-launch { background-color: #89b4fa; color: #11111b; font-weight: bold; padding: 10px 20px; border-radius: 8px; margin-top: 15px; }"
-    ".btn-launch:hover { background-color: #b4befe; }"
-    ".btn-launch:active { background-color: #74c7ec; }"
-    ".btn-settings { background-color: #313244; color: #cdd6f4; font-weight: bold; padding: 10px; border-radius: 8px; margin: 10px; }"
-    ".btn-settings:hover { background-color: #45475a; }"
-    ".btn-settings:active { background-color: #585b70; }"
-    ".champions-panel { background-color: #181825; border-radius: 15px; padding: 20px; margin-top: 30px; border: 2px solid #313244; }"
-    ".champ-title { font-size: 22px; font-weight: bold; color: #f9e2af; margin-bottom: 10px; }"
-    ".champ-item { font-size: 16px; color: #cdd6f4; }";
+GtkWidget *main_window = NULL;
 
 GtkWidget *main_window = NULL;
 
@@ -294,13 +180,10 @@ GtkWidget* create_game_entry(const char *icon, const char *title, const char *de
 
 static void activate(GtkApplication *app, gpointer user_data)
 {
-    GtkCssProvider *provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_string(provider, css_data);
-    gtk_style_context_add_provider_for_display(
-        gdk_display_get_default(),
-        GTK_STYLE_PROVIDER(provider),
-        GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-
+    // Since apply_theme handles CSS loading dynamically for launcher, we don't need css_data provider here.
+    // Apply theme sets the provider.
+    // But if theme is 0, apply_theme loads 'launcher.css', so we just call apply_theme(theme_id).
+    
     GtkWidget *window = gtk_application_window_new(app);
     main_window = window;
     gtk_window_set_title(GTK_WINDOW(window), "C Games Collection - Launcher");

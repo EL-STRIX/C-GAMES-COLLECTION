@@ -11,135 +11,11 @@
 #include <stdlib.h>  // Used for random numbers (rand)
 #include <time.h>    // Used to set the random seed based on time
 #include <string.h>  // Used for text/string handling
-// --- PERSISTENCE & THEME ENGINE INJECTED ---
-#include <stdio.h>
-#include <string.h>
-#include <gtk/gtk.h>
+#include "../common/persistence.h"
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
-
-int load_top_score(const char *game_name, char *out_player_name) {
-    g_mkdir_with_parents("data", 0755);
-    char filename[100];
-    snprintf(filename, sizeof(filename), "data/%s_score.ini", game_name);
-    
-    GKeyFile *kf = g_key_file_new();
-    if (!g_key_file_load_from_file(kf, filename, G_KEY_FILE_NONE, NULL)) {
-        if (out_player_name) strcpy(out_player_name, "None");
-        g_key_file_free(kf);
-        return -1;
-    }
-    
-    int score = g_key_file_get_integer(kf, "Score", "Value", NULL);
-    gchar *name = g_key_file_get_string(kf, "Score", "Player", NULL);
-    if (name && out_player_name) {
-        strncpy(out_player_name, name, 49);
-        out_player_name[49] = '\0';
-    } else if (out_player_name) {
-        strcpy(out_player_name, "Unknown");
-    }
-    
-    g_free(name);
-    g_key_file_free(kf);
-    return score;
-}
-
-void save_score(const char *game_name, const char *player_name, int score, int is_lower_better) {
-    char top_player[50]; 
-    int top_score = load_top_score(game_name, top_player);
-    int is_new_record = (top_score == -1) || (is_lower_better ? (score < top_score) : (score > top_score));
-    
-    if (is_new_record) {
-        g_mkdir_with_parents("data", 0755);
-        char filename[100]; 
-        snprintf(filename, sizeof(filename), "data/%s_score.ini", game_name);
-        GKeyFile *kf = g_key_file_new();
-        g_key_file_set_string(kf, "Score", "Player", player_name);
-        g_key_file_set_integer(kf, "Score", "Value", score);
-        g_key_file_save_to_file(kf, filename, NULL);
-        g_key_file_free(kf);
-    }
-}
-
-void save_global_settings(const char *player_name, int theme_id) {
-    GKeyFile *kf = g_key_file_new();
-    g_mkdir_with_parents("data", 0755);
-    g_key_file_set_string(kf, "Settings", "PlayerName", player_name);
-    g_key_file_set_integer(kf, "Settings", "ThemeID", theme_id);
-    g_key_file_save_to_file(kf, "data/settings.ini", NULL);
-    g_key_file_free(kf);
-}
-
-void load_global_settings(char *player_name, int *theme_id) {
-    g_mkdir_with_parents("data", 0755);
-    GKeyFile *kf = g_key_file_new();
-    if (g_key_file_load_from_file(kf, "data/settings.ini", G_KEY_FILE_NONE, NULL)) {
-        gchar *name = g_key_file_get_string(kf, "Settings", "PlayerName", NULL);
-        if (name) {
-            strncpy(player_name, name, 49);
-            player_name[49] = '\0';
-            g_free(name);
-        } else {
-            strcpy(player_name, "Player 1");
-        }
-        
-        GError *err = NULL;
-        int t = g_key_file_get_integer(kf, "Settings", "ThemeID", &err);
-        if (err) {
-            *theme_id = 0;
-            g_error_free(err);
-        } else {
-            *theme_id = t;
-        }
-    } else {
-        strcpy(player_name, "Player 1");
-        *theme_id = 0;
-    }
-    g_key_file_free(kf);
-}
-
-gboolean return_to_launcher(void) {
-    return TRUE;
-}
-
-static GtkCssProvider *current_theme_provider = NULL;
-
-void apply_theme(int theme_id) {
-    // Disabled as per user request to keep game pages strictly white/blue regardless of launcher theme.
-    // The launcher can be dark/hacker, but the game screens stay professional white/blue.
-}
-// --- END INJECTED ENGINE ---
-
-const char *css_data =
-    "* { font-family: \"Segoe UI Emoji\", \"Noto Color Emoji\", sans-serif; }"
-    "headerbar { min-height: 60px; background-color: #1e1e2e; color: #cdd6f4; border-bottom: 1px solid #11111b; }"
-    ".header-title { font-size: 20pt; font-weight: 900; color: #ffffff; letter-spacing: 1px; }"
-    "windowcontrols button { min-width: 40px; min-height: 40px; border-radius: 5px; }"
-    "window { background-color: #f0f4f8; }"
-    "label { color: #0f172a; }"
-    "button { all: unset; border-radius: 12px; padding: 12px 24px; transition: all 0.2s ease; }"
-    ".card { background-color: #ffffff; border-radius: 20px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }"
-    ".game-title { font-size: 24pt; font-weight: 900; color: #2563eb; margin-bottom: 10px; }"
-    ".name-question { font-size: 14pt; font-weight: 500; color: #475569; margin-bottom: 20px; }"
-    ".welcome-text { font-size: 18pt; font-weight: 800; color: #2563eb; margin-bottom: 20px; }"
-    ".input-field { font-size: 14pt; padding: 12px; border: 2px solid #cbd5e1; border-radius: 10px; }"
-    ".input-field:focus { border-color: #2563eb; }"
-    ".guess-cheer-text { font-size: 14pt; font-weight: 600; color: #475569; }"
-    ".btn-blue { background-color: #2563eb; color: #ffffff; font-weight: bold; font-size: 14pt; border-radius: 12px; }"
-    ".btn-blue:hover { background-color: #3b82f6; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }"
-    ".btn-blue:active { background-color: #1d4ed8; }"
-    ".btn-exit { background-color: #ef4444; color: #ffffff; font-weight: bold; font-size: 12pt; border-radius: 10px; padding: 10px 20px; }"
-    ".btn-exit:hover { background-color: #f87171; box-shadow: 0 4px 12px rgba(239,68,68,0.3); }"
-    ".feedback-box { background-color: #fee2e2; color: #b91c1c; border-radius: 12px; padding: 15px; margin-top: 20px; font-weight: bold; font-size: 14pt; }"
-    ".success-text { font-size: 16pt; font-weight: bold; color: #0f172a; }"
-    ".big-number { font-size: 40pt; font-weight: 900; color: #22c55e; margin: 20px; text-shadow: 0 4px 12px rgba(34,197,94,0.2); }"
-    ".tip-text { color: #64748b; font-size: 12pt; margin-top: 20px; }"
-    ".warning-text { color: #ef4444; font-weight: 700; font-size: 12pt; margin-top: 10px; }"
-    ".attempts-text { color: #2563eb; font-size: 16pt; font-weight: 800; }"
-    ".result-small-text { font-size: 16pt; font-weight: 600; color: #475569; }"
-    ".result-performance-text { font-size: 18pt; font-weight: 800; color: #3b82f6; margin-top: 15px; }"
-    ".dev-footer { font-size: 10pt; color: #94a3b8; font-weight: 600; margin-top: 20px; }";
 
 // --- GAME DATA ---
 // This structure holds all the information our game needs to run.
@@ -496,14 +372,9 @@ static void activate(GtkApplication *app_system, gpointer user_data)
     gtk_widget_add_css_class(title_lbl, "header-title");
     gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), title_lbl);
 
-    // Load CSS Styles
-    GtkCssProvider *provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_string(provider, css_data);
-    gtk_style_context_add_provider_for_display(
-        gdk_display_get_default(),
-        GTK_STYLE_PROVIDER(provider),
-        GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-
+    // Load CSS dynamically
+    load_css_from_file("theme_white_blue.css");
+    
     // Setup "Stack" to switch pages
     app->stack = gtk_stack_new();
     gtk_stack_set_transition_type(GTK_STACK(app->stack),

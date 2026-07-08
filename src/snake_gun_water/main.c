@@ -1,11 +1,11 @@
 /*
  * ----------------------------------------------------------------------------
- * Project: Rock Paper Scissors (GTK4)
+ * Project: Snake Gun Water (GTK4)
  * Developer: Sujay Paul
- * Date: 10-12-2025
+ * Date: 11-12-2025
  * Email: sujaypaul892@gmail.com
  * ----------------------------------------------------------------------------
- * NOTE: This file implements a Rock-Paper-Scissors GUI using GTK4.
+ * NOTE: This file implements a Snake-Gun-Water GUI using GTK4.
  * Short comments were added throughout for readability — code logic remains unchanged.
  */
 
@@ -14,109 +14,16 @@
 #include <string.h>
 #include <time.h>
 #include <gtk/gtk.h>
-// --- PERSISTENCE & THEME ENGINE INJECTED ---
-#include <stdio.h>
-#include <string.h>
-#include <gtk/gtk.h>
+#include "../common/persistence.h"
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
 
-int load_top_score(const char *game_name, char *out_player_name) {
-    g_mkdir_with_parents("data", 0755);
-    char filename[100];
-    snprintf(filename, sizeof(filename), "data/%s_score.ini", game_name);
-    
-    GKeyFile *kf = g_key_file_new();
-    if (!g_key_file_load_from_file(kf, filename, G_KEY_FILE_NONE, NULL)) {
-        if (out_player_name) strcpy(out_player_name, "None");
-        g_key_file_free(kf);
-        return -1;
-    }
-    
-    int score = g_key_file_get_integer(kf, "Score", "Value", NULL);
-    gchar *name = g_key_file_get_string(kf, "Score", "Player", NULL);
-    if (name && out_player_name) {
-        strncpy(out_player_name, name, 49);
-        out_player_name[49] = '\0';
-    } else if (out_player_name) {
-        strcpy(out_player_name, "Unknown");
-    }
-    
-    g_free(name);
-    g_key_file_free(kf);
-    return score;
-}
-
-void save_score(const char *game_name, const char *player_name, int score, int is_lower_better) {
-    char top_player[50]; 
-    int top_score = load_top_score(game_name, top_player);
-    int is_new_record = (top_score == -1) || (is_lower_better ? (score < top_score) : (score > top_score));
-    
-    if (is_new_record) {
-        g_mkdir_with_parents("data", 0755);
-        char filename[100]; 
-        snprintf(filename, sizeof(filename), "data/%s_score.ini", game_name);
-        GKeyFile *kf = g_key_file_new();
-        g_key_file_set_string(kf, "Score", "Player", player_name);
-        g_key_file_set_integer(kf, "Score", "Value", score);
-        g_key_file_save_to_file(kf, filename, NULL);
-        g_key_file_free(kf);
-    }
-}
-
-void save_global_settings(const char *player_name, int theme_id) {
-    GKeyFile *kf = g_key_file_new();
-    g_mkdir_with_parents("data", 0755);
-    g_key_file_set_string(kf, "Settings", "PlayerName", player_name);
-    g_key_file_set_integer(kf, "Settings", "ThemeID", theme_id);
-    g_key_file_save_to_file(kf, "data/settings.ini", NULL);
-    g_key_file_free(kf);
-}
-
-void load_global_settings(char *player_name, int *theme_id) {
-    g_mkdir_with_parents("data", 0755);
-    GKeyFile *kf = g_key_file_new();
-    if (g_key_file_load_from_file(kf, "data/settings.ini", G_KEY_FILE_NONE, NULL)) {
-        gchar *name = g_key_file_get_string(kf, "Settings", "PlayerName", NULL);
-        if (name) {
-            strncpy(player_name, name, 49);
-            player_name[49] = '\0';
-            g_free(name);
-        } else {
-            strcpy(player_name, "Player 1");
-        }
-        
-        GError *err = NULL;
-        int t = g_key_file_get_integer(kf, "Settings", "ThemeID", &err);
-        if (err) {
-            *theme_id = 0;
-            g_error_free(err);
-        } else {
-            *theme_id = t;
-        }
-    } else {
-        strcpy(player_name, "Player 1");
-        *theme_id = 0;
-    }
-    g_key_file_free(kf);
-}
-
-gboolean return_to_launcher(void) {
-    return TRUE;
-}
-
-static GtkCssProvider *current_theme_provider = NULL;
-
-void apply_theme(int theme_id) {
-    // Disabled as per user request to keep game pages strictly white/blue regardless of launcher theme.
-}
-// --- END INJECTED ENGINE ---
-
 /* --- Game Constants --- */
-#define CHOICE_ROCK 1
-#define CHOICE_PAPER 2
-#define CHOICE_SCISSORS 3
+#define CHOICE_snake 1
+#define CHOICE_gun 2
+#define CHOICE_water 3
 #define TOTAL_ROUNDS 3
 
 /* --- Data Structure --- */
@@ -138,7 +45,7 @@ typedef struct {
     GtkWidget *score_label;    /* label showing live scores */
     GtkWidget *feedback_label; /* label showing last choices */
     GtkWidget *result_label;   /* label showing round result (win/lose/draw) */
-    GtkWidget *choices_box;    /* container for rock/paper/scissor buttons */
+    GtkWidget *choices_box;    /* container for snake/gun/scissor buttons */
     GtkWidget *next_round_btn; /* button to proceed to next round */
 
     /* Screen 3 (Result) */
@@ -199,10 +106,10 @@ gboolean on_show_final_results(gpointer user_data) {
     }
 
     if (data->player_score > data->computer_score) {
-        save_score("rps", data->player_name, data->player_score, 0);
+        save_score("sgw", data->player_name, data->player_score, 0);
     }
     char best_player[50];
-    int best_score = load_top_score("rps", best_player);
+    int best_score = load_top_score("sgw", best_player);
 
     if (best_score != -1) {
         score_text = g_strdup_printf("Final Score: %d - %d\nAll-Time Best: %s (%d wins)", data->player_score, data->computer_score, best_player, best_score);
@@ -267,8 +174,8 @@ void start_next_round_ui(AppData *data) {
 /* Process a single round: generate computer choice, decide winner, update UI */
 void process_round(AppData *data, int user_choice) {
     int computer_choice = (rand() % 3) + 1; /* random int in 1..3 */
-    const char *user_str = (user_choice == 1) ? "ROCK" : (user_choice == 2) ? "PAPER" : "SCISSORS";
-    const char *comp_str = (computer_choice == 1) ? "ROCK" : (computer_choice == 2) ? "PAPER" : "SCISSORS";
+    const char *user_str = (user_choice == 1) ? "snake" : (user_choice == 2) ? "gun" : "water";
+    const char *comp_str = (computer_choice == 1) ? "snake" : (computer_choice == 2) ? "gun" : "water";
     int result = 0; /* 0 draw, 1 player win, 2 computer win */
 
     /* compare choices to determine result and update scores */
@@ -339,9 +246,9 @@ static void on_start_clicked(GtkButton *btn, AppData *data) {
 }
 
 /* Simple wrappers connecting each choice button to process_round() */
-void on_rock_clicked(GtkButton *btn, gpointer user_data) { process_round((AppData*)user_data, CHOICE_ROCK); }
-void on_paper_clicked(GtkButton *btn, gpointer user_data) { process_round((AppData*)user_data, CHOICE_PAPER); }
-void on_scissors_clicked(GtkButton *btn, gpointer user_data) { process_round((AppData*)user_data, CHOICE_SCISSORS); }
+void on_snake_clicked(GtkButton *btn, gpointer user_data) { process_round((AppData*)user_data, CHOICE_snake); }
+void on_gun_clicked(GtkButton *btn, gpointer user_data) { process_round((AppData*)user_data, CHOICE_gun); }
+void on_water_clicked(GtkButton *btn, gpointer user_data) { process_round((AppData*)user_data, CHOICE_water); }
 void on_next_round_clicked(GtkButton *btn, gpointer user_data) { start_next_round_ui((AppData*)user_data); }
 void on_play_again_clicked(GtkButton *btn, gpointer user_data) { start_new_game((AppData*)user_data); }
 
@@ -387,47 +294,7 @@ void on_header_back_clicked(GtkButton *btn, gpointer user_data) {
 /* --- CSS Styling --- */
 /* Loads application CSS into the GTK style context */
 void load_css(void) {
-    GtkCssProvider *provider = gtk_css_provider_new();
-    GdkDisplay *display = gdk_display_get_default();
-
-    const char *css =
-        "* { font-family: \"Segoe UI Emoji\", \"Noto Color Emoji\", sans-serif; }"
-        "headerbar { min-height: 60px; background-color: #1e1e2e; color: #cdd6f4; border-bottom: 1px solid #11111b; }"
-        ".header-title { font-size: 20pt; font-weight: 900; color: #ffffff; letter-spacing: 1px; }"
-        "windowcontrols button { min-width: 40px; min-height: 40px; border-radius: 5px; }"
-        ".window-bg { background-color: #f0f4f8; }"
-        "label { color: #0f172a; }"
-        "button { all: unset; border-radius: 12px; padding: 12px 24px; transition: all 0.2s ease; }"
-        ".login-card, .game-card, .result-card, .card { background-color: #ffffff; border-radius: 20px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }"
-        ".game-title { font-size: 24pt; font-weight: 900; color: #2563eb; margin-bottom: 10px; }"
-        ".name-question { font-size: 14pt; font-weight: 500; color: #475569; margin-bottom: 20px; }"
-        ".welcome-text { font-size: 18pt; font-weight: 800; color: #2563eb; margin-bottom: 20px; }"
-        ".input-label { font-size: 11pt; color: #475569; margin-bottom: 5px; }"
-        ".round-header { font-size: 18pt; font-weight: bold; color: #2563eb; margin-bottom: 5px; }"
-        ".score-info { font-size: 12pt; font-weight: 600; color: #475569; margin-bottom: 15px; }"
-        ".styled-entry { font-size: 14pt; padding: 12px; border: 2px solid #cbd5e1; border-radius: 10px; background: #ffffff; color: #000; }"
-        ".styled-entry:focus { border-color: #2563eb; }"
-        "#start_btn, .btn-blue { background-color: #2563eb; color: #ffffff; font-weight: bold; font-size: 14pt; border-radius: 12px; margin-top: 15px; }"
-        "#start_btn:hover, .btn-blue:hover { background-color: #3b82f6; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }"
-        "#start_btn:active, .btn-blue:active { background-color: #1d4ed8; }"
-        ".btn-exit { background-color: #ef4444; color: #ffffff; font-weight: bold; font-size: 12pt; border-radius: 10px; padding: 10px 20px; margin-top: 15px; }"
-        ".btn-exit:hover { background-color: #f87171; box-shadow: 0 4px 12px rgba(239,68,68,0.3); }"
-        ".btn-exit:active { background-color: #dc2626; }"
-        ".choice-btn { background-color: #f8fafc; border: 2px solid #e2e8f0; border-radius: 16px; padding: 20px; transition: all 0.2s ease; }"
-        ".choice-btn:hover { background-color: #f1f5f9; border-color: #cbd5e1; box-shadow: 0 8px 24px rgba(0,0,0,0.05); transform: translateY(-2px); }"
-        ".choice-emoji { font-size: 40px; }"
-        ".choice-label { font-weight: bold; color: #334155; font-size: 14pt; margin-top: 10px; }"
-        ".footer-tip { font-size: 10pt; color: #94a3b8; margin-top: 20px; }"
-        ".footer-credit { font-size: 10pt; color: #94a3b8; font-weight: 600; margin-top: 10px; }"
-        ".success { color: #22c55e; font-weight: 900; font-size: 18pt; text-shadow: 0 2px 10px rgba(34,197,94,0.2); }"
-        ".error { color: #ef4444; font-weight: 900; font-size: 18pt; text-shadow: 0 2px 10px rgba(239,68,68,0.2); }"
-        ".warning { color: #eab308; font-weight: 900; font-size: 18pt; text-shadow: 0 2px 10px rgba(234,179,8,0.2); }";
-
-    gtk_css_provider_load_from_string(provider, css);
-
-    if (display)
-        gtk_style_context_add_provider_for_display(display, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-    g_object_unref(provider);
+    load_css_from_file("theme_white_blue.css");
 }
 
 /* --- UI Construction --- */
@@ -468,7 +335,7 @@ GtkWidget* create_login_screen(AppData *data) {
     gtk_widget_set_size_request(card, 350, -1);
     gtk_box_append(GTK_BOX(vbox), card);
 
-    GtkWidget *title_lbl = gtk_label_new("🎮 ROCK PAPER SCISSORS");
+    GtkWidget *title_lbl = gtk_label_new("🎮 SNAKE GUN WATER");
     gtk_widget_add_css_class(title_lbl, "game-title");
     gtk_box_append(GTK_BOX(card), title_lbl);
 
@@ -497,8 +364,9 @@ GtkWidget* create_login_screen(AppData *data) {
 
     return vbox;
 }
+
 /* 2. Game Screen */
-/* Main gameplay screen: shows rounds, scores, and rock-paper-scissors buttons. */
+/* Main gameplay screen: shows rounds, scores, and snake-gun-water buttons. */
 GtkWidget* create_game_screen(AppData *data) {
     GtkWidget *center_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_valign(center_box, GTK_ALIGN_CENTER);
@@ -511,7 +379,7 @@ GtkWidget* create_game_screen(AppData *data) {
     gtk_widget_set_size_request(card, 380, -1);
     gtk_box_append(GTK_BOX(center_box), card);
 
-    GtkWidget *title_lbl = gtk_label_new("🎮 ROCK PAPER SCISSORS");
+    GtkWidget *title_lbl = gtk_label_new("🎮 SNAKE GUN WATER");
     gtk_widget_add_css_class(title_lbl, "game-title");
     gtk_box_append(GTK_BOX(card), title_lbl);
 
@@ -532,17 +400,17 @@ GtkWidget* create_game_screen(AppData *data) {
     gtk_widget_set_margin_bottom(data->choices_box, 10);
 
     /* Custom Buttons - USING EMOJIS */
-    GtkWidget *btn_rock = create_choice_button("✊", "Rock", G_CALLBACK(on_rock_clicked), data);
-    GtkWidget *btn_paper = create_choice_button("✋", "Paper", G_CALLBACK(on_paper_clicked), data);
-    GtkWidget *btn_scissors = create_choice_button("✌️", "Scissors", G_CALLBACK(on_scissors_clicked), data);
+    GtkWidget *btn_snake = create_choice_button("🐍", "SNAKE", G_CALLBACK(on_snake_clicked), data);
+    GtkWidget *btn_gun = create_choice_button("🔫", "GUN", G_CALLBACK(on_gun_clicked), data);
+    GtkWidget *btn_water = create_choice_button("💧", "WATER", G_CALLBACK(on_water_clicked), data);
     
-    gtk_widget_set_size_request(btn_rock, 80, 80);
-    gtk_widget_set_size_request(btn_paper, 80, 80);
-    gtk_widget_set_size_request(btn_scissors, 80, 80);
+    gtk_widget_set_size_request(btn_snake, 80, 80);
+    gtk_widget_set_size_request(btn_gun, 80, 80);
+    gtk_widget_set_size_request(btn_water, 80, 80);
 
-    gtk_box_append(GTK_BOX(data->choices_box), btn_rock);
-    gtk_box_append(GTK_BOX(data->choices_box), btn_paper);
-    gtk_box_append(GTK_BOX(data->choices_box), btn_scissors);
+    gtk_box_append(GTK_BOX(data->choices_box), btn_snake);
+    gtk_box_append(GTK_BOX(data->choices_box), btn_gun);
+    gtk_box_append(GTK_BOX(data->choices_box), btn_water);
 
     gtk_box_append(GTK_BOX(card), data->choices_box);
 
@@ -575,7 +443,7 @@ GtkWidget* create_result_screen(AppData *data) {
     gtk_widget_set_size_request(card, 350, -1);
     gtk_box_append(GTK_BOX(vbox), card);
 
-    GtkWidget *title_lbl = gtk_label_new("🎮 ROCK PAPER SCISSORS");
+    GtkWidget *title_lbl = gtk_label_new("🎮 SNAKE GUN WATER");
     gtk_widget_add_css_class(title_lbl, "game-title");
     gtk_box_append(GTK_BOX(card), title_lbl);
 
@@ -626,7 +494,7 @@ void activate(GtkApplication *app, gpointer user_data) {
     gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), TRUE);
     gtk_window_set_titlebar(GTK_WINDOW(window), header);
 
-    GtkWidget *title_lbl = gtk_label_new("Epic Rock Paper Scissors Battle");
+    GtkWidget *title_lbl = gtk_label_new("Epic Snake Gun Water Battle");
     gtk_widget_add_css_class(title_lbl, "header-title");
     gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), title_lbl);
 
@@ -666,16 +534,16 @@ void activate(GtkApplication *app, gpointer user_data) {
     int theme_id;
     load_global_settings(data->player_name, &theme_id);
     // apply_theme(theme_id);
-    
+
     /* Set default player name if available */
     if (strlen(data->player_name) > 0) {
         gtk_editable_set_text(GTK_EDITABLE(data->name_entry), data->player_name);
     }
 
     gtk_widget_set_visible(data->next_round_btn, FALSE);
+    start_new_game(data);
 
     if (strlen(data->player_name) > 0 && strcmp(data->player_name, "Player 1") != 0) {
-        start_new_game(data);
         gtk_stack_set_visible_child_name(GTK_STACK(data->stack), "game_screen");
     } else {
         gtk_stack_set_visible_child_name(GTK_STACK(data->stack), "login_screen");
@@ -685,7 +553,7 @@ void activate(GtkApplication *app, gpointer user_data) {
 }
 
 int main(int argc, char **argv) {
-    GtkApplication *app = gtk_application_new("org.sujay.rps", G_APPLICATION_NON_UNIQUE);
+    GtkApplication *app = gtk_application_new("org.sujay.sgw", G_APPLICATION_NON_UNIQUE);
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
     int status = g_application_run(G_APPLICATION(app), argc, argv);
     g_object_unref(app);
