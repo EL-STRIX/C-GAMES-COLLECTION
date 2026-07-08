@@ -15,7 +15,7 @@ TARGETS = $(BIN_DIR)/launcher.exe \
 all: $(TARGETS)
 
 $(BIN_DIR):
-	-mkdir $(BIN_DIR)
+	-mkdir -p $(BIN_DIR)
 
 # Launcher
 $(BIN_DIR)/launcher.exe: src/launcher/main.c $(COMMON_SRC) | $(BIN_DIR)
@@ -45,4 +45,4 @@ test: $(BIN_DIR)/test_persistence.exe
 	./$(BIN_DIR)/test_persistence.exe
 
 clean:
-	-del /Q /S bin\*.exe
+	-rm -f $(BIN_DIR)/*.exe
