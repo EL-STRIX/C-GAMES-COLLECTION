@@ -46,7 +46,6 @@ static void test_scores(void) {
 }
 
 int main(int argc, char **argv) {
-    gtk_init();
     g_test_init(&argc, &argv, NULL);
     g_test_add_func("/persistence/settings", test_settings);
     g_test_add_func("/persistence/scores", test_scores);
