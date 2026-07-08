@@ -10,8 +10,7 @@
 // GAME STATE
 // ============================================================
 
-typedef struct
-{
+typedef struct {
     char name1[50];
     char name2[50];
     int score1;
@@ -23,17 +22,22 @@ typedef struct
     int game_over;
 } GameState;
 
-GameState game;
-
-// UI Widgets
-GtkWidget *app->window;
-GtkWidget *app->stack;
-GtkWidget *app->entry_p1, *app->entry_p2;
-GtkWidget *app->label_score_p1, *app->label_score_p2;
-GtkWidget *app->buttons[3][3];
-GtkWidget *app->result_title;
-GtkWidget *app->result_subtitle;
-GtkWidget *app->result_score_label;
+// AppData encapsulates the application's runtime state and widget references,
+// eliminating globals and ensuring memory safety across callback boundaries.
+typedef struct {
+    GameState game;
+    GtkWidget *window;
+    GtkWidget *stack;
+    GtkWidget *entry_p1;
+    GtkWidget *entry_p2;
+    GtkWidget *label_score_p1;
+    GtkWidget *label_score_p2;
+    GtkWidget *buttons[3][3];
+    GtkWidget *result_title;
+    GtkWidget *result_subtitle;
+    GtkWidget *result_score_label;
+    GtkWidget *lbl_start_error;
+} AppData;
 
 // ============================================================
 // GAME LOGIC
@@ -266,8 +270,8 @@ void on_header_back_clicked(GtkButton *btn, gpointer user_data)
     if (g_strcmp0(visible_child, "game_page") == 0) {
         GtkAlertDialog *dialog = gtk_alert_dialog_new("Are you sure you want to return to the main menu?");
         gtk_alert_dialog_set_detail(dialog, "Any unsaved progress will be lost.");
-        const char *app->buttons[] = {"Cancel", "Return to Menu", NULL};
-        gtk_alert_dialog_set_buttons(dialog, buttons);
+        const char *btn_labels[] = {"Cancel", "Return to Menu", NULL};
+        gtk_alert_dialog_set_buttons(dialog, btn_labels);
         gtk_alert_dialog_set_cancel_button(dialog, 0);
         gtk_alert_dialog_set_default_button(dialog, 0);
         gtk_alert_dialog_choose(dialog, GTK_WINDOW(app->window), NULL, confirm_exit_response, NULL);
@@ -312,7 +316,7 @@ static void activate(GtkApplication *gtk_app, gpointer user_data)
     app->window = gtk_application_window_new(gtk_app);
     gtk_window_set_default_size(GTK_WINDOW(app->window), 900, 700);
     gtk_window_maximize(GTK_WINDOW(app->window));
-    gtk_widget_add_css_class(app->window, "app->window-bg");
+    gtk_widget_add_css_class(app->window, "window-bg");
 
     GtkWidget *header = gtk_header_bar_new();
     gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), TRUE);
