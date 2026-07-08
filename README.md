@@ -63,28 +63,9 @@ Provides a foundational template for building GTK4 desktop applications, demonst
 
 ## 🏗 Architecture
 
-The project follows an Event-Driven Architecture typical for GUI applications. Each game, along with the central launcher, is compiled as an entirely independent GTK4 executable. The launcher asynchronously spawns game processes to navigate the arcade, ensuring zero memory leaks between sessions.
+The project follows an Event-Driven Architecture typical for GUI applications. Each game, along with the central launcher, is compiled as an independent GTK4 executable. The launcher asynchronously spawns game processes to navigate the arcade, ensuring strict memory isolation between applications.
 
-```mermaid
-graph TD
-    L[Launcher.exe] -->|Spawns via g_spawn| A[Game.exe]
-    A -->|activates| B[Main Window]
-    B --> C[GtkStack Container]
-    C --> D[Welcome Screen]
-    C --> E[Game Screen]
-    C --> F[Result Screen]
-    
-    U((User Input)) -->|Clicks/Keys| G[Signal Handlers]
-    G --> H{Game Logic / State Update}
-    H -->|Update| E
-    H -->|Game Over| F
-    F -->|Return| L
-```
-
-### Component Relationships
-- **State Structs (`GameState` / `AppData`)**: Centralized memory structs holding player scores, names, and current rounds.
-- **UI Builders**: Functions dedicated to constructing widget trees (e.g., `create_welcome_page`, `create_game_page`).
-- **Callbacks**: Signal handlers attached to buttons (`on_start_clicked`, `on_cell_clicked`) that mutate state and trigger UI updates.
+For an in-depth breakdown of process boundaries, UI state management, and the `GKeyFile` persistence engine, see the [ARCHITECTURE.md](ARCHITECTURE.md) documentation.
 
 ---
 
@@ -92,24 +73,23 @@ graph TD
 
 ```text
 C-GAMES-COLLECTION/
-├── games/
-│   ├── launcher.c          # Central Arcade Launcher logic
-│   ├── number-guessing/
-│   │   └── main.c          # Logic and UI for Number Guessing
-│   ├── rock-paper-scissors/
-│   │   └── main.c          # Logic and UI for Rock Paper Scissors
-│   ├── snake-gun-water/
-│   │   └── main.c          # Logic and UI for Snake Gun Water
-│   └── tic-tac-toe-gui/
-│       └── main.c          # Logic and UI for Tic Tac Toe
+├── src/
+│   ├── common/             # Shared persistence and CSS engine
+│   ├── launcher/           # Central Arcade Launcher
+│   ├── number_guessing/    # Number Guessing logic and UI
+│   ├── rock_paper_scissors/# Rock Paper Scissors logic and UI
+│   ├── snake_gun_water/    # Snake Gun Water logic and UI
+│   └── tic_tac_toe/        # Tic Tac Toe logic and UI
+├── assets/
+│   └── css/                # Isolated stylesheet themes
 ├── tests/
-│   └── test_persistence.c  # GLib unit tests for the INI data layer
+│   └── test_persistence.c  # GLib unit tests for the data layer
 ├── Makefile                # Automated build script
 └── README.md               # Project documentation
 ```
 
 **Major Components:**
-- `games/`: Folder containing all completely independent executable source files. They communicate with the other binaries via the OS process tree. All files self-contain the `GKeyFile` persistence engine.
+- `src/`: Core directory containing modular, independent C source directories. Games communicate via OS processes and share the `src/common` modules cleanly.
 - `bin/` (auto-generated): Where all compiled `.exe` files and `.ini` save files are stored.
 
 ---
@@ -196,7 +176,7 @@ As these are standalone desktop applications, deployment involves compiling bina
 ## ⚡ Performance Optimizations
 
 * **Memory Management**: UI elements are managed by the GTK framework's reference counting system. Stack containers ensure inactive screens are hidden rather than destroyed/recreated continuously, reducing CPU overhead.
-* **Inline CSS**: CSS data is compiled directly into the binary as C-strings (`css_data`), avoiding external file I/O operations at runtime.
+* **Asset Isolation**: CSS styling is fully decoupled into standard `.css` files located in `assets/css/`, loaded dynamically at runtime via `g_build_filename` to prevent binary bloating while ensuring extreme flexibility.
 * **Atomic Save States**: The `GKeyFile` parser is highly optimized for writing standard INI files safely, preventing UI blocking or corruption during fast data persistence.
 
 ---
