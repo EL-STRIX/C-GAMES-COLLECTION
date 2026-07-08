@@ -21,20 +21,22 @@
 #endif
 
 /* --- Game Constants --- */
-#define CHOICE_snake 1
-#define CHOICE_gun 2
-#define CHOICE_water 3
+#define CHOICE_SNAKE 1
+#define CHOICE_GUN 2
+#define CHOICE_WATER 3
 #define TOTAL_ROUNDS 3
 
 /* --- Data Structure --- */
+// AppData encapsulates the application's runtime state and widget references,
+// eliminating globals and ensuring memory safety across callback boundaries.
 typedef struct {
     GtkWidget *window; 
-    int current_round;          /* current round index (1-based) */
-    int player_score;          /* player cumulative score */
-    int computer_score;        /* computer cumulative score */
-    char player_name[50];      /* stored player name from login */
+    int current_round;         
+    int player_score;          
+    int computer_score;        
+    char player_name[50];      
 
-    GtkWidget *stack;          /* main UI stack with screens */
+    GtkWidget *stack;          
 
     /* Screen 1 (Login) */
     GtkWidget *name_entry;     /* entry widget for player's name */
@@ -173,16 +175,28 @@ void start_next_round_ui(AppData *data) {
 
 /* Process a single round: generate computer choice, decide winner, update UI */
 void process_round(AppData *data, int user_choice) {
-    int computer_choice = (rand() % 3) + 1; /* random int in 1..3 */
-    const char *user_str = (user_choice == 1) ? "snake" : (user_choice == 2) ? "gun" : "water";
-    const char *comp_str = (computer_choice == 1) ? "snake" : (computer_choice == 2) ? "gun" : "water";
+    int computer_choice = (rand() % 3) + 1;
+    const char *user_str, *comp_str;
+    switch (user_choice) {
+        case CHOICE_SNAKE: user_str = "Snake"; break;
+        case CHOICE_GUN: user_str = "Gun"; break;
+        case CHOICE_WATER: user_str = "Water"; break;
+        default: user_str = "Unknown";
+    }
+    switch (computer_choice) {
+        case CHOICE_SNAKE: comp_str = "Snake"; break;
+        case CHOICE_GUN: comp_str = "Gun"; break;
+        case CHOICE_WATER: comp_str = "Water"; break;
+        default: comp_str = "Unknown";
+    }
+    
     int result = 0; /* 0 draw, 1 player win, 2 computer win */
 
     /* compare choices to determine result and update scores */
     if (user_choice == computer_choice) result = 0;
-    else if ((user_choice == 1 && computer_choice == 3) ||
-             (user_choice == 2 && computer_choice == 1) ||
-             (user_choice == 3 && computer_choice == 2)) {
+    else if ((user_choice == CHOICE_SNAKE && computer_choice == CHOICE_WATER) ||
+             (user_choice == CHOICE_GUN && computer_choice == CHOICE_SNAKE) ||
+             (user_choice == CHOICE_WATER && computer_choice == CHOICE_GUN)) {
         result = 1;
         data->player_score++;
     } else {
@@ -246,9 +260,9 @@ static void on_start_clicked(GtkButton *btn, AppData *data) {
 }
 
 /* Simple wrappers connecting each choice button to process_round() */
-void on_snake_clicked(GtkButton *btn, gpointer user_data) { process_round((AppData*)user_data, CHOICE_snake); }
-void on_gun_clicked(GtkButton *btn, gpointer user_data) { process_round((AppData*)user_data, CHOICE_gun); }
-void on_water_clicked(GtkButton *btn, gpointer user_data) { process_round((AppData*)user_data, CHOICE_water); }
+void on_snake_clicked(GtkButton *btn, gpointer user_data) { process_round((AppData*)user_data, CHOICE_SNAKE); }
+void on_gun_clicked(GtkButton *btn, gpointer user_data) { process_round((AppData*)user_data, CHOICE_GUN); }
+void on_water_clicked(GtkButton *btn, gpointer user_data) { process_round((AppData*)user_data, CHOICE_WATER); }
 void on_next_round_clicked(GtkButton *btn, gpointer user_data) { start_next_round_ui((AppData*)user_data); }
 void on_play_again_clicked(GtkButton *btn, gpointer user_data) { start_new_game((AppData*)user_data); }
 

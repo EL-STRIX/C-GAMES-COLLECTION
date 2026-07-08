@@ -27,14 +27,16 @@
 #define TOTAL_ROUNDS 3
 
 /* --- Data Structure --- */
+// AppData encapsulates the application's runtime state and widget references,
+// eliminating globals and ensuring memory safety across callback boundaries.
 typedef struct {
     GtkWidget *window; 
-    int current_round;          /* current round index (1-based) */
-    int player_score;          /* player cumulative score */
-    int computer_score;        /* computer cumulative score */
-    char player_name[50];      /* stored player name from login */
+    int current_round;         
+    int player_score;          
+    int computer_score;        
+    char player_name[50];      
 
-    GtkWidget *stack;          /* main UI stack with screens */
+    GtkWidget *stack;          
 
     /* Screen 1 (Login) */
     GtkWidget *name_entry;     /* entry widget for player's name */

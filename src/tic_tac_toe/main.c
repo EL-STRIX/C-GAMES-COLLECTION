@@ -26,59 +26,59 @@ typedef struct
 GameState game;
 
 // UI Widgets
-GtkWidget *window;
-GtkWidget *stack;
-GtkWidget *entry_p1, *entry_p2;
-GtkWidget *label_score_p1, *label_score_p2;
-GtkWidget *buttons[3][3];
-GtkWidget *result_title;
-GtkWidget *result_subtitle;
-GtkWidget *result_score_label;
+GtkWidget *app->window;
+GtkWidget *app->stack;
+GtkWidget *app->entry_p1, *app->entry_p2;
+GtkWidget *app->label_score_p1, *app->label_score_p2;
+GtkWidget *app->buttons[3][3];
+GtkWidget *app->result_title;
+GtkWidget *app->result_subtitle;
+GtkWidget *app->result_score_label;
 
 // ============================================================
 // GAME LOGIC
 // ============================================================
 
-void init_game_state()
+void init_game_state(AppData *app)
 {
-    game.current_round = 1;
-    game.score1 = 0;
-    game.score2 = 0;
+    app->game.current_round = 1;
+    app->game.score1 = 0;
+    app->game.score2 = 0;
     for (int i = 0; i < 3; i++)
-        game.round_winners[i] = -1;
+        app->game.round_winners[i] = -1;
 }
 
-void reset_board_logic()
+void reset_board_logic(AppData *app)
 {
     char num = '1';
     for (int r = 0; r < 3; ++r)
     {
         for (int c = 0; c < 3; ++c)
         {
-            game.board[r][c] = num++;
+            app->game.board[r][c] = num++;
         }
     }
-    game.current_player = (game.current_round % 2 != 0) ? 1 : 2;
-    game.game_over = 0;
+    app->game.current_player = (app->game.current_round % 2 != 0) ? 1 : 2;
+    app->game.game_over = 0;
 }
 
-int check_winner()
+int check_winner(AppData *app)
 {
     for (int i = 0; i < 3; i++)
     {
-        if (game.board[i][0] == game.board[i][1] && game.board[i][1] == game.board[i][2]) return 1;
-        if (game.board[0][i] == game.board[1][i] && game.board[1][i] == game.board[2][i]) return 1;
+        if (app->game.board[i][0] == app->game.board[i][1] && app->game.board[i][1] == app->game.board[i][2]) return 1;
+        if (app->game.board[0][i] == app->game.board[1][i] && app->game.board[1][i] == app->game.board[2][i]) return 1;
     }
-    if (game.board[0][0] == game.board[1][1] && game.board[1][1] == game.board[2][2]) return 1;
-    if (game.board[0][2] == game.board[1][1] && game.board[1][1] == game.board[2][0]) return 1;
+    if (app->game.board[0][0] == app->game.board[1][1] && app->game.board[1][1] == app->game.board[2][2]) return 1;
+    if (app->game.board[0][2] == app->game.board[1][1] && app->game.board[1][1] == app->game.board[2][0]) return 1;
     return 0;
 }
 
-int check_draw()
+int check_draw(AppData *app)
 {
     for (int r = 0; r < 3; r++)
         for (int c = 0; c < 3; c++)
-            if (game.board[r][c] != 'X' && game.board[r][c] != 'O') return 0;
+            if (app->game.board[r][c] != 'X' && app->game.board[r][c] != 'O') return 0;
     return 1;
 }
 
@@ -86,20 +86,20 @@ int check_draw()
 // UI UPDATES
 // ============================================================
 
-void update_ui_board()
+void update_ui_board(AppData *app)
 {
     char s1[100], s2[100];
-    snprintf(s1, sizeof(s1), "%s: %d", game.name1, game.score1);
-    snprintf(s2, sizeof(s2), "%s: %d", game.name2, game.score2);
-    gtk_label_set_text(GTK_LABEL(label_score_p1), s1);
-    gtk_label_set_text(GTK_LABEL(label_score_p2), s2);
+    snprintf(s1, sizeof(s1), "%s: %d", app->game.name1, app->game.score1);
+    snprintf(s2, sizeof(s2), "%s: %d", app->game.name2, app->game.score2);
+    gtk_label_set_text(GTK_LABEL(app->label_score_p1), s1);
+    gtk_label_set_text(GTK_LABEL(app->label_score_p2), s2);
 
     for (int r = 0; r < 3; r++)
     {
         for (int c = 0; c < 3; c++)
         {
-            char val = game.board[r][c];
-            GtkWidget *btn = buttons[r][c];
+            char val = app->game.board[r][c];
+            GtkWidget *btn = app->buttons[r][c];
 
             gtk_widget_remove_css_class(btn, "player-x");
             gtk_widget_remove_css_class(btn, "player-o");
@@ -118,60 +118,60 @@ void update_ui_board()
     }
 }
 
-void show_result_screen()
+void show_result_screen(AppData *app)
 {
-    gtk_label_set_text(GTK_LABEL(result_title), "GAME OVER");
+    gtk_label_set_text(GTK_LABEL(app->result_title), "GAME OVER");
 
     char result_txt[100];
-    if (game.score1 > game.score2) {
-        snprintf(result_txt, 100, "VICTORY!\n%s won the match.", game.name1);
-        gtk_widget_remove_css_class(result_subtitle, "error");
-        gtk_widget_add_css_class(result_subtitle, "success");
-    } else if (game.score2 > game.score1) {
-        snprintf(result_txt, 100, "VICTORY!\n%s won the match.", game.name2);
-        gtk_widget_remove_css_class(result_subtitle, "success");
-        gtk_widget_add_css_class(result_subtitle, "error");
+    if (app->game.score1 > app->game.score2) {
+        snprintf(result_txt, 100, "VICTORY!\n%s won the match.", app->game.name1);
+        gtk_widget_remove_css_class(app->result_subtitle, "error");
+        gtk_widget_add_css_class(app->result_subtitle, "success");
+    } else if (app->game.score2 > app->game.score1) {
+        snprintf(result_txt, 100, "VICTORY!\n%s won the match.", app->game.name2);
+        gtk_widget_remove_css_class(app->result_subtitle, "success");
+        gtk_widget_add_css_class(app->result_subtitle, "error");
     } else {
         snprintf(result_txt, 100, "DRAW!\nNo clear winner.");
-        gtk_widget_remove_css_class(result_subtitle, "success");
-        gtk_widget_remove_css_class(result_subtitle, "error");
-        gtk_widget_add_css_class(result_subtitle, "warning");
+        gtk_widget_remove_css_class(app->result_subtitle, "success");
+        gtk_widget_remove_css_class(app->result_subtitle, "error");
+        gtk_widget_add_css_class(app->result_subtitle, "warning");
     }
 
-    gtk_label_set_text(GTK_LABEL(result_subtitle), result_txt);
+    gtk_label_set_text(GTK_LABEL(app->result_subtitle), result_txt);
 
     char best_player[50];
     int best_score = load_top_score("ttt_gui", best_player);
     char score_txt[200];
     if (best_score != -1) {
-        snprintf(score_txt, 200, "Final Score: %d - %d\nAll-Time Best: %s (%d wins)", game.score1, game.score2, best_player, best_score);
+        snprintf(score_txt, 200, "Final Score: %d - %d\nAll-Time Best: %s (%d wins)", app->game.score1, app->game.score2, best_player, best_score);
     } else {
-        snprintf(score_txt, 200, "Final Score: %d - %d", game.score1, game.score2);
+        snprintf(score_txt, 200, "Final Score: %d - %d", app->game.score1, app->game.score2);
     }
-    gtk_label_set_text(GTK_LABEL(result_score_label), score_txt);
+    gtk_label_set_text(GTK_LABEL(app->result_score_label), score_txt);
 
-    gtk_stack_set_visible_child_name(GTK_STACK(stack), "result_page");
+    gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "result_page");
 }
 
-void handle_round_end(int winner_id)
+void handle_round_end(AppData *app, int winner_id)
 {
-    game.game_over = 1;
+    app->game.game_over = 1;
     if (winner_id == 1) {
-        game.score1++;
-        save_score("ttt_gui", game.name1, game.score1, 0);
+        app->game.score1++;
+        save_score("ttt_gui", app->game.name1, app->game.score1, 0);
     } else if (winner_id == 2) {
-        game.score2++;
-        save_score("ttt_gui", game.name2, game.score2, 0);
+        app->game.score2++;
+        save_score("ttt_gui", app->game.name2, app->game.score2, 0);
     }
 
-    game.round_winners[game.current_round - 1] = winner_id;
+    app->game.round_winners[app->game.current_round - 1] = winner_id;
 
-    if (game.current_round >= 3) {
-        show_result_screen();
+    if (app->game.current_round >= 3) {
+        show_result_screen(app);
     } else {
-        game.current_round++;
-        reset_board_logic();
-        update_ui_board();
+        app->game.current_round++;
+        reset_board_logic(app);
+        update_ui_board(app);
     }
 }
 
@@ -181,64 +181,68 @@ void handle_round_end(int winner_id)
 
 void on_cell_clicked(GtkWidget *widget, gpointer data)
 {
-    if (game.game_over) return;
+    AppData *app = (AppData *)data;
+    if (app->game.game_over) return;
     int id = GPOINTER_TO_INT(data);
     int r = id / 3;
     int c = id % 3;
 
-    if (game.board[r][c] == 'X' || game.board[r][c] == 'O') return;
+    if (app->game.board[r][c] == 'X' || app->game.board[r][c] == 'O') return;
 
-    game.board[r][c] = (game.current_player == 1) ? 'X' : 'O';
+    app->game.board[r][c] = (app->game.current_player == 1) ? 'X' : 'O';
 
-    if (check_winner()) {
-        update_ui_board();
-        handle_round_end(game.current_player);
-    } else if (check_draw()) {
-        update_ui_board();
-        handle_round_end(0);
+    if (check_winner(app)) {
+        update_ui_board(app);
+        handle_round_end(app, app->game.current_player);
+    } else if (check_draw(app)) {
+        update_ui_board(app);
+        handle_round_end(app, 0);
     } else {
-        game.current_player = (game.current_player == 1) ? 2 : 1;
-        update_ui_board();
+        app->game.current_player = (app->game.current_player == 1) ? 2 : 1;
+        update_ui_board(app);
     }
 }
 
 void on_start_clicked(GtkWidget *widget, gpointer data)
 {
-    const char *name = gtk_editable_get_text(GTK_EDITABLE(entry_p1));
+    AppData *app = (AppData *)data;
+    const char *name = gtk_editable_get_text(GTK_EDITABLE(app->entry_p1));
     char *trimmed = g_strstrip(g_strdup(name));
     if (g_utf8_strlen(trimmed, -1) == 0) {
-        gtk_label_set_text(GTK_LABEL(lbl_start_error), "Please enter your name to play!");
+        gtk_label_set_text(GTK_LABEL(app->lbl_start_error), "Please enter your name to play!");
         g_free(trimmed);
         return;
     }
-    gtk_label_set_text(GTK_LABEL(lbl_start_error), "");
+    gtk_label_set_text(GTK_LABEL(app->lbl_start_error), "");
     
-    strncpy(game.name1, trimmed, sizeof(game.name1) - 1);
+    strncpy(app->game.name1, trimmed, sizeof(app->game.name1) - 1);
     g_free(trimmed);
-    game.name1[sizeof(game.name1) - 1] = '\0';
-    save_global_settings(game.name1, -1);
+    app->game.name1[sizeof(app->game.name1) - 1] = '\0';
+    save_global_settings(app->game.name1, -1);
     
-    snprintf(game.name2, sizeof(game.name2), "Guest");
+    snprintf(app->game.name2, sizeof(app->game.name2), "Guest");
 
-    init_game_state();
-    reset_board_logic();
-    update_ui_board();
+    init_game_state(app);
+    reset_board_logic(app);
+    update_ui_board(app);
     
-    gtk_stack_set_visible_child_name(GTK_STACK(stack), "game_page");
+    gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "game_page");
 }
 
 void on_reset_game_clicked(GtkWidget *widget, gpointer data)
 {
-    reset_board_logic();
-    update_ui_board();
+    AppData *app = (AppData *)data;
+    reset_board_logic(app);
+    update_ui_board(app);
 }
 
 void on_play_again_clicked(GtkWidget *widget, gpointer data)
 {
-    init_game_state();
-    reset_board_logic();
-    update_ui_board();
-    gtk_stack_set_visible_child_name(GTK_STACK(stack), "game_page");
+    AppData *app = (AppData *)data;
+    init_game_state(app);
+    reset_board_logic(app);
+    update_ui_board(app);
+    gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "game_page");
 }
 
 static void confirm_exit_response(GObject *source_object, GAsyncResult *res, gpointer user_data) {
@@ -251,26 +255,26 @@ static void confirm_exit_response(GObject *source_object, GAsyncResult *res, gpo
     }
     if (response == 1) {
         if (return_to_launcher()) {
-            gtk_window_close(GTK_WINDOW(window));
+            gtk_window_close(GTK_WINDOW(app->window));
         }
     }
 }
 
 void on_header_back_clicked(GtkButton *btn, gpointer user_data)
 {
-    const char *visible_child = gtk_stack_get_visible_child_name(GTK_STACK(stack));
+    const char *visible_child = gtk_stack_get_visible_child_name(GTK_STACK(app->stack));
     if (g_strcmp0(visible_child, "game_page") == 0) {
         GtkAlertDialog *dialog = gtk_alert_dialog_new("Are you sure you want to return to the main menu?");
         gtk_alert_dialog_set_detail(dialog, "Any unsaved progress will be lost.");
-        const char *buttons[] = {"Cancel", "Return to Menu", NULL};
+        const char *app->buttons[] = {"Cancel", "Return to Menu", NULL};
         gtk_alert_dialog_set_buttons(dialog, buttons);
         gtk_alert_dialog_set_cancel_button(dialog, 0);
         gtk_alert_dialog_set_default_button(dialog, 0);
-        gtk_alert_dialog_choose(dialog, GTK_WINDOW(window), NULL, confirm_exit_response, NULL);
+        gtk_alert_dialog_choose(dialog, GTK_WINDOW(app->window), NULL, confirm_exit_response, NULL);
         g_object_unref(dialog);
     } else {
         if (return_to_launcher()) {
-            gtk_window_close(GTK_WINDOW(window));
+            gtk_window_close(GTK_WINDOW(app->window));
         }
     }
 }
@@ -300,28 +304,29 @@ void add_footer(GtkWidget *box)
 // MAIN UI SETUP
 // ============================================================
 
-static void activate(GtkApplication *app, gpointer user_data)
+static void activate(GtkApplication *gtk_app, gpointer user_data)
 {
+    AppData *app = g_new0(AppData, 1);
     load_css_from_file("theme_white_blue.css");
 
-    window = gtk_application_window_new(app);
-    gtk_window_set_default_size(GTK_WINDOW(window), 900, 700);
-    gtk_window_maximize(GTK_WINDOW(window));
-    gtk_widget_add_css_class(window, "window-bg");
+    app->window = gtk_application_window_new(gtk_app);
+    gtk_window_set_default_size(GTK_WINDOW(app->window), 900, 700);
+    gtk_window_maximize(GTK_WINDOW(app->window));
+    gtk_widget_add_css_class(app->window, "app->window-bg");
 
     GtkWidget *header = gtk_header_bar_new();
     gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), TRUE);
-    gtk_window_set_titlebar(GTK_WINDOW(window), header);
+    gtk_window_set_titlebar(GTK_WINDOW(app->window), header);
     
     GtkWidget *title_lbl = gtk_label_new("Epic Tic Tac Toe Battle");
     gtk_widget_add_css_class(title_lbl, "header-title");
     gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), title_lbl);
 
-    stack = gtk_stack_new();
-    gtk_stack_set_transition_type(GTK_STACK(stack), GTK_STACK_TRANSITION_TYPE_CROSSFADE);
+    app->stack = gtk_stack_new();
+    gtk_stack_set_transition_type(GTK_STACK(app->stack), GTK_STACK_TRANSITION_TYPE_CROSSFADE);
     // Global Overlay for the "Return to Main Menu" button
     GtkWidget *overlay = gtk_overlay_new();
-    gtk_overlay_set_child(GTK_OVERLAY(overlay), stack);
+    gtk_overlay_set_child(GTK_OVERLAY(overlay), app->stack);
 
     GtkWidget *global_btn_back = gtk_button_new_with_label("🔙 Return to Main Menu");
     gtk_widget_set_halign(global_btn_back, GTK_ALIGN_START);
@@ -329,11 +334,11 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_widget_set_margin_top(global_btn_back, 15);
     gtk_widget_set_margin_end(global_btn_back, 15);
     gtk_widget_add_css_class(global_btn_back, "btn-exit");
-    g_signal_connect(global_btn_back, "clicked", G_CALLBACK(on_header_back_clicked), NULL);
+    g_signal_connect(global_btn_back, "clicked", G_CALLBACK(on_header_back_clicked), app);
 
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), global_btn_back);
 
-    gtk_window_set_child(GTK_WINDOW(window), overlay);
+    gtk_window_set_child(GTK_WINDOW(app->window), overlay);
 
     // ============================================================
     // PAGE 1: START SCREEN
@@ -357,22 +362,22 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_widget_add_css_class(lbl_p1, "input-label");
     gtk_box_append(GTK_BOX(start_card), lbl_p1);
 
-    entry_p1 = gtk_entry_new();
-    gtk_widget_add_css_class(entry_p1, "styled-entry");
-    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_p1), "Type name here...");
-    gtk_box_append(GTK_BOX(start_card), entry_p1);
+    app->entry_p1 = gtk_entry_new();
+    gtk_widget_add_css_class(app->entry_p1, "styled-entry");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(app->entry_p1), "Type name here...");
+    gtk_box_append(GTK_BOX(start_card), app->entry_p1);
     
-    lbl_start_error = gtk_label_new("");
-    gtk_widget_add_css_class(lbl_start_error, "error-msg");
-    gtk_box_append(GTK_BOX(start_card), lbl_start_error);
+    app->lbl_start_error = gtk_label_new("");
+    gtk_widget_add_css_class(app->lbl_start_error, "error-msg");
+    gtk_box_append(GTK_BOX(start_card), app->lbl_start_error);
 
     GtkWidget *btn_start = gtk_button_new_with_label("START BATTLE");
     gtk_widget_set_name(btn_start, "start_btn"); 
-    g_signal_connect(btn_start, "clicked", G_CALLBACK(on_start_clicked), NULL);
+    g_signal_connect(btn_start, "clicked", G_CALLBACK(on_start_clicked), app);
     gtk_box_append(GTK_BOX(start_card), btn_start);
 
     gtk_box_append(GTK_BOX(start_page_wrapper), start_card);
-    gtk_stack_add_named(GTK_STACK(stack), start_page_wrapper, "start_page");
+    gtk_stack_add_named(GTK_STACK(app->stack), start_page_wrapper, "start_page");
 
     // ============================================================
     // PAGE 2: GAME BOARD
@@ -390,13 +395,13 @@ static void activate(GtkApplication *app, gpointer user_data)
     GtkWidget *box_scores = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 30);
     gtk_widget_set_halign(box_scores, GTK_ALIGN_CENTER);
 
-    label_score_p1 = gtk_label_new("Player 1: 0");
-    label_score_p2 = gtk_label_new("Player 2: 0");
-    gtk_widget_add_css_class(label_score_p1, "score-info");
-    gtk_widget_add_css_class(label_score_p2, "score-info");
+    app->label_score_p1 = gtk_label_new("Player 1: 0");
+    app->label_score_p2 = gtk_label_new("Player 2: 0");
+    gtk_widget_add_css_class(app->label_score_p1, "score-info");
+    gtk_widget_add_css_class(app->label_score_p2, "score-info");
 
-    gtk_box_append(GTK_BOX(box_scores), label_score_p1);
-    gtk_box_append(GTK_BOX(box_scores), label_score_p2);
+    gtk_box_append(GTK_BOX(box_scores), app->label_score_p1);
+    gtk_box_append(GTK_BOX(box_scores), app->label_score_p2);
 
     GtkWidget *grid = gtk_grid_new();
     gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
@@ -408,16 +413,16 @@ static void activate(GtkApplication *app, gpointer user_data)
     for (int i = 0; i < 9; i++) {
         int r = i / 3;
         int c = i % 3;
-        buttons[r][c] = gtk_button_new_with_label("");
-        gtk_widget_add_css_class(buttons[r][c], "grid-button");
-        g_signal_connect(buttons[r][c], "clicked", G_CALLBACK(on_cell_clicked), GINT_TO_POINTER(i));
-        gtk_grid_attach(GTK_GRID(grid), buttons[r][c], c, r, 1, 1);
+        app->buttons[r][c] = gtk_button_new_with_label("");
+        gtk_widget_add_css_class(app->buttons[r][c], "grid-button");
+        g_signal_connect(app->buttons[r][c], "clicked", G_CALLBACK(on_cell_clicked), GINT_TO_POINTER(i));
+        gtk_grid_attach(GTK_GRID(grid), app->buttons[r][c], c, r, 1, 1);
     }
 
     GtkWidget *btn_reset = gtk_button_new_with_label("RUN IT BACK 🔄");
     gtk_widget_set_margin_top(btn_reset, 10);
     gtk_widget_set_name(btn_reset, "start_btn"); 
-    g_signal_connect(btn_reset, "clicked", G_CALLBACK(on_reset_game_clicked), NULL);
+    g_signal_connect(btn_reset, "clicked", G_CALLBACK(on_reset_game_clicked), app);
     
     GtkWidget *lbl_tip_game = gtk_label_new("💡 Hint: Use your brain. It helps.");
     gtk_widget_set_margin_top(lbl_tip_game, 15);
@@ -428,10 +433,10 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_box_append(GTK_BOX(game_card), btn_reset);
     gtk_box_append(GTK_BOX(game_card), lbl_tip_game);
     
-    add_footer(game_card); 
+    add_footer(app, game_card); 
 
     gtk_box_append(GTK_BOX(game_page_wrapper), game_card);
-    gtk_stack_add_named(GTK_STACK(stack), game_page_wrapper, "game_page");
+    gtk_stack_add_named(GTK_STACK(app->stack), game_page_wrapper, "game_page");
 
     // ============================================================
     // PAGE 3: RESULT SCREEN
@@ -442,34 +447,34 @@ static void activate(GtkApplication *app, gpointer user_data)
 
     GtkWidget *result_card = create_card_box();
 
-    result_title = gtk_label_new("GAME OVER");
-    gtk_widget_add_css_class(result_title, "game-title");
+    app->result_title = gtk_label_new("GAME OVER");
+    gtk_widget_add_css_class(app->result_title, "game-title");
 
-    result_subtitle = gtk_label_new("");
-    gtk_label_set_justify(GTK_LABEL(result_subtitle), GTK_JUSTIFY_CENTER);
-    gtk_widget_set_margin_bottom(result_subtitle, 10);
-    gtk_widget_add_css_class(result_subtitle, "welcome-text");
+    app->result_subtitle = gtk_label_new("");
+    gtk_label_set_justify(GTK_LABEL(app->result_subtitle), GTK_JUSTIFY_CENTER);
+    gtk_widget_set_margin_bottom(app->result_subtitle, 10);
+    gtk_widget_add_css_class(app->result_subtitle, "welcome-text");
 
-    result_score_label = gtk_label_new("Final Score: 0 - 0");
-    gtk_widget_add_css_class(result_score_label, "score-info");
+    app->result_score_label = gtk_label_new("Final Score: 0 - 0");
+    gtk_widget_add_css_class(app->result_score_label, "score-info");
 
     GtkWidget *box_actions = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
     gtk_widget_set_halign(box_actions, GTK_ALIGN_CENTER);
 
     GtkWidget *btn_rematch = gtk_button_new_with_label("Rematch?");
     gtk_widget_set_name(btn_rematch, "start_btn"); 
-    g_signal_connect(btn_rematch, "clicked", G_CALLBACK(on_play_again_clicked), NULL);
+    g_signal_connect(btn_rematch, "clicked", G_CALLBACK(on_play_again_clicked), app);
 
     gtk_box_append(GTK_BOX(box_actions), btn_rematch);
 
-    gtk_box_append(GTK_BOX(result_card), result_title);
-    gtk_box_append(GTK_BOX(result_card), result_subtitle);
-    gtk_box_append(GTK_BOX(result_card), result_score_label);
+    gtk_box_append(GTK_BOX(result_card), app->result_title);
+    gtk_box_append(GTK_BOX(result_card), app->result_subtitle);
+    gtk_box_append(GTK_BOX(result_card), app->result_score_label);
     gtk_box_append(GTK_BOX(result_card), box_actions);
-    add_footer(result_card);
+    add_footer(app, result_card);
 
     gtk_box_append(GTK_BOX(result_page_wrapper), result_card);
-    gtk_stack_add_named(GTK_STACK(stack), result_page_wrapper, "result_page");
+    gtk_stack_add_named(GTK_STACK(app->stack), result_page_wrapper, "result_page");
     
     int theme_id;
     char player_name[50];
@@ -478,20 +483,20 @@ static void activate(GtkApplication *app, gpointer user_data)
     
     /* Set default player name if available */
     if (strlen(player_name) > 0) {
-        gtk_editable_set_text(GTK_EDITABLE(entry_p1), player_name);
+        gtk_editable_set_text(GTK_EDITABLE(app->entry_p1), player_name);
     }
     
     if (strlen(player_name) > 0 && strcmp(player_name, "Player 1") != 0) {
-        strncpy(game.name1, player_name, sizeof(game.name1) - 1);
-        game.name1[sizeof(game.name1) - 1] = '\0';
-        snprintf(game.name2, sizeof(game.name2), "Guest");
-        init_game_state();
-        gtk_stack_set_visible_child_name(GTK_STACK(stack), "game_page");
+        strncpy(app->game.name1, player_name, sizeof(app->game.name1) - 1);
+        app->game.name1[sizeof(app->game.name1) - 1] = '\0';
+        snprintf(app->game.name2, sizeof(app->game.name2), "Guest");
+        init_game_state(app);
+        gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "game_page");
     } else {
-        gtk_stack_set_visible_child_name(GTK_STACK(stack), "start_page");
+        gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "start_page");
     }
 
-    gtk_window_present(GTK_WINDOW(window));
+    gtk_window_present(GTK_WINDOW(app->window));
 }
 
 int main(int argc, char **argv)

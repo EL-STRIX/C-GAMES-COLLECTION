@@ -32,8 +32,6 @@ void apply_theme(int theme_id) {
 
 GtkWidget *main_window = NULL;
 
-GtkWidget *main_window = NULL;
-
 static void on_save_settings(GtkButton *btn, gpointer user_data) {
     GtkWidget **widgets = (GtkWidget **)user_data;
     GtkEntryBuffer *buf = gtk_entry_get_buffer(GTK_ENTRY(widgets[0]));
@@ -127,6 +125,9 @@ static void launch_game(GtkButton *btn, gpointer user_data)
     GError *error = NULL;
     char *argv[] = { full_path, NULL };
     GPid pid;
+    
+    // We launch games as separate asynchronous processes to ensure a crash in a game 
+    // does not bring down the main launcher. This also isolates game memory space.
     gboolean success = g_spawn_async(NULL, argv, NULL, G_SPAWN_DO_NOT_REAP_CHILD, NULL, NULL, &pid, &error);
     if (!success) {
         GtkAlertDialog *dialog = gtk_alert_dialog_new("Failed to launch game: %s\nPath: %s", error->message, full_path);

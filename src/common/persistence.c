@@ -55,7 +55,11 @@ int load_top_score(const char *game_name, char *out_player_name) {
     snprintf(filename, sizeof(filename), "data/%s_score.ini", game_name);
     
     GKeyFile *kf = g_key_file_new();
-    if (!g_key_file_load_from_file(kf, filename, G_KEY_FILE_NONE, NULL)) {
+    GError *error = NULL;
+    if (!g_key_file_load_from_file(kf, filename, G_KEY_FILE_NONE, &error)) {
+        // Log cleanly to console if not found, this is normal for first runs
+        g_message("Could not load score file %s: %s", filename, error ? error->message : "Unknown error");
+        if (error) g_error_free(error);
         if (out_player_name) strcpy(out_player_name, "None");
         g_key_file_free(kf);
         return -1;
@@ -87,7 +91,13 @@ void save_score(const char *game_name, const char *player_name, int score, int i
         GKeyFile *kf = g_key_file_new();
         g_key_file_set_string(kf, "Score", "Player", player_name);
         g_key_file_set_integer(kf, "Score", "Value", score);
-        g_key_file_save_to_file(kf, filename, NULL);
+        GError *error = NULL;
+        if (!g_key_file_save_to_file(kf, filename, &error)) {
+            g_warning("Failed to save score to %s: %s", filename, error ? error->message : "Unknown error");
+            if (error) g_error_free(error);
+        } else {
+            g_message("Saved new top score to %s", filename);
+        }
         g_key_file_free(kf);
     }
 }
@@ -97,13 +107,20 @@ void save_global_settings(const char *player_name, int theme_id) {
     GKeyFile *kf = g_key_file_new();
     g_key_file_set_string(kf, "Settings", "PlayerName", player_name);
     g_key_file_set_integer(kf, "Settings", "ThemeID", theme_id);
-    g_key_file_save_to_file(kf, "data/settings.ini", NULL);
+    GError *error = NULL;
+    if (!g_key_file_save_to_file(kf, "data/settings.ini", &error)) {
+        g_warning("Failed to save global settings: %s", error ? error->message : "Unknown error");
+        if (error) g_error_free(error);
+    } else {
+        g_message("Saved global settings successfully.");
+    }
     g_key_file_free(kf);
 }
 
 void load_global_settings(char *player_name, int *theme_id) {
     GKeyFile *kf = g_key_file_new();
-    if (g_key_file_load_from_file(kf, "data/settings.ini", G_KEY_FILE_NONE, NULL)) {
+    GError *error = NULL;
+    if (g_key_file_load_from_file(kf, "data/settings.ini", G_KEY_FILE_NONE, &error)) {
         gchar *name = g_key_file_get_string(kf, "Settings", "PlayerName", NULL);
         if (name) {
             strncpy(player_name, name, 49);
@@ -122,6 +139,8 @@ void load_global_settings(char *player_name, int *theme_id) {
             *theme_id = t;
         }
     } else {
+        g_message("Could not load global settings, falling back to defaults. (%s)", error ? error->message : "Unknown error");
+        if (error) g_error_free(error);
         strcpy(player_name, "Player 1");
         *theme_id = 0;
     }

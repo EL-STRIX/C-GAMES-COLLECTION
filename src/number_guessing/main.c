@@ -18,7 +18,7 @@
 #endif
 
 // --- GAME DATA ---
-// This structure holds all the information our game needs to run.
+// Encapsulates the application's runtime state to avoid globals and support modular UI flows.
 typedef struct
 {
     GtkWidget *stack;  // Manages switching between screens (Welcome -> Game -> Result)
@@ -48,11 +48,13 @@ typedef struct
 
 // --- GAME LOGIC FUNCTIONS ---
 
-// 1. Resets the game to start a new round
+// Resets the state of the game for a new round
 static void start_game_logic(GameApp *app)
 {
-    srand(time(0));                          // Randomize based on current time
-    app->secret_number = (rand() % 100) + 1; // Pick number 1-100
+    // Seed securely so that the sequence is highly unpredictable
+    srand(time(0));
+    // Determine the secret target (1-100 inclusive)
+    app->secret_number = (rand() % 100) + 1;
     app->attempts = 0;
 
     // Reset UI controls
@@ -73,7 +75,7 @@ static void start_game_logic(GameApp *app)
     gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "page_game");
 }
 
-// 2. Called when "START" button is clicked on Login screen
+// Triggers when the player starts the game from the login screen
 static void on_start_clicked(GtkButton *btn, GameApp *app)
 {
     const char *name = gtk_editable_get_text(GTK_EDITABLE(app->name_entry));
