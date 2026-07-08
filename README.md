@@ -1,4 +1,10 @@
+![C Games Banner](assets/branding/banner.png)
+
 # 🎮 C Games Collection
+
+[![CI Build](https://github.com/sujay/c-games-collection/actions/workflows/build.yml/badge.svg)](https://github.com/sujay/c-games-collection/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
 A curated collection of classic mini-games developed entirely in C, featuring modern Graphical User Interfaces (GUIs) powered by GTK4. 
 
@@ -23,11 +29,11 @@ Provides a foundational template for building GTK4 desktop applications, demonst
 
 ## 📸 Screenshots / Demo
 
-*(Placeholders for screenshots)*
+*Please capture screenshots and save them in the `assets/screenshots/` directory using the naming convention below.*
 
 | Number Guessing | Rock Paper Scissors | Snake Gun Water | Tic Tac Toe |
 | :---: | :---: | :---: | :---: |
-| ![Number Guessing](https://via.placeholder.com/250x350.png?text=Number+Guessing) | ![Rock Paper Scissors](https://via.placeholder.com/250x350.png?text=Rock+Paper+Scissors) | ![Snake Gun Water](https://via.placeholder.com/250x350.png?text=Snake+Gun+Water) | ![Tic Tac Toe](https://via.placeholder.com/250x350.png?text=Tic+Tac+Toe) |
+| ![Number Guessing](assets/screenshots/number_guessing_demo.png) | ![Rock Paper Scissors](assets/screenshots/rps_demo.png) | ![Snake Gun Water](assets/screenshots/sgw_demo.png) | ![Tic Tac Toe](assets/screenshots/ttt_demo.png) |
 
 ---
 

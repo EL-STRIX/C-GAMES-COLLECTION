@@ -31,7 +31,11 @@ jobs:
           
     - name: Build All Games
       run: |
-        make
+        make all
+        
+    - name: Run Tests
+      run: |
+        make test
         
     # On Windows, we need to bundle the required GTK DLLs with the executables
     - name: Bundle DLLs
@@ -49,8 +53,14 @@ jobs:
         ls -la
         ls -la bin/ || echo "bin/ not found!"
         
+    - name: Package Release
+      run: |
+        mkdir release
+        cp -r bin release/
+        cp -r assets release/
+        
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: C-Games-Collection-Windows
-        path: ${{ github.workspace }}/bin
+        path: ${{ github.workspace }}/release
