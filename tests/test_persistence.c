@@ -18,7 +18,7 @@ static void test_settings(void) {
     g_assert_cmpstr(out_name, ==, "Test\nPlayer");
     g_assert_cmpint(out_theme, ==, 2);
     
-    remove("settings.ini");
+    remove("data/settings.ini");
 }
 
 static void test_scores(void) {
@@ -42,7 +42,7 @@ static void test_scores(void) {
     g_assert_cmpstr(top_player, ==, "Charlie");
     g_assert_cmpint(top_score, ==, 200);
     
-    remove("test_game_score.ini");
+    remove("data/test_game_score.ini");
 }
 
 int main(int argc, char **argv) {
