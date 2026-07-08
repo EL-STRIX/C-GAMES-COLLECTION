@@ -65,7 +65,7 @@ int load_top_score(const char *game_name, char *out_player_name, size_t out_size
     GError *error = NULL;
     if (!g_key_file_load_from_file(kf, filename, G_KEY_FILE_NONE, &error)) {
         // Log cleanly to console if not found, this is normal for first runs
-        g_message("Could not load score file %s: %s", filename, error ? error->message : "Unknown error");
+        // We removed g_message here to prevent spamming the console on first launch
         if (error) g_error_free(error);
         if (out_player_name && out_size > 0) {
             snprintf(out_player_name, out_size, "None");
@@ -152,7 +152,7 @@ void load_global_settings(char *player_name, size_t out_size, int *theme_id) {
             if (theme_id) *theme_id = t;
         }
     } else {
-        g_message("Could not load global settings, falling back to defaults. (%s)", error ? error->message : "Unknown error");
+        // Removed g_message here to prevent spamming the console on first launch
         if (error) g_error_free(error);
         if (out_size > 0) snprintf(player_name, out_size, "Player 1");
         if (theme_id) *theme_id = 0;

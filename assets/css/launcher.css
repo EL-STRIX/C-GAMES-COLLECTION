@@ -1,4 +1,4 @@
-* { font-family: "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
+* { font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif; }
 window { background-color: #1e1e2e; }
 headerbar { min-height: 60px; background-color: #11111b; color: #cdd6f4; border-bottom: 1px solid #000000; }
 windowcontrols button { min-width: 40px; min-height: 40px; border-radius: 5px; }

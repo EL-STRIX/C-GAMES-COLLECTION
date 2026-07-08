@@ -291,6 +291,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     
     // Create a scrollable window just in case
     GtkWidget *scrolled = gtk_scrolled_window_new();
+    gtk_scrolled_window_set_min_content_height(GTK_SCROLLED_WINDOW(scrolled), 550);
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), main_vbox);
     gtk_window_set_child(GTK_WINDOW(window), scrolled);
     
