@@ -9,6 +9,11 @@
 
 // Helper function to dynamically locate and load CSS from assets/css directory
 void load_css_from_file(const char *filename) {
+    if (strpbrk(filename, "/\\")) {
+        g_warning("Security violation: path traversal detected in css filename '%s'", filename);
+        return;
+    }
+    
     char *base_dir = NULL;
     
 #ifdef _WIN32
