@@ -187,7 +187,7 @@ void on_cell_clicked(GtkWidget *widget, gpointer data)
 {
     AppData *app = (AppData *)data;
     if (app->game.game_over) return;
-    int id = GPOINTER_TO_INT(data);
+    int id = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(widget), "cell_id"));
     int r = id / 3;
     int c = id % 3;
 
@@ -423,7 +423,8 @@ static void activate(GtkApplication *gtk_app, gpointer user_data)
         int c = i % 3;
         app->buttons[r][c] = gtk_button_new_with_label("");
         gtk_widget_add_css_class(app->buttons[r][c], "grid-button");
-        g_signal_connect(app->buttons[r][c], "clicked", G_CALLBACK(on_cell_clicked), GINT_TO_POINTER(i));
+        g_object_set_data(G_OBJECT(app->buttons[r][c]), "cell_id", GINT_TO_POINTER(i));
+        g_signal_connect(app->buttons[r][c], "clicked", G_CALLBACK(on_cell_clicked), app);
         gtk_grid_attach(GTK_GRID(grid), app->buttons[r][c], c, r, 1, 1);
     }
 
