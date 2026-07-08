@@ -1,5 +1,3 @@
-![C Games Banner](assets/branding/banner.png)
-
 # 🎮 C Games Collection
 
 [![CI Build](https://github.com/sujay/c-games-collection/actions/workflows/build.yml/badge.svg)](https://github.com/sujay/c-games-collection/actions)
