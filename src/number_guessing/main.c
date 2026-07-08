@@ -172,7 +172,7 @@ static void on_submit_guess(GtkButton *btn, gpointer user_data)
         
         save_score("number_guessing", app->player_name, app->attempts, 1);
         char best_player[50];
-        int best_score = load_top_score("number_guessing", best_player);
+        int best_score = load_top_score("number_guessing", best_player, sizeof(best_player));
 
         // Prepare result strings
         char congrats[200], numbuf[64], attempts_final[128];
@@ -383,7 +383,7 @@ static void activate(GtkApplication *app_system, gpointer user_data)
                                   GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
 
     int theme_id;
-    load_global_settings(app->player_name, &theme_id);
+    load_global_settings(app->player_name, sizeof(app->player_name), &theme_id);
     // apply_theme(theme_id);
 
     // Create all pages

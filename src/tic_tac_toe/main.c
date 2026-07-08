@@ -145,7 +145,7 @@ void show_result_screen(AppData *app)
     gtk_label_set_text(GTK_LABEL(app->result_subtitle), result_txt);
 
     char best_player[50];
-    int best_score = load_top_score("ttt_gui", best_player);
+    int best_score = load_top_score("ttt_gui", best_player, sizeof(best_player));
     char score_txt[200];
     if (best_score != -1) {
         snprintf(score_txt, 200, "Final Score: %d - %d\nAll-Time Best: %s (%d wins)", app->game.score1, app->game.score2, best_player, best_score);
@@ -482,7 +482,7 @@ static void activate(GtkApplication *gtk_app, gpointer user_data)
     
     int theme_id;
     char player_name[50];
-    load_global_settings(player_name, &theme_id);
+    load_global_settings(player_name, sizeof(player_name), &theme_id);
     // apply_theme(theme_id);
     
     /* Set default player name if available */

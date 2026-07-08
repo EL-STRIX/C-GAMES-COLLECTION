@@ -47,10 +47,12 @@ void load_css_from_file(const char *filename) {
     g_free(base_dir);
 }
 
-int load_top_score(const char *game_name, char *out_player_name) {
-    // Ensure data directory exists relative to executable if possible, 
-    // or just assume current working directory is project root where bin and data reside.
-    g_mkdir_with_parents("data", 0755);
+int load_top_score(const char *game_name, char *out_player_name, size_t out_size) {
+    if (strpbrk(game_name, "/\\.")) {
+        g_warning("Security violation: path traversal detected in game_name '%s'", game_name);
+        return -1;
+    }
+    g_mkdir_with_parents("data", 0700);
     char filename[100];
     snprintf(filename, sizeof(filename), "data/%s_score.ini", game_name);
     
@@ -60,18 +62,20 @@ int load_top_score(const char *game_name, char *out_player_name) {
         // Log cleanly to console if not found, this is normal for first runs
         g_message("Could not load score file %s: %s", filename, error ? error->message : "Unknown error");
         if (error) g_error_free(error);
-        if (out_player_name) strcpy(out_player_name, "None");
+        if (out_player_name && out_size > 0) {
+            snprintf(out_player_name, out_size, "None");
+        }
         g_key_file_free(kf);
         return -1;
     }
     
     int score = g_key_file_get_integer(kf, "Score", "Value", NULL);
     gchar *name = g_key_file_get_string(kf, "Score", "Player", NULL);
-    if (name && out_player_name) {
-        strncpy(out_player_name, name, 49);
-        out_player_name[49] = '\0';
-    } else if (out_player_name) {
-        strcpy(out_player_name, "Unknown");
+    if (name && out_player_name && out_size > 0) {
+        strncpy(out_player_name, name, out_size - 1);
+        out_player_name[out_size - 1] = '\0';
+    } else if (out_player_name && out_size > 0) {
+        snprintf(out_player_name, out_size, "Unknown");
     }
     
     g_free(name);
@@ -80,9 +84,13 @@ int load_top_score(const char *game_name, char *out_player_name) {
 }
 
 void save_score(const char *game_name, const char *player_name, int score, int is_lower_better) {
-    g_mkdir_with_parents("data", 0755);
+    if (strpbrk(game_name, "/\\.")) {
+        g_warning("Security violation: path traversal detected in game_name '%s'", game_name);
+        return;
+    }
+    g_mkdir_with_parents("data", 0700);
     char top_player[50]; 
-    int top_score = load_top_score(game_name, top_player);
+    int top_score = load_top_score(game_name, top_player, sizeof(top_player));
     int is_new_record = (top_score == -1) || (is_lower_better ? (score < top_score) : (score > top_score));
     
     if (is_new_record) {
@@ -103,7 +111,7 @@ void save_score(const char *game_name, const char *player_name, int score, int i
 }
 
 void save_global_settings(const char *player_name, int theme_id) {
-    g_mkdir_with_parents("data", 0755);
+    g_mkdir_with_parents("data", 0700);
     GKeyFile *kf = g_key_file_new();
     g_key_file_set_string(kf, "Settings", "PlayerName", player_name);
     g_key_file_set_integer(kf, "Settings", "ThemeID", theme_id);
@@ -117,32 +125,32 @@ void save_global_settings(const char *player_name, int theme_id) {
     g_key_file_free(kf);
 }
 
-void load_global_settings(char *player_name, int *theme_id) {
+void load_global_settings(char *player_name, size_t out_size, int *theme_id) {
     GKeyFile *kf = g_key_file_new();
     GError *error = NULL;
     if (g_key_file_load_from_file(kf, "data/settings.ini", G_KEY_FILE_NONE, &error)) {
         gchar *name = g_key_file_get_string(kf, "Settings", "PlayerName", NULL);
-        if (name) {
-            strncpy(player_name, name, 49);
-            player_name[49] = '\0';
+        if (name && out_size > 0) {
+            strncpy(player_name, name, out_size - 1);
+            player_name[out_size - 1] = '\0';
             g_free(name);
-        } else {
-            strcpy(player_name, "Player 1");
+        } else if (out_size > 0) {
+            snprintf(player_name, out_size, "Player 1");
         }
         
         GError *err = NULL;
         int t = g_key_file_get_integer(kf, "Settings", "ThemeID", &err);
         if (err) {
-            *theme_id = 0;
+            if (theme_id) *theme_id = 0;
             g_error_free(err);
         } else {
-            *theme_id = t;
+            if (theme_id) *theme_id = t;
         }
     } else {
         g_message("Could not load global settings, falling back to defaults. (%s)", error ? error->message : "Unknown error");
         if (error) g_error_free(error);
-        strcpy(player_name, "Player 1");
-        *theme_id = 0;
+        if (out_size > 0) snprintf(player_name, out_size, "Player 1");
+        if (theme_id) *theme_id = 0;
     }
     g_key_file_free(kf);
 }

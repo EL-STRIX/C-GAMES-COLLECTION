@@ -546,7 +546,7 @@ void activate(GtkApplication *app, gpointer user_data) {
     load_css(); /* apply app CSS */
     
     int theme_id;
-    load_global_settings(data->player_name, &theme_id);
+    load_global_settings(data->player_name, sizeof(data->player_name), &theme_id);
     // apply_theme(theme_id);
 
     /* Set default player name if available */

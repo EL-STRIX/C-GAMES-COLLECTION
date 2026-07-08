@@ -12,7 +12,7 @@ static void test_settings(void) {
     save_global_settings("Test\nPlayer", 2);
     char out_name[50];
     int out_theme = 0;
-    load_global_settings(out_name, &out_theme);
+    load_global_settings(out_name, sizeof(out_name), &out_theme);
     
     // GKeyFile handles newlines natively via escaping
     g_assert_cmpstr(out_name, ==, "Test\nPlayer");
@@ -26,19 +26,19 @@ static void test_scores(void) {
     save_score("test_game", "Alice", 100, 0);
     
     char top_player[50];
-    int top_score = load_top_score("test_game", top_player);
+    int top_score = load_top_score("test_game", top_player, sizeof(top_player));
     g_assert_cmpstr(top_player, ==, "Alice");
     g_assert_cmpint(top_score, ==, 100);
     
     // Bob scores lower, should not save
     save_score("test_game", "Bob", 50, 0);
-    top_score = load_top_score("test_game", top_player);
+    top_score = load_top_score("test_game", top_player, sizeof(top_player));
     g_assert_cmpstr(top_player, ==, "Alice");
     g_assert_cmpint(top_score, ==, 100);
     
     // Charlie scores higher, should save
     save_score("test_game", "Charlie", 200, 0);
-    top_score = load_top_score("test_game", top_player);
+    top_score = load_top_score("test_game", top_player, sizeof(top_player));
     g_assert_cmpstr(top_player, ==, "Charlie");
     g_assert_cmpint(top_score, ==, 200);
     

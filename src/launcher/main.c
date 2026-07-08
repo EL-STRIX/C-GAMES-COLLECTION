@@ -202,7 +202,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     // Apply Global Theme
     char dummy_name[50];
     int theme_id;
-    load_global_settings(dummy_name, &theme_id);
+    load_global_settings(dummy_name, sizeof(dummy_name), &theme_id);
     apply_theme(theme_id);
     
     GtkWidget *main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
