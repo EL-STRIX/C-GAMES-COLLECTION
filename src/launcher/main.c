@@ -62,7 +62,7 @@ static void open_settings_dialog(GtkButton *btn, gpointer user_data) {
     
     char name[50];
     int theme_id;
-    load_global_settings(name, &theme_id);
+    load_global_settings(name, sizeof(name), &theme_id);
     
     GtkWidget *lbl_name = gtk_label_new("Global Player Name:");
     GtkWidget *entry_name = gtk_entry_new();
@@ -276,7 +276,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     
     for (int i = 0; i < 4; i++) {
         char player[50];
-        int score = load_top_score(games[i].id, player);
+        int score = load_top_score(games[i].id, player, sizeof(player));
         if (score != -1) {
             char txt[100];
             snprintf(txt, sizeof(txt), games[i].fmt, games[i].name, player, score);

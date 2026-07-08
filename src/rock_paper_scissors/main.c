@@ -112,7 +112,7 @@ gboolean on_show_final_results(gpointer user_data) {
         save_score("rps", data->player_name, data->player_score, 0);
     }
     char best_player[50];
-    int best_score = load_top_score("rps", best_player);
+    int best_score = load_top_score("rps", best_player, sizeof(best_player));
 
     if (best_score != -1) {
         score_text = g_strdup_printf("Final Score: %d - %d\nAll-Time Best: %s (%d wins)", data->player_score, data->computer_score, best_player, best_score);
