@@ -31,15 +31,42 @@ Thank you for your interest in contributing. This repository is built to profess
 - Use GTK's native structured logging (`g_warning`, `g_message`, `g_critical`) instead of primitive `printf` statements for persistence failures or IO bounds.
 - Always check pointers returned by GTK builder functions or `g_new0` before accessing them.
 
-## 3. Pull Request Process
+## 3. Workflow & Collaboration Strategy
 
-1. **Branching**: Branch off `main` using a descriptive format (e.g., `feature/add-pong-game` or `fix/persistence-leak`).
-2. **Commit Messages**: Commits must be concise, one-line summaries using standard imperative formatting (e.g., `Add structured logging to persistence engine`). Avoid vague commits (`Update file`).
+### Branch Naming Convention
+We enforce a strict prefix-based branch naming strategy to keep workflows organized:
+- `feat/` for new features or games (e.g., `feat/add-pong-game`)
+- `fix/` for bug fixes (e.g., `fix/persistence-leak`)
+- `docs/` for documentation improvements (e.g., `docs/update-readme`)
+- `chore/` for build, CI, or tool changes (e.g., `chore/update-actions`)
+- `refactor/` for structural code changes that do not alter behavior
+
+### Commit Message Conventions
+We strictly follow [Conventional Commits](https://www.conventionalcommits.org/). Commit messages must be structured as follows:
+`<type>[optional scope]: <description>`
+
+Examples:
+- `feat(persistence): add dynamic css loader`
+- `fix(ttt): prevent diagonal win condition bug`
+- `chore(ci): enforce make test on windows`
+- `docs: update issue templates`
+
+### Versioning Strategy
+This project strictly adheres to [Semantic Versioning (SemVer)](https://semver.org/).
+- **MAJOR (`x.0.0`)**: Incompatible API changes, major architectural overhauls, or breaking persistence changes.
+- **MINOR (`0.x.0`)**: Adding new games or features in a backward-compatible manner.
+- **PATCH (`0.0.x`)**: Backward-compatible bug fixes, security patches, and documentation.
+Releases are automatically tracked and tagged in the `CHANGELOG.md`.
+
+## 4. Pull Request Process
+
+1. **Branching**: Checkout a new branch from `main` using the Branch Naming Convention above.
+2. **Commit Messages**: Ensure all commits follow the Conventional Commits specification.
 3. **Compilation**: Your code must compile with absolutely zero warnings (`-Wall -Wextra`).
 4. **Testing**: Run the test suite via `make test` to ensure `persistence.c` boundaries remain intact. Run the GUI launcher to manually test UI transitions and asset loading.
-5. **Review**: Submit a PR explaining the architectural impact of your changes. Wait for maintainer approval before merging.
+5. **Review**: Submit a PR linking to the relevant issue. Wait for maintainer approval and CI checks to pass before merging.
 
-## 4. Architectural Boundaries
+## 5. Architectural Boundaries
 
 Before writing new games or shared modules, understand that `src/` isolates each game completely. 
 - Games may only share logic located in `src/common/`.
