@@ -441,7 +441,7 @@ static void activate(GtkApplication *gtk_app, gpointer user_data)
     gtk_box_append(GTK_BOX(game_card), btn_reset);
     gtk_box_append(GTK_BOX(game_card), lbl_tip_game);
     
-    add_footer(app, game_card); 
+    add_footer(game_card); 
 
     gtk_box_append(GTK_BOX(game_page_wrapper), game_card);
     gtk_stack_add_named(GTK_STACK(app->stack), game_page_wrapper, "game_page");
@@ -479,7 +479,7 @@ static void activate(GtkApplication *gtk_app, gpointer user_data)
     gtk_box_append(GTK_BOX(result_card), app->result_subtitle);
     gtk_box_append(GTK_BOX(result_card), app->result_score_label);
     gtk_box_append(GTK_BOX(result_card), box_actions);
-    add_footer(app, result_card);
+    add_footer(result_card);
 
     gtk_box_append(GTK_BOX(result_page_wrapper), result_card);
     gtk_stack_add_named(GTK_STACK(app->stack), result_page_wrapper, "result_page");
