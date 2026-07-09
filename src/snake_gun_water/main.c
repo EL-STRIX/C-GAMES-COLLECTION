@@ -272,9 +272,10 @@ void on_next_round_clicked(GtkButton *btn, gpointer user_data) { (void)btn; sgw_
 void on_play_again_clicked(GtkButton *btn, gpointer user_data) { (void)btn; sgw_start_new_game((SgwAppData*)user_data); }
 
 /* Back Button Callback - returns to menu with confirmation if playing */
-void on_header_back_clicked(GtkButton *btn, gpointer user_data) {
+static void sgw_on_header_back_clicked(GtkButton *btn, gpointer user_data) {
     (void)btn;
     SgwAppData *data = (SgwAppData *)user_data;
+    (void)data;
     switch_to_launcher();
 }
 
@@ -306,7 +307,7 @@ GtkWidget* create_choice_button(const char *emoji, const char *label_text, GCall
 }
 
 /* 1. Login Screen */
-GtkWidget* create_login_screen(SgwAppData *data) {
+static GtkWidget* sgw_create_welcome_page(SgwAppData *data) {
     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 20);
     gtk_widget_set_valign(vbox, GTK_ALIGN_CENTER);
     gtk_widget_set_halign(vbox, GTK_ALIGN_CENTER);
@@ -348,7 +349,7 @@ GtkWidget* create_login_screen(SgwAppData *data) {
 
 /* 2. Game Screen */
 /* Main gameplay screen: shows rounds, scores, and snake-gun-water buttons. */
-GtkWidget* create_game_screen(SgwAppData *data) {
+static GtkWidget* sgw_create_game_page(SgwAppData *data) {
     GtkWidget *center_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_valign(center_box, GTK_ALIGN_CENTER);
     gtk_widget_set_halign(center_box, GTK_ALIGN_CENTER);
@@ -410,7 +411,7 @@ GtkWidget* create_game_screen(SgwAppData *data) {
 
 /* 3. Result Screen (MODIFIED) */
 /* Final summary screen: displays winner, final score, and options to restart or exit. */
-GtkWidget* create_result_screen(SgwAppData *data) {
+static GtkWidget* sgw_create_result_page(SgwAppData *data) {
     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 20);
     gtk_widget_set_valign(vbox, GTK_ALIGN_CENTER);
     gtk_widget_set_halign(vbox, GTK_ALIGN_CENTER);
@@ -455,89 +456,6 @@ GtkWidget* create_result_screen(SgwAppData *data) {
     return vbox;
 }
 
-void activate(GtkApplication *app, gpointer user_data) {
-    (void)user_data;
-    SgwAppData *data = g_slice_new0(SgwAppData);
-
-    GtkWidget *window = gtk_application_window_new(app);
-    gtk_window_set_default_size(GTK_WINDOW(window), 400, 600);
-    gtk_window_maximize(GTK_WINDOW(window));
-    
-    /* Store the window in SgwAppData so the Exit button can use it */
-    data->window = window;
-
-    GtkWidget *header = gtk_header_bar_new();
-    gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), TRUE);
-    gtk_window_set_titlebar(GTK_WINDOW(window), header);
-
-    GtkWidget *title_lbl = gtk_label_new("Epic Snake Gun Water Battle");
-    gtk_widget_add_css_class(title_lbl, "header-title");
-    gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), title_lbl);
-
-    GtkWidget *main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    gtk_widget_add_css_class(main_box, "window-bg");
-    // Global Overlay for the "Return to Main Menu" button
-    GtkWidget *overlay = gtk_overlay_new();
-    gtk_overlay_set_child(GTK_OVERLAY(overlay), main_box);
-
-    GtkWidget *global_btn_back = gtk_button_new_with_label("🔙 Return to Main Menu");
-    gtk_widget_set_halign(global_btn_back, GTK_ALIGN_START);
-    gtk_widget_set_valign(global_btn_back, GTK_ALIGN_START);
-    gtk_widget_set_margin_top(global_btn_back, 15);
-    gtk_widget_set_margin_end(global_btn_back, 15);
-    gtk_widget_add_css_class(global_btn_back, "btn-secondary");
-    g_signal_connect(global_btn_back, "clicked", G_CALLBACK(on_header_back_clicked), data);
-
-    gtk_overlay_add_overlay(GTK_OVERLAY(overlay), global_btn_back);
-
-    gtk_window_set_child(GTK_WINDOW(window), overlay);
-
-    data->stack = gtk_stack_new();
-    gtk_stack_set_transition_type(GTK_STACK(data->stack), GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
-    
-    gtk_widget_set_vexpand(data->stack, TRUE);
-    gtk_widget_set_hexpand(data->stack, TRUE);
-
-    gtk_box_append(GTK_BOX(main_box), data->stack);
-
-    /* add the three screens to the stack */
-    gtk_stack_add_named(GTK_STACK(data->stack), create_login_screen(data), "login_screen");
-    gtk_stack_add_named(GTK_STACK(data->stack), create_game_screen(data), "game_screen");
-    gtk_stack_add_named(GTK_STACK(data->stack), create_result_screen(data), "result_screen");
-
-    apply_global_theme(); /* apply app CSS */
-    
-    int theme_id;
-    load_global_settings(data->player_name, sizeof(data->player_name), &theme_id);
-    // apply_theme(theme_id);
-
-    /* Set default player name if available */
-    if (strlen(data->player_name) > 0) {
-        gtk_editable_set_text(GTK_EDITABLE(data->name_entry), data->player_name);
-    }
-
-    gtk_widget_set_visible(data->next_round_btn, FALSE);
-    sgw_start_new_game(data);
-
-    if (strlen(data->player_name) > 0 && strcmp(data->player_name, "Player 1") != 0) {
-        gtk_stack_set_visible_child_name(GTK_STACK(data->stack), "game_screen");
-    } else {
-        gtk_stack_set_visible_child_name(GTK_STACK(data->stack), "login_screen");
-    }
-
-    gtk_window_present(GTK_WINDOW(window));
-}
-
-int main(int argc, char **argv) {
-    /* Initialize RNG securely */
-    srand((unsigned)time(NULL));
-
-    GtkApplication *app = gtk_application_new("com.sujay.snakegunwater", G_APPLICATION_DEFAULT_FLAGS);
-    g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
-    int status = g_application_run(G_APPLICATION(app), argc, argv);
-    g_object_unref(app);
-    return status;
-}
 GtkWidget* sgw_create_ui(void)
 {
     static gboolean rng_seeded = FALSE;
@@ -567,7 +485,7 @@ GtkWidget* sgw_create_ui(void)
     }
 
     if (strlen(app->player_name) > 0 && strcmp(app->player_name, "Player 1") != 0) {
-        sgw_start_game_logic(app);
+        sgw_start_new_game(app);
     } else {
         gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "page_welcome");
     }

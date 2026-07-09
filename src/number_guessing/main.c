@@ -99,6 +99,7 @@ static void ng_on_header_back_clicked(GtkButton *btn, gpointer user_data)
 {
     (void)btn;
     NgAppData *app = (NgAppData *)user_data;
+    (void)app;
     switch_to_launcher();
 }
 
@@ -189,7 +190,7 @@ static void ng_on_play_again_clicked(GtkButton *btn, NgAppData *app)
 // --- UI BUILDER FUNCTIONS ---
 
 // Build Page 1: Login Screen
-GtkWidget *create_welcome_page(NgAppData *app)
+static GtkWidget *ng_create_welcome_page(NgAppData *app)
 {
     GtkWidget *box = create_card_box();
 
@@ -221,7 +222,7 @@ GtkWidget *create_welcome_page(NgAppData *app)
 }
 
 // Build Page 2: Game Screen
-GtkWidget *create_game_page(NgAppData *app)
+static GtkWidget *ng_create_game_page(NgAppData *app)
 {
     GtkWidget *box = create_card_box();
 
@@ -270,7 +271,7 @@ GtkWidget *create_game_page(NgAppData *app)
 }
 
 // Build Page 3: Result Screen
-GtkWidget *create_result_page(NgAppData *app)
+static GtkWidget *ng_create_result_page(NgAppData *app)
 {
     GtkWidget *box = create_card_box();
 

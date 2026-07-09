@@ -263,7 +263,7 @@ void on_header_back_clicked(GtkButton *btn, gpointer user_data)
 {
     (void)btn;
     TttAppData *app = (TttAppData *)user_data;
-    switch_to_launcher();
+    handle_header_back_clicked(app->window, app->stack, "game_page");
 }
 
 // ============================================================
@@ -283,45 +283,35 @@ void add_footer(GtkWidget *box)
 // MAIN UI SETUP
 // ============================================================
 
+static void ttt_on_header_back_clicked(GtkButton *btn, gpointer user_data)
+{
+    (void)btn;
+    (void)user_data;
+    switch_to_launcher();
+}
 
 GtkWidget* ttt_create_ui(void)
 {
-    static gboolean rng_seeded = FALSE;
-    if (!rng_seeded) {
-        srand((unsigned)time(NULL));
-        rng_seeded = TRUE;
-    }
 
+    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     TttAppData *app = g_new0(TttAppData, 1);
 
-    app->stack = gtk_stack_new();
-    gtk_stack_set_transition_type(GTK_STACK(app->stack), GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
 
-    int theme_id;
-    load_global_settings(app->player_name, sizeof(app->player_name), &theme_id);
-
-    GtkWidget *page1 = ttt_create_welcome_page(app);
-    GtkWidget *page2 = ttt_create_game_page(app);
-    GtkWidget *page3 = ttt_create_result_page(app);
-
-    gtk_stack_add_named(GTK_STACK(app->stack), page1, "page_welcome");
-    gtk_stack_add_named(GTK_STACK(app->stack), page2, "page_game");
-    gtk_stack_add_named(GTK_STACK(app->stack), page3, "page_result");
+    GtkWidget *header = gtk_header_bar_new();
+    gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), TRUE);
+    gtk_box_append(GTK_BOX(vbox), header);
     
-    if (strlen(app->player_name) > 0) {
-        gtk_editable_set_text(GTK_EDITABLE(app->name_entry), app->player_name);
-    }
+    GtkWidget *title_lbl = gtk_label_new("Epic Tic Tac Toe Battle");
+    gtk_widget_add_css_class(title_lbl, "header-title");
+    gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), title_lbl);
 
-    if (strlen(app->player_name) > 0 && strcmp(app->player_name, "Player 1") != 0) {
-        ttt_start_game_logic(app);
-    } else {
-        gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "page_welcome");
-    }
-
+    app->stack = gtk_stack_new();
+    gtk_stack_set_transition_type(GTK_STACK(app->stack), GTK_STACK_TRANSITION_TYPE_CROSSFADE);
+    // Global Overlay for the "Return to Main Menu" button
     GtkWidget *overlay = gtk_overlay_new();
     gtk_overlay_set_child(GTK_OVERLAY(overlay), app->stack);
 
-    GtkWidget *global_btn_back = gtk_button_new_with_label("🔙 Return to Main Menu");
+    GtkWidget *global_btn_back = gtk_button_new_with_label("≡ƒöÖ Return to Main Menu");
     gtk_widget_set_halign(global_btn_back, GTK_ALIGN_START);
     gtk_widget_set_valign(global_btn_back, GTK_ALIGN_START);
     gtk_widget_set_margin_top(global_btn_back, 15);
@@ -331,17 +321,165 @@ GtkWidget* ttt_create_ui(void)
 
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), global_btn_back);
 
-    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    
-    GtkWidget *header = gtk_header_bar_new();
-    gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), FALSE);
-    GtkWidget *title_lbl = gtk_label_new("Tic Tac Toe");
-    gtk_widget_add_css_class(title_lbl, "header-title");
-    gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), title_lbl);
-    
-    gtk_box_append(GTK_BOX(vbox), header);
-    gtk_widget_set_vexpand(overlay, TRUE);
     gtk_box_append(GTK_BOX(vbox), overlay);
+
+    // ============================================================
+    // PAGE 1: START SCREEN
+    // ============================================================
+    GtkWidget *start_page_wrapper = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(start_page_wrapper, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(start_page_wrapper, GTK_ALIGN_CENTER);
+
+    GtkWidget *start_card = create_card_box();
+    
+    GtkWidget *lbl_title = gtk_label_new("≡ƒÄ« TIC TAC TOE");
+    gtk_widget_add_css_class(lbl_title, "title-large");
+    gtk_box_append(GTK_BOX(start_card), lbl_title);
+
+    GtkWidget *lbl_subtitle = gtk_label_new("Welcome to the Arena");
+    gtk_widget_add_css_class(lbl_subtitle, "subtitle");
+    gtk_box_append(GTK_BOX(start_card), lbl_subtitle);
+
+    GtkWidget *lbl_p1 = gtk_label_new("What is your name, Challenger?");
+    gtk_widget_set_halign(lbl_p1, GTK_ALIGN_START);
+    gtk_widget_add_css_class(lbl_p1, "subtitle");
+    gtk_box_append(GTK_BOX(start_card), lbl_p1);
+
+    app->entry_p1 = gtk_entry_new();
+    gtk_widget_add_css_class(app->entry_p1, "styled-entry");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(app->entry_p1), "Type name here...");
+    gtk_box_append(GTK_BOX(start_card), app->entry_p1);
+    
+    app->lbl_start_error = gtk_label_new("");
+    gtk_widget_add_css_class(app->lbl_start_error, "error-msg");
+    gtk_box_append(GTK_BOX(start_card), app->lbl_start_error);
+
+    GtkWidget *btn_start = gtk_button_new_with_label("START BATTLE");
+    gtk_widget_add_css_class(btn_start, "btn-primary");
+    g_signal_connect(btn_start, "clicked", G_CALLBACK(on_start_clicked), app);
+    gtk_box_append(GTK_BOX(start_card), btn_start);
+
+    gtk_box_append(GTK_BOX(start_page_wrapper), start_card);
+    gtk_stack_add_named(GTK_STACK(app->stack), start_page_wrapper, "start_page");
+
+    // ============================================================
+    // PAGE 2: GAME BOARD
+    // ============================================================
+    GtkWidget *game_page_wrapper = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(game_page_wrapper, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(game_page_wrapper, GTK_ALIGN_CENTER);
+
+    GtkWidget *game_card = create_card_box();
+    
+    GtkWidget *lbl_round = gtk_label_new("Battle Arena");
+    gtk_widget_add_css_class(lbl_round, "title-large");
+    gtk_box_append(GTK_BOX(game_card), lbl_round);
+
+    GtkWidget *box_scores = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 30);
+    gtk_widget_set_halign(box_scores, GTK_ALIGN_CENTER);
+
+    app->label_score_p1 = gtk_label_new("Player 1: 0");
+    app->label_score_p2 = gtk_label_new("Player 2: 0");
+    gtk_widget_add_css_class(app->label_score_p1, "score-info");
+    gtk_widget_add_css_class(app->label_score_p2, "score-info");
+
+    gtk_box_append(GTK_BOX(box_scores), app->label_score_p1);
+    gtk_box_append(GTK_BOX(box_scores), app->label_score_p2);
+
+    GtkWidget *grid = gtk_grid_new();
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+    gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
+    gtk_widget_set_margin_top(grid, 20);
+    gtk_widget_set_margin_bottom(grid, 20);
+
+    for (int i = 0; i < 9; i++) {
+        int r = i / 3;
+        int c = i % 3;
+        app->buttons[r][c] = gtk_button_new_with_label("");
+        gtk_widget_add_css_class(app->buttons[r][c], "grid-button");
+        g_object_set_data(G_OBJECT(app->buttons[r][c]), "cell_id", GINT_TO_POINTER(i));
+        g_signal_connect(app->buttons[r][c], "clicked", G_CALLBACK(on_cell_clicked), app);
+        gtk_grid_attach(GTK_GRID(grid), app->buttons[r][c], c, r, 1, 1);
+    }
+
+    GtkWidget *btn_reset = gtk_button_new_with_label("RUN IT BACK ≡ƒöä");
+    gtk_widget_set_margin_top(btn_reset, 10);
+    gtk_widget_add_css_class(btn_reset, "btn-primary");
+    g_signal_connect(btn_reset, "clicked", G_CALLBACK(on_reset_game_clicked), app);
+    
+    GtkWidget *lbl_tip_game = gtk_label_new("≡ƒÆí Hint: Use your brain. It helps.");
+    gtk_widget_set_margin_top(lbl_tip_game, 15);
+    gtk_widget_add_css_class(lbl_tip_game, "subtitle");
+
+    gtk_box_append(GTK_BOX(game_card), box_scores);
+    gtk_box_append(GTK_BOX(game_card), grid);
+    gtk_box_append(GTK_BOX(game_card), btn_reset);
+    gtk_box_append(GTK_BOX(game_card), lbl_tip_game);
+    
+    add_footer(game_card); 
+
+    gtk_box_append(GTK_BOX(game_page_wrapper), game_card);
+    gtk_stack_add_named(GTK_STACK(app->stack), game_page_wrapper, "game_page");
+
+    // ============================================================
+    // PAGE 3: RESULT SCREEN
+    // ============================================================
+    GtkWidget *result_page_wrapper = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(result_page_wrapper, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(result_page_wrapper, GTK_ALIGN_CENTER);
+
+    GtkWidget *result_card = create_card_box();
+
+    app->result_title = gtk_label_new("GAME OVER");
+    gtk_widget_add_css_class(app->result_title, "title-large");
+
+    app->result_subtitle = gtk_label_new("");
+    gtk_label_set_justify(GTK_LABEL(app->result_subtitle), GTK_JUSTIFY_CENTER);
+    gtk_widget_set_margin_bottom(app->result_subtitle, 10);
+    gtk_widget_add_css_class(app->result_subtitle, "subtitle");
+
+    app->result_score_label = gtk_label_new("Final Score: 0 - 0");
+    gtk_widget_add_css_class(app->result_score_label, "score-info");
+
+    GtkWidget *box_actions = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+    gtk_widget_set_halign(box_actions, GTK_ALIGN_CENTER);
+
+    GtkWidget *btn_rematch = gtk_button_new_with_label("Rematch?");
+    gtk_widget_add_css_class(btn_rematch, "btn-primary");
+    g_signal_connect(btn_rematch, "clicked", G_CALLBACK(on_play_again_clicked), app);
+
+    gtk_box_append(GTK_BOX(box_actions), btn_rematch);
+
+    gtk_box_append(GTK_BOX(result_card), app->result_title);
+    gtk_box_append(GTK_BOX(result_card), app->result_subtitle);
+    gtk_box_append(GTK_BOX(result_card), app->result_score_label);
+    gtk_box_append(GTK_BOX(result_card), box_actions);
+    add_footer(result_card);
+
+    gtk_box_append(GTK_BOX(result_page_wrapper), result_card);
+    gtk_stack_add_named(GTK_STACK(app->stack), result_page_wrapper, "result_page");
+    
+    int theme_id;
+    char player_name[50];
+    load_global_settings(player_name, sizeof(player_name), &theme_id);
+    // apply_theme(theme_id); - Already applied globally
+    
+    /* Set default player name if available */
+    if (strlen(player_name) > 0) {
+        gtk_editable_set_text(GTK_EDITABLE(app->entry_p1), player_name);
+    }
+    
+    if (strlen(player_name) > 0 && strcmp(player_name, "Player 1") != 0) {
+        strncpy(app->game.name1, player_name, sizeof(app->game.name1) - 1);
+        app->game.name1[sizeof(app->game.name1) - 1] = '\0';
+        snprintf(app->game.name2, sizeof(app->game.name2), "Guest");
+        init_game_state(app);
+        gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "game_page");
+    } else {
+        gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "start_page");
+    }
 
     return vbox;
 }
+
