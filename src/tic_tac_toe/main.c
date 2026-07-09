@@ -245,7 +245,7 @@ void on_reset_game_clicked(GtkWidget *widget, gpointer data)
     update_ui_board(app);
 }
 
-void on_play_again_clicked(GtkWidget *widget, gpointer data)
+void ttt_on_play_again_clicked(GtkWidget *widget, gpointer data)
 {
     (void)widget;
     TttAppData *app = (TttAppData *)data;
@@ -447,7 +447,7 @@ GtkWidget* ttt_create_ui(void)
 
     GtkWidget *btn_rematch = gtk_button_new_with_label("Rematch?");
     gtk_widget_add_css_class(btn_rematch, "btn-primary");
-    g_signal_connect(btn_rematch, "clicked", G_CALLBACK(on_play_again_clicked), app);
+    g_signal_connect(btn_rematch, "clicked", G_CALLBACK(ttt_on_play_again_clicked), app);
 
     gtk_box_append(GTK_BOX(box_actions), btn_rematch);
 

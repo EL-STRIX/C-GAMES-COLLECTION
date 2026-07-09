@@ -66,7 +66,7 @@ static void rps_process_round(RpsAppData *data, int user_choice);
 
 /* --- Helpers --- */
 /* Update the score label text using current names and scores */
-void update_score_display(RpsAppData *data) {
+void rps_update_score_display(RpsAppData *data) {
     char *text = g_strdup_printf("%s: %d  |  Computer: %d",
                                   data->player_name[0] ? data->player_name : "Player",
                                   data->player_score, data->computer_score);
@@ -75,7 +75,7 @@ void update_score_display(RpsAppData *data) {
 }
 
 /* Update the round header label depending on current round */
-void update_round_display(RpsAppData *data) {
+void rps_update_round_display(RpsAppData *data) {
     char *text;
     if (data->current_round <= TOTAL_ROUNDS) {
         text = g_strdup_printf("Round %d: Fight!", data->current_round);
@@ -88,7 +88,7 @@ void update_round_display(RpsAppData *data) {
 }
 
 /* Timer callback to compute and show final results -- runs in main loop */
-gboolean on_show_final_results(gpointer user_data) {
+gboolean rps_on_show_final_results(gpointer user_data) {
     (void)user_data;
     RpsAppData *data = (RpsAppData *)user_data;
     char *outcome_text;
@@ -150,8 +150,8 @@ void rps_start_new_game(RpsAppData *data) {
     gtk_widget_remove_css_class(data->result_label, "error");
     gtk_widget_remove_css_class(data->result_label, "warning");
 
-    update_round_display(data);
-    update_score_display(data);
+    rps_update_round_display(data);
+    rps_update_score_display(data);
 
     /* make choices visible and hide next button until a round is played */
     gtk_widget_set_visible(data->choices_box, TRUE);
@@ -170,8 +170,8 @@ void rps_start_next_round_ui(RpsAppData *data) {
     gtk_widget_remove_css_class(data->result_label, "error");
     gtk_widget_remove_css_class(data->result_label, "warning");
 
-    update_round_display(data);
-    update_score_display(data);
+    rps_update_round_display(data);
+    rps_update_score_display(data);
 
     gtk_widget_set_visible(data->choices_box, TRUE);
     gtk_widget_set_visible(data->next_round_btn, FALSE);
@@ -218,7 +218,7 @@ void rps_process_round(RpsAppData *data, int user_choice) {
         gtk_widget_add_css_class(data->result_label, "error");
     }
 
-    update_score_display(data);
+    rps_update_score_display(data);
     gtk_widget_set_visible(data->choices_box, FALSE); /* hide choice buttons after play */
 
     if (data->current_round < TOTAL_ROUNDS) {
@@ -226,10 +226,10 @@ void rps_process_round(RpsAppData *data, int user_choice) {
         gtk_button_set_label(GTK_BUTTON(data->next_round_btn), "Next Round ->");
         gtk_widget_set_visible(data->next_round_btn, TRUE); /* show next button */
     } else {
-        /* increment once more so update_round_display() shows calculation state in callback */
+        /* increment once more so rps_update_round_display() shows calculation state in callback */
         data->current_round++;
         /* schedule final result display after 1 second */
-        g_timeout_add_seconds(1, on_show_final_results, data);
+        g_timeout_add_seconds(1, rps_on_show_final_results, data);
     }
 }
 
@@ -256,8 +256,8 @@ static void rps_on_start_clicked(GtkButton *btn, RpsAppData *data) {
 void on_rock_clicked(GtkButton *btn, gpointer user_data) { (void)btn; rps_process_round((RpsAppData*)user_data, CHOICE_ROCK); }
 void on_paper_clicked(GtkButton *btn, gpointer user_data) { (void)btn; rps_process_round((RpsAppData*)user_data, CHOICE_PAPER); }
 void on_scissors_clicked(GtkButton *btn, gpointer user_data) { (void)btn; rps_process_round((RpsAppData*)user_data, CHOICE_SCISSORS); }
-void on_next_round_clicked(GtkButton *btn, gpointer user_data) { (void)btn; rps_start_next_round_ui((RpsAppData*)user_data); }
-void on_play_again_clicked(GtkButton *btn, gpointer user_data) { (void)btn; rps_start_new_game((RpsAppData*)user_data); }
+void rps_on_next_round_clicked(GtkButton *btn, gpointer user_data) { (void)btn; rps_start_next_round_ui((RpsAppData*)user_data); }
+void rps_on_play_again_clicked(GtkButton *btn, gpointer user_data) { (void)btn; rps_start_new_game((RpsAppData*)user_data); }
 static void rps_on_header_back_clicked(GtkButton *btn, gpointer user_data) {
     (void)btn;
     RpsAppData *data = (RpsAppData *)user_data;
@@ -274,7 +274,7 @@ void load_css(void) {
 /* --- UI Construction --- */
 
 /* Helper to build a choice button with emoji + label */
-GtkWidget* create_choice_button(const char *emoji, const char *label_text, GCallback callback, RpsAppData *data) {
+GtkWidget* rps_create_choice_button(const char *emoji, const char *label_text, GCallback callback, RpsAppData *data) {
     GtkWidget *btn = gtk_button_new();
     gtk_widget_add_css_class(btn, "choice-btn");
     
@@ -369,9 +369,9 @@ static GtkWidget* rps_create_game_page(RpsAppData *data) {
     gtk_widget_set_margin_bottom(data->choices_box, 10);
 
     /* Custom Buttons - USING EMOJIS */
-    GtkWidget *btn_rock = create_choice_button("✊", "Rock", G_CALLBACK(on_rock_clicked), data);
-    GtkWidget *btn_paper = create_choice_button("✋", "Paper", G_CALLBACK(on_paper_clicked), data);
-    GtkWidget *btn_scissors = create_choice_button("✌️", "Scissors", G_CALLBACK(on_scissors_clicked), data);
+    GtkWidget *btn_rock = rps_create_choice_button("✊", "Rock", G_CALLBACK(on_rock_clicked), data);
+    GtkWidget *btn_paper = rps_create_choice_button("✋", "Paper", G_CALLBACK(on_paper_clicked), data);
+    GtkWidget *btn_scissors = rps_create_choice_button("✌️", "Scissors", G_CALLBACK(on_scissors_clicked), data);
     
     gtk_widget_set_size_request(btn_rock, 80, 80);
     gtk_widget_set_size_request(btn_paper, 80, 80);
@@ -388,7 +388,7 @@ static GtkWidget* rps_create_game_page(RpsAppData *data) {
 
     data->next_round_btn = gtk_button_new_with_label("Next");
     gtk_widget_add_css_class(data->next_round_btn, "btn-primary");
-    g_signal_connect(data->next_round_btn, "clicked", G_CALLBACK(on_next_round_clicked), data);
+    g_signal_connect(data->next_round_btn, "clicked", G_CALLBACK(rps_on_next_round_clicked), data);
     gtk_box_append(GTK_BOX(card), data->next_round_btn);
 
     GtkWidget *credit_lbl = gtk_label_new("Developed by SUJAY PAUL");
@@ -431,7 +431,7 @@ static GtkWidget* rps_create_result_page(RpsAppData *data) {
     data->play_again_btn = gtk_button_new_with_label("Rematch?");
     gtk_widget_add_css_class(data->play_again_btn, "btn-primary");
     gtk_widget_set_hexpand(data->play_again_btn, TRUE);
-    g_signal_connect(data->play_again_btn, "clicked", G_CALLBACK(on_play_again_clicked), data);
+    g_signal_connect(data->play_again_btn, "clicked", G_CALLBACK(rps_on_play_again_clicked), data);
     gtk_box_append(GTK_BOX(button_box), data->play_again_btn);
 
     /* Add the button box to the card */
