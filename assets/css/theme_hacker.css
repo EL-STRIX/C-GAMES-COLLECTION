@@ -1,140 +1,49 @@
-/* 
- * ============================================================
- * UNIVERSAL GTK4 THEME - HACKER
- * Monospace, high contrast retro terminal aesthetic.
- * ============================================================
- */
+/* UNIVERSAL GTK4 THEME - HACKER */
+* { font-family: "Cascadia Code", "Fira Code", "Consolas", monospace; }
+window { background-color: #000000; }
+headerbar { min-height: 56px; background-color: #050505; color: #00ff00; border-bottom: 1px solid #003300; }
+.header-title { font-size: 14pt; font-weight: 800; color: #00ff00; text-transform: uppercase; letter-spacing: 2px; }
+windowcontrols button { border-radius: 0; }
 
-* {
-    font-family: "Cascadia Code", "Fira Code", "Courier New", monospace;
-}
-
-window { 
-    background-color: #0d0d0d; 
-}
-
-headerbar { 
-    min-height: 56px; 
-    background-color: #000000; 
-    color: #00ff00; 
-    border-bottom: 2px solid #004400; 
-}
-.header-title { 
-    font-size: 16pt; 
-    font-weight: 800; 
-    color: #00ff00; 
-    letter-spacing: 1px;
-}
-windowcontrols button { 
-    border-radius: 0px; 
-}
-
-label { color: #00aa00; }
-.title-large { font-size: 24pt; font-weight: 800; color: #00ff00; margin-bottom: 8px; text-shadow: 0 0 8px rgba(0,255,0,0.5); }
-.subtitle { font-size: 12pt; font-weight: 400; color: #00aa00; margin-bottom: 24px; }
-.game-title { font-size: 18pt; font-weight: 700; color: #00ff00; margin-top: 12px; margin-bottom: 6px; }
-.game-desc { font-size: 11pt; color: #00aa00; margin-bottom: 16px; line-height: 1.4; }
-.champ-title { font-size: 14pt; font-weight: 700; color: #ffff00; margin-bottom: 12px; }
-.champ-item { font-size: 11pt; font-weight: 600; color: #00ff00; }
+label { color: #00cc00; }
+.title-large { font-size: 22pt; font-weight: 800; color: #00ff00; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,255,0,0.5); }
+.subtitle { font-size: 11pt; font-weight: 400; color: #008800; margin-bottom: 24px; text-transform: uppercase; }
+.game-title { font-size: 12pt; font-weight: 700; color: #00ff00; margin-top: 12px; margin-bottom: 6px; text-transform: uppercase; }
+.game-desc { font-size: 10pt; color: #009900; margin-bottom: 16px; line-height: 1.5; }
+.champ-title { font-size: 11pt; font-weight: 700; color: #005500; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 12px; }
+.champ-item { font-size: 11pt; font-weight: 600; color: #00cc00; padding: 4px 0; }
 .score-info { font-size: 12pt; font-weight: 600; color: #00ff00; margin-bottom: 12px; }
 
-.success { color: #00ff00; font-weight: 800; font-size: 18pt; margin-top: 10px; margin-bottom: 10px; text-shadow: 0 0 10px rgba(0,255,0,0.8); }
-.error { color: #ff0000; font-weight: 800; font-size: 18pt; margin-top: 10px; margin-bottom: 10px; text-shadow: 0 0 10px rgba(255,0,0,0.8); }
-.warning { color: #ffff00; font-weight: 800; font-size: 18pt; margin-top: 10px; margin-bottom: 10px; }
+.success { color: #00ff00; font-weight: 800; font-size: 16pt; margin: 10px 0; text-shadow: 0 0 8px rgba(0,255,0,0.8); }
+.error { color: #ff0000; font-weight: 800; font-size: 16pt; margin: 10px 0; text-shadow: 0 0 8px rgba(255,0,0,0.8); }
+.warning { color: #ffff00; font-weight: 800; font-size: 16pt; margin: 10px 0; }
 .error-msg { color: #ff0000; font-size: 10pt; font-weight: 600; margin-top: 4px; }
 
-.card { 
-    background-color: #000000; 
-    border-radius: 0px; 
-    padding: 24px; 
-    border: 2px solid #004400;
-    box-shadow: 0 4px 12px rgba(0, 255, 0, 0.1); 
-    transition: all 0.2s ease; 
-}
-.card:hover {
-    box-shadow: 0 8px 24px rgba(0, 255, 0, 0.2); 
-    transform: translateY(-2px);
-    border-color: #00aa00;
-}
+.card { background-color: #020202; border-radius: 0; padding: 24px; border: 1px solid #003300; transition: all 0.2s ease; box-shadow: inset 0 0 20px rgba(0,255,0,0.02); }
+.card:hover { border-color: #00ff00; box-shadow: 0 0 15px rgba(0,255,0,0.1), inset 0 0 20px rgba(0,255,0,0.05); }
 
-.styled-entry { 
-    font-size: 12pt; 
-    padding: 10px 14px; 
-    border: 2px solid #004400; 
-    border-radius: 0px; 
-    background: #000000; 
-    color: #00ff00; 
-    transition: all 0.15s ease;
-}
-.styled-entry:focus { 
-    border-color: #00ff00; 
-    box-shadow: 0 0 0 3px rgba(0, 255, 0, 0.2); 
-}
+.styled-entry { font-size: 11pt; padding: 10px 14px; border: 1px solid #004400; border-radius: 0; background: #000000; color: #00ff00; transition: all 0.15s ease; }
+.styled-entry:focus { border-color: #00ff00; box-shadow: 0 0 10px rgba(0,255,0,0.2); }
 
-button { 
-    border: none; outline: none; 
-    border-radius: 8px; 
-    padding: 10px 20px; 
-    font-weight: 600;
-    font-size: 11pt;
-    transition: all 0.15s ease; 
-    border: 1px solid transparent;
-}
-button label {
-    color: inherit;
-}
-.btn-primary { 
-    background-color: #004400; 
-    color: #00ff00; 
-    border: 1px solid #00ff00;
-}
-.btn-primary:hover { background-color: #007700; box-shadow: 0 0 12px rgba(0, 255, 0, 0.5); }
-.btn-primary:active { background-color: #002200; }
+button { border-radius: 0; padding: 10px 20px; font-weight: 600; font-size: 11pt; text-transform: uppercase; transition: all 0.1s ease; border: 1px solid #004400; }
+.btn-primary { background-color: #001100; color: #00ff00; border-color: #00aa00; }
+.btn-primary:hover { background-color: #002200; border-color: #00ff00; box-shadow: 0 0 10px rgba(0,255,0,0.3); }
+.btn-primary:active { background-color: #00ff00; color: #000000; }
 
-.btn-secondary { 
-    background-color: #000000; 
-    color: #00aa00; 
-    border: 1px solid #00aa00;
-}
-.btn-secondary:hover { background-color: #002200; color: #00ff00; border-color: #00ff00; }
-.btn-secondary:active { background-color: #000000; }
+.btn-secondary { background-color: #000000; color: #00aa00; border-color: #003300; }
+.btn-secondary:hover { background-color: #001100; border-color: #00ff00; color: #00ff00; }
+.btn-secondary:active { background-color: #003300; }
 
-.btn-danger { 
-    background-color: #440000; 
-    color: #ff0000; 
-    border: 1px solid #ff0000;
-}
-.btn-danger:hover { background-color: #770000; box-shadow: 0 0 12px rgba(255, 0, 0, 0.5); }
-.btn-danger:active { background-color: #220000; }
+.btn-danger { background-color: #110000; color: #ff0000; border-color: #aa0000; }
+.btn-danger:hover { background-color: #220000; border-color: #ff0000; box-shadow: 0 0 10px rgba(255,0,0,0.3); }
+.btn-danger:active { background-color: #ff0000; color: #000000; }
 
-.grid-button { 
-    font-size: 32pt; 
-    font-weight: 900; 
-    min-width: 80px; 
-    min-height: 80px; 
-    background-color: #000000; 
-    border: 2px solid #004400; 
-    border-radius: 0px; 
-}
-.grid-button:hover { 
-    background-color: #002200; 
-    border-color: #00ff00; 
-}
-.player-x { color: #00ff00; text-shadow: 0 0 8px rgba(0,255,0,0.5); }
-.player-o { color: #ff0000; text-shadow: 0 0 8px rgba(255,0,0,0.5); }
+.grid-button { font-size: 28pt; font-weight: 900; min-width: 80px; min-height: 80px; background-color: #000000; border: 1px solid #004400; color: #00ff00; }
+.grid-button:hover { background-color: #001100; border-color: #00ff00; }
+.player-x { color: #00ff00; text-shadow: 0 0 10px rgba(0,255,0,0.5); }
+.player-o { color: #ff0000; text-shadow: 0 0 10px rgba(255,0,0,0.5); }
 
-.choice-btn { 
-    background-color: #000000; 
-    border: 2px solid #004400; 
-    border-radius: 0px; 
-    padding: 16px; 
-    min-width: 100px;
-}
-.choice-btn:hover { 
-    background-color: #002200; 
-    border-color: #00ff00; 
-    transform: translateY(-2px); 
-    box-shadow: 0 6px 16px rgba(0, 255, 0, 0.2);
-}
-.choice-emoji { font-size: 32pt; margin-bottom: 8px; font-weight: normal; font-family: "Segoe UI Emoji", "Apple Color Emoji", sans-serif; }
-.choice-label { font-weight: 600; color: #00aa00; font-size: 11pt; }
+.choice-btn { background-color: #000000; border: 1px solid #004400; padding: 16px; min-width: 110px; border-radius: 0; }
+.choice-btn:hover { background-color: #001100; border-color: #00ff00; }
+.choice-emoji { font-size: 32pt; margin-bottom: 8px; filter: grayscale(100%) brightness(1.5) sepia(100%) hue-rotate(80deg) saturate(300%); }
+.choice-label { font-weight: 600; font-size: 11pt; color: #00cc00; text-transform: uppercase; }

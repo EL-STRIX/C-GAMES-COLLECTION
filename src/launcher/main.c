@@ -56,7 +56,7 @@ static void open_settings_dialog(GtkButton *btn, gpointer user_data) {
     GtkWidget *dropdown = gtk_drop_down_new_from_strings(themes);
     gtk_drop_down_set_selected(GTK_DROP_DOWN(dropdown), (guint)theme_id);
     
-    GtkWidget *save_btn = gtk_button_new_with_label("Save & Close");
+    GtkWidget *save_btn = gtk_button_new_with_label("Save Settings");
     gtk_widget_add_css_class(save_btn, "btn-primary");
     
     GtkWidget **widgets = g_new(GtkWidget*, 3);
@@ -125,13 +125,25 @@ GtkWidget* create_game_entry(const char *icon, const char *title, const char *de
     gtk_label_set_wrap(GTK_LABEL(lbl_desc), TRUE);
     gtk_label_set_justify(GTK_LABEL(lbl_desc), GTK_JUSTIFY_CENTER);
     
-    GtkWidget *btn = gtk_button_new_with_label("Play Now");
+    GtkWidget *btn_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+    gtk_widget_set_halign(btn_box, GTK_ALIGN_CENTER);
+    GtkWidget *play_icon = gtk_image_new_from_icon_name("media-playback-start-symbolic");
+    GtkWidget *play_lbl = gtk_label_new("Play Now");
+    gtk_box_append(GTK_BOX(btn_box), play_icon);
+    gtk_box_append(GTK_BOX(btn_box), play_lbl);
+    
+    GtkWidget *btn = gtk_button_new();
+    gtk_button_set_child(GTK_BUTTON(btn), btn_box);
     gtk_widget_add_css_class(btn, "btn-primary");
     g_signal_connect(btn, "clicked", G_CALLBACK(launch_game), (gpointer)game_id);
     
     gtk_box_append(GTK_BOX(box), lbl_icon);
     gtk_box_append(GTK_BOX(box), lbl_title);
     gtk_box_append(GTK_BOX(box), lbl_desc);
+    gtk_widget_set_vexpand(btn, FALSE);
+    gtk_widget_set_valign(btn, GTK_ALIGN_END);
+    gtk_widget_set_vexpand(lbl_desc, TRUE);
+    gtk_widget_set_valign(lbl_desc, GTK_ALIGN_START);
     gtk_box_append(GTK_BOX(box), btn);
     
     return box;
@@ -159,11 +171,12 @@ static void activate(GtkApplication *app, gpointer user_data)
     
     GtkWidget *header_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     
-    GtkWidget *title = gtk_label_new("🎮 C GAMES COLLECTION");
+    GtkWidget *title = gtk_label_new("C GAMES COLLECTION");
     gtk_widget_add_css_class(title, "header-title");
     gtk_widget_set_hexpand(title, TRUE);
     
-    GtkWidget *btn_settings = gtk_button_new_with_label("🔧 Settings");
+    GtkWidget *btn_settings = gtk_button_new_from_icon_name("emblem-system-symbolic");
+    gtk_widget_set_tooltip_text(btn_settings, "Global Settings");
     gtk_widget_add_css_class(btn_settings, "btn-secondary");
     gtk_widget_set_valign(btn_settings, GTK_ALIGN_CENTER);
     g_signal_connect(btn_settings, "clicked", G_CALLBACK(open_settings_dialog), window);
@@ -197,7 +210,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     GtkWidget *champ_frame = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_widget_add_css_class(champ_frame, "card");
     
-    GtkWidget *champ_label = gtk_label_new("🏆 HALL OF FAME 🏆");
+    GtkWidget *champ_label = gtk_label_new("HALL OF FAME");
     gtk_widget_add_css_class(champ_label, "champ-title");
     gtk_box_append(GTK_BOX(champ_frame), champ_label);
     

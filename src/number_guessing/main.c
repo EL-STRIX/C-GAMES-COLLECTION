@@ -103,7 +103,7 @@ static void ng_on_header_back_clicked(GtkButton *btn, gpointer user_data)
     switch_to_launcher();
 }
 
-// 3. Called when "SUBMIT GUESS" button is clicked
+// 3. Called when "Submit Guess" button is clicked
 static void ng_on_submit_guess(GtkButton *btn, gpointer user_data)
 {
     (void)btn;
@@ -178,7 +178,7 @@ static void ng_on_submit_guess(GtkButton *btn, gpointer user_data)
     }
 }
 
-// 4. Called when "PLAY AGAIN" is clicked
+// 4. Called when "Play Again" is clicked
 static void ng_on_play_again_clicked(GtkButton *btn, NgAppData *app)
 {
     (void)btn;
@@ -208,7 +208,7 @@ static GtkWidget *ng_create_welcome_page(NgAppData *app)
     app->name_warning_label = gtk_label_new("");
     gtk_widget_add_css_class(app->name_warning_label, "error-msg");
 
-    GtkWidget *start_btn = gtk_button_new_with_label("START ADVENTURE");
+    GtkWidget *start_btn = gtk_button_new_with_label("Start Game");
     gtk_widget_add_css_class(start_btn, "btn-primary");
     g_signal_connect(start_btn, "clicked", G_CALLBACK(ng_on_start_clicked), app);
 
@@ -240,7 +240,7 @@ static GtkWidget *ng_create_game_page(NgAppData *app)
     gtk_widget_add_css_class(app->guess_spin, "styled-entry");
     gtk_widget_set_halign(app->guess_spin, GTK_ALIGN_CENTER);
 
-    GtkWidget *submit_btn = gtk_button_new_with_label("SUBMIT GUESS");
+    GtkWidget *submit_btn = gtk_button_new_with_label("Submit Guess");
     gtk_widget_add_css_class(submit_btn, "btn-primary");
     g_signal_connect(submit_btn, "clicked", G_CALLBACK(ng_on_submit_guess), app);
 
@@ -294,7 +294,7 @@ static GtkWidget *ng_create_result_page(NgAppData *app)
     GtkWidget *btn_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
     gtk_widget_set_halign(btn_box, GTK_ALIGN_CENTER);
 
-    GtkWidget *play_btn = gtk_button_new_with_label("PLAY AGAIN");
+    GtkWidget *play_btn = gtk_button_new_with_label("Play Again");
     gtk_widget_add_css_class(play_btn, "btn-primary");
     g_signal_connect(play_btn, "clicked", G_CALLBACK(ng_on_play_again_clicked), app);
     g_signal_connect(play_btn, "activate", G_CALLBACK(ng_on_play_again_clicked), app);
@@ -356,7 +356,15 @@ GtkWidget* ng_create_ui(void)
     GtkWidget *overlay = gtk_overlay_new();
     gtk_overlay_set_child(GTK_OVERLAY(overlay), app->stack);
 
-    GtkWidget *global_btn_back = gtk_button_new_with_label("🔙 Return to Main Menu");
+    GtkWidget *btn_box_back = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+    gtk_widget_set_halign(btn_box_back, GTK_ALIGN_CENTER);
+    GtkWidget *back_icon = gtk_image_new_from_icon_name("go-previous-symbolic");
+    GtkWidget *back_lbl = gtk_label_new("Main Menu");
+    gtk_box_append(GTK_BOX(btn_box_back), back_icon);
+    gtk_box_append(GTK_BOX(btn_box_back), back_lbl);
+    
+    GtkWidget *global_btn_back = gtk_button_new();
+    gtk_button_set_child(GTK_BUTTON(global_btn_back), btn_box_back);
     gtk_widget_set_halign(global_btn_back, GTK_ALIGN_START);
     gtk_widget_set_valign(global_btn_back, GTK_ALIGN_START);
     gtk_widget_set_margin_top(global_btn_back, 15);

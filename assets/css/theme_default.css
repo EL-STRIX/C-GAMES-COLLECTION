@@ -1,147 +1,49 @@
-/* 
- * ============================================================
- * UNIVERSAL GTK4 THEME - DEFAULT (LIGHT)
- * GNOME/Adwaita inspired, professional desktop aesthetic.
- * ============================================================
- */
+/* UNIVERSAL GTK4 THEME - DEFAULT (LIGHT) */
+* { font-family: "Inter", "Segoe UI", "Noto Sans", sans-serif; }
+window { background-color: #f8fafc; }
+headerbar { min-height: 56px; background-color: #ffffff; color: #1e293b; border-bottom: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+.header-title { font-size: 16pt; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; }
+windowcontrols button { border-radius: 6px; }
 
-* {
-    font-family: "Inter", "Segoe UI", "Noto Sans", sans-serif;
-}
-
-/* Base Window */
-window { 
-    background-color: #f6f8fa; 
-}
-
-/* Header Bar */
-headerbar { 
-    min-height: 56px; 
-    background-color: #ffffff; 
-    color: #1e293b; 
-    border-bottom: 1px solid #e2e8f0; 
-}
-.header-title { 
-    font-size: 16pt; 
-    font-weight: 800; 
-    color: #0f172a; 
-    letter-spacing: -0.5px;
-}
-windowcontrols button { 
-    border-radius: 6px; 
-}
-
-/* General Typography */
 label { color: #334155; }
-.title-large { font-size: 24pt; font-weight: 800; color: #1e40af; margin-bottom: 8px; letter-spacing: -0.5px; }
-.subtitle { font-size: 12pt; font-weight: 400; color: #64748b; margin-bottom: 24px; }
-.game-title { font-size: 18pt; font-weight: 700; color: #0f172a; margin-top: 12px; margin-bottom: 6px; }
-.game-desc { font-size: 11pt; color: #475569; margin-bottom: 16px; line-height: 1.4; }
-.champ-title { font-size: 14pt; font-weight: 700; color: #b45309; margin-bottom: 12px; }
-.champ-item { font-size: 11pt; font-weight: 600; color: #0f172a; }
+.title-large { font-size: 24pt; font-weight: 800; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.5px; }
+.subtitle { font-size: 11pt; font-weight: 400; color: #64748b; margin-bottom: 24px; }
+.game-title { font-size: 13pt; font-weight: 700; color: #0f172a; margin-top: 12px; margin-bottom: 6px; }
+.game-desc { font-size: 10pt; color: #64748b; margin-bottom: 16px; line-height: 1.4; }
+.champ-title { font-size: 11pt; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+.champ-item { font-size: 11pt; font-weight: 600; color: #334155; padding: 4px 0; }
 .score-info { font-size: 12pt; font-weight: 600; color: #334155; margin-bottom: 12px; }
 
-/* Feedback Text */
-.success { color: #16a34a; font-weight: 800; font-size: 18pt; margin-top: 10px; margin-bottom: 10px; }
-.error { color: #dc2626; font-weight: 800; font-size: 18pt; margin-top: 10px; margin-bottom: 10px; }
-.warning { color: #d97706; font-weight: 800; font-size: 18pt; margin-top: 10px; margin-bottom: 10px; }
+.success { color: #16a34a; font-weight: 800; font-size: 16pt; margin: 10px 0; }
+.error { color: #dc2626; font-weight: 800; font-size: 16pt; margin: 10px 0; }
+.warning { color: #d97706; font-weight: 800; font-size: 16pt; margin: 10px 0; }
 .error-msg { color: #ef4444; font-size: 10pt; font-weight: 600; margin-top: 4px; }
 
-/* Cards & Layout */
-.card { 
-    background-color: #ffffff; 
-    border-radius: 12px; 
-    padding: 24px; 
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04); 
-    transition: all 0.2s ease; 
-}
-.card:hover {
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08); 
-    transform: translateY(-2px);
-}
+.card { background-color: #ffffff; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+.card:hover { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08); transform: translateY(-2px); border-color: #cbd5e1; }
 
-/* Forms */
-.styled-entry { 
-    font-size: 12pt; 
-    padding: 10px 14px; 
-    border: 1px solid #cbd5e1; 
-    border-radius: 8px; 
-    background: #ffffff; 
-    color: #0f172a; 
-    transition: all 0.15s ease;
-}
-.styled-entry:focus { 
-    border-color: #3b82f6; 
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); 
-}
+.styled-entry { font-size: 11pt; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff; color: #0f172a; transition: all 0.15s ease; }
+.styled-entry:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
 
-/* Buttons */
-button { 
-    border: none; outline: none; 
-    border-radius: 8px; 
-    padding: 10px 20px; 
-    font-weight: 600;
-    font-size: 11pt;
-    transition: all 0.15s ease; 
-}
-button label {
-    color: inherit;
-}
-.btn-primary { 
-    background-color: #2563eb; 
-    color: #ffffff; 
-}
-.btn-primary:hover { background-color: #3b82f6; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+button { border-radius: 8px; padding: 10px 20px; font-weight: 600; font-size: 11pt; transition: all 0.15s ease; background-clip: padding-box; }
+.btn-primary { background-color: #2563eb; color: #ffffff; border: 1px solid #1d4ed8; }
+.btn-primary:hover { background-color: #3b82f6; border-color: #2563eb; box-shadow: 0 4px 12px rgba(37,99,235,0.2); }
 .btn-primary:active { background-color: #1d4ed8; }
 
-.btn-secondary { 
-    background-color: #f1f5f9; 
-    color: #334155; 
-    border: 1px solid #e2e8f0;
-}
-.btn-secondary:hover { background-color: #e2e8f0; }
-.btn-secondary:active { background-color: #cbd5e1; }
+.btn-secondary { background-color: #ffffff; color: #334155; border: 1px solid #cbd5e1; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.btn-secondary:hover { background-color: #f8fafc; border-color: #94a3b8; }
+.btn-secondary:active { background-color: #f1f5f9; }
 
-.btn-danger { 
-    background-color: #ef4444; 
-    color: #ffffff; 
-}
-.btn-danger:hover { background-color: #f87171; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
+.btn-danger { background-color: #ef4444; color: #ffffff; border: 1px solid #b91c1c; }
+.btn-danger:hover { background-color: #f87171; border-color: #ef4444; box-shadow: 0 4px 12px rgba(239,68,68,0.2); }
 .btn-danger:active { background-color: #dc2626; }
 
-/* Interactive Game Grids & Elements */
-.grid-button { 
-    font-size: 32pt; 
-    font-weight: 900; 
-    min-width: 80px; 
-    min-height: 80px; 
-    background-color: #ffffff; 
-    border: 1px solid #e2e8f0; 
-    border-radius: 12px; 
-    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
-}
-.grid-button:hover { 
-    background-color: #f8fafc; 
-    border-color: #cbd5e1; 
-}
+.grid-button { font-size: 28pt; font-weight: 900; min-width: 80px; min-height: 80px; background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+.grid-button:hover { background-color: #f1f5f9; }
 .player-x { color: #2563eb; }
 .player-o { color: #ef4444; }
 
-/* Game Choices (RPS / SGW) */
-.choice-btn { 
-    background-color: #ffffff; 
-    border: 1px solid #e2e8f0; 
-    border-radius: 12px; 
-    padding: 16px; 
-    min-width: 100px;
-    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
-}
-.choice-btn:hover { 
-    background-color: #f8fafc; 
-    border-color: #cbd5e1; 
-    transform: translateY(-2px); 
-    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
-}
-.choice-emoji { font-size: 32pt; margin-bottom: 8px; font-weight: normal; font-family: "Segoe UI Emoji", "Apple Color Emoji", sans-serif; }
+.choice-btn { background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 16px; min-width: 110px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+.choice-btn:hover { background-color: #f8fafc; border-color: #94a3b8; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.06); }
+.choice-emoji { font-size: 32pt; margin-bottom: 8px; font-weight: normal; }
 .choice-label { font-weight: 600; color: #475569; font-size: 11pt; }

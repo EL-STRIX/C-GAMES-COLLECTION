@@ -339,7 +339,7 @@ static GtkWidget* sgw_create_welcome_page(SgwAppData *data) {
     gtk_widget_add_css_class(data->name_error_label, "error");
     gtk_box_append(GTK_BOX(card), data->name_error_label);
 
-    GtkWidget *start_btn = gtk_button_new_with_label("START BATTLE");
+    GtkWidget *start_btn = gtk_button_new_with_label("Start Battle");
     gtk_widget_add_css_class(start_btn, "btn-primary");
     g_signal_connect(start_btn, "clicked", G_CALLBACK(sgw_on_start_clicked), data);
     gtk_box_append(GTK_BOX(card), start_btn);
@@ -397,7 +397,7 @@ static GtkWidget* sgw_create_game_page(SgwAppData *data) {
     data->result_label = gtk_label_new("");
     gtk_box_append(GTK_BOX(card), data->result_label);
 
-    data->next_round_btn = gtk_button_new_with_label("Next");
+    data->next_round_btn = gtk_button_new_with_label("Next Round");
     gtk_widget_add_css_class(data->next_round_btn, "btn-primary");
     g_signal_connect(data->next_round_btn, "clicked", G_CALLBACK(sgw_on_next_round_clicked), data);
     gtk_box_append(GTK_BOX(card), data->next_round_btn);
@@ -439,7 +439,7 @@ static GtkWidget* sgw_create_result_page(SgwAppData *data) {
     gtk_widget_set_margin_top(button_box, 15);
 
     /* 1. Play Again Button */
-    data->play_again_btn = gtk_button_new_with_label("Rematch?");
+    data->play_again_btn = gtk_button_new_with_label("Play Again");
     gtk_widget_add_css_class(data->play_again_btn, "btn-primary");
     gtk_widget_set_hexpand(data->play_again_btn, TRUE);
     g_signal_connect(data->play_again_btn, "clicked", G_CALLBACK(sgw_on_play_again_clicked), data);
@@ -493,7 +493,15 @@ GtkWidget* sgw_create_ui(void)
     GtkWidget *overlay = gtk_overlay_new();
     gtk_overlay_set_child(GTK_OVERLAY(overlay), app->stack);
 
-    GtkWidget *global_btn_back = gtk_button_new_with_label("🔙 Return to Main Menu");
+    GtkWidget *btn_box_back = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+    gtk_widget_set_halign(btn_box_back, GTK_ALIGN_CENTER);
+    GtkWidget *back_icon = gtk_image_new_from_icon_name("go-previous-symbolic");
+    GtkWidget *back_lbl = gtk_label_new("Main Menu");
+    gtk_box_append(GTK_BOX(btn_box_back), back_icon);
+    gtk_box_append(GTK_BOX(btn_box_back), back_lbl);
+    
+    GtkWidget *global_btn_back = gtk_button_new();
+    gtk_button_set_child(GTK_BUTTON(global_btn_back), btn_box_back);
     gtk_widget_set_halign(global_btn_back, GTK_ALIGN_START);
     gtk_widget_set_valign(global_btn_back, GTK_ALIGN_START);
     gtk_widget_set_margin_top(global_btn_back, 15);

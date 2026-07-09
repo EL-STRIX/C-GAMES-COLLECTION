@@ -311,7 +311,15 @@ GtkWidget* ttt_create_ui(void)
     GtkWidget *overlay = gtk_overlay_new();
     gtk_overlay_set_child(GTK_OVERLAY(overlay), app->stack);
 
-    GtkWidget *global_btn_back = gtk_button_new_with_label("≡ƒöÖ Return to Main Menu");
+    GtkWidget *btn_box_back = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+    gtk_widget_set_halign(btn_box_back, GTK_ALIGN_CENTER);
+    GtkWidget *back_icon = gtk_image_new_from_icon_name("go-previous-symbolic");
+    GtkWidget *back_lbl = gtk_label_new("Main Menu");
+    gtk_box_append(GTK_BOX(btn_box_back), back_icon);
+    gtk_box_append(GTK_BOX(btn_box_back), back_lbl);
+    
+    GtkWidget *global_btn_back = gtk_button_new();
+    gtk_button_set_child(GTK_BUTTON(global_btn_back), btn_box_back);
     gtk_widget_set_halign(global_btn_back, GTK_ALIGN_START);
     gtk_widget_set_valign(global_btn_back, GTK_ALIGN_START);
     gtk_widget_set_margin_top(global_btn_back, 15);
@@ -354,7 +362,7 @@ GtkWidget* ttt_create_ui(void)
     gtk_widget_add_css_class(app->lbl_start_error, "error-msg");
     gtk_box_append(GTK_BOX(start_card), app->lbl_start_error);
 
-    GtkWidget *btn_start = gtk_button_new_with_label("START BATTLE");
+    GtkWidget *btn_start = gtk_button_new_with_label("Start Battle");
     gtk_widget_add_css_class(btn_start, "btn-primary");
     g_signal_connect(btn_start, "clicked", G_CALLBACK(on_start_clicked), app);
     gtk_box_append(GTK_BOX(start_card), btn_start);
@@ -403,7 +411,7 @@ GtkWidget* ttt_create_ui(void)
         gtk_grid_attach(GTK_GRID(grid), app->buttons[r][c], c, r, 1, 1);
     }
 
-    GtkWidget *btn_reset = gtk_button_new_with_label("RUN IT BACK ≡ƒöä");
+    GtkWidget *btn_reset = gtk_button_new_with_label("Reset Game");
     gtk_widget_set_margin_top(btn_reset, 10);
     gtk_widget_add_css_class(btn_reset, "btn-primary");
     g_signal_connect(btn_reset, "clicked", G_CALLBACK(on_reset_game_clicked), app);
@@ -445,7 +453,7 @@ GtkWidget* ttt_create_ui(void)
     GtkWidget *box_actions = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
     gtk_widget_set_halign(box_actions, GTK_ALIGN_CENTER);
 
-    GtkWidget *btn_rematch = gtk_button_new_with_label("Rematch?");
+    GtkWidget *btn_rematch = gtk_button_new_with_label("Play Again");
     gtk_widget_add_css_class(btn_rematch, "btn-primary");
     g_signal_connect(btn_rematch, "clicked", G_CALLBACK(ttt_on_play_again_clicked), app);
 
