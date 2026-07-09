@@ -5,11 +5,15 @@ BIN_DIR = bin
 
 COMMON_SRC = src/common/persistence.c src/common/ui_utils.c
 
-TARGETS = $(BIN_DIR)/launcher.exe \
-          $(BIN_DIR)/number-guessing.exe \
-          $(BIN_DIR)/rock-paper-scissors.exe \
-          $(BIN_DIR)/snake-gun-water.exe \
-          $(BIN_DIR)/tic-tac-toe-gui.exe \
+ALL_SRC = src/launcher/main.c \
+          src/number_guessing/main.c \
+          src/rock_paper_scissors/main.c \
+          src/snake_gun_water/main.c \
+          src/tic_tac_toe/main.c \
+          src/common/persistence.c \
+          src/common/ui_utils.c
+
+TARGETS = $(BIN_DIR)/c-games-collection.exe \
           $(BIN_DIR)/test_persistence.exe
 
 all: $(TARGETS)
@@ -17,24 +21,8 @@ all: $(TARGETS)
 $(BIN_DIR):
 	-mkdir -p $(BIN_DIR)
 
-# Launcher
-$(BIN_DIR)/launcher.exe: src/launcher/main.c $(COMMON_SRC) | $(BIN_DIR)
-	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
-
-# Number Guessing
-$(BIN_DIR)/number-guessing.exe: src/number_guessing/main.c $(COMMON_SRC) | $(BIN_DIR)
-	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
-
-# Rock Paper Scissors
-$(BIN_DIR)/rock-paper-scissors.exe: src/rock_paper_scissors/main.c $(COMMON_SRC) | $(BIN_DIR)
-	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
-
-# Snake Gun Water
-$(BIN_DIR)/snake-gun-water.exe: src/snake_gun_water/main.c $(COMMON_SRC) | $(BIN_DIR)
-	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
-
-# Tic Tac Toe GUI
-$(BIN_DIR)/tic-tac-toe-gui.exe: src/tic_tac_toe/main.c $(COMMON_SRC) | $(BIN_DIR)
+# Unified Binary
+$(BIN_DIR)/c-games-collection.exe: $(ALL_SRC) | $(BIN_DIR)
 	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
 
 # Tests

@@ -4,14 +4,16 @@
 #include "../common/persistence.h"
 #include "../common/constants.h"
 #include "../common/ui_utils.h"
-
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
-// apply_theme moved to ui_utils
+#include "../common/games.h"
 
 GtkWidget *main_window = NULL;
+GtkWidget *global_app_stack = NULL;
+
+void switch_to_launcher(void) {
+    if (global_app_stack) {
+        gtk_stack_set_visible_child_name(GTK_STACK(global_app_stack), "launcher_home");
+    }
+}
 
 static void on_save_settings(GtkButton *btn, gpointer user_data) {
     (void)btn;
@@ -73,83 +75,43 @@ static void open_settings_dialog(GtkButton *btn, gpointer user_data) {
     gtk_window_present(GTK_WINDOW(dialog));
 }
 
-static void on_child_exit(GPid pid, gint status, gpointer user_data) {
-    (void)status;
-    (void)user_data;
-    g_spawn_close_pid(pid);
-    if (main_window) {
-        gtk_widget_set_visible(main_window, TRUE);
-        gtk_widget_set_sensitive(main_window, TRUE);
-    }
-}
-
-static gboolean delayed_hide_launcher(gpointer data) {
-    (void)data;
-    if (main_window) {
-        gtk_widget_set_visible(main_window, FALSE);
-    }
-    return G_SOURCE_REMOVE;
-}
-
 static void launch_game(GtkButton *btn, gpointer user_data)
 {
     (void)btn;
-    const char *exe_name = (const char *)user_data;
-    char *full_path = NULL;
-
-#ifdef _WIN32
-    char path[MAX_PATH];
-    GetModuleFileNameA(NULL, path, MAX_PATH);
-    char *dir = g_path_get_dirname(path);
-    full_path = g_build_filename(dir, exe_name, NULL);
-    g_free(dir);
-#else
-    char *exe_path = g_file_read_link("/proc/self/exe", NULL);
-    if (exe_path) {
-        char *dir = g_path_get_dirname(exe_path);
-        full_path = g_build_filename(dir, exe_name, NULL);
-        g_free(dir);
-        g_free(exe_path);
-    } else {
-        char *cwd = g_get_current_dir();
-        full_path = g_build_filename(cwd, exe_name, NULL);
-        g_free(cwd);
-    }
-#endif
-
-    GError *error = NULL;
-    char *argv[] = { full_path, NULL };
-    GPid pid;
+    const char *game_id = (const char *)user_data;
     
-    // We launch games as separate asynchronous processes to ensure a crash in a game 
-    // does not bring down the main launcher. This also isolates game memory space.
-    gboolean success = g_spawn_async(NULL, argv, NULL, G_SPAWN_DO_NOT_REAP_CHILD, NULL, NULL, &pid, &error);
-    if (!success) {
-        GtkAlertDialog *dialog = gtk_alert_dialog_new("Failed to launch game: %s\nPath: %s", error->message, full_path);
-        gtk_alert_dialog_show(dialog, NULL);
-        g_object_unref(dialog);
-        g_error_free(error);
-    } else {
-        if (main_window) {
-            // Prevent double clicks
-            gtk_widget_set_sensitive(main_window, FALSE);
-            // Delay hiding the launcher so the game window has time to spawn
-            // and cover the screen, creating a seamless instant transition.
-            g_timeout_add(800, delayed_hide_launcher, NULL);
-        }
-        g_child_watch_add(pid, on_child_exit, NULL);
+    GtkStack *stack = GTK_STACK(global_app_stack);
+    
+    // Check if page already exists, if so destroy it to reset state cleanly
+    GtkWidget *existing = gtk_stack_get_child_by_name(stack, game_id);
+    if (existing) {
+        gtk_stack_remove(stack, existing);
     }
-    g_free(full_path);
+    
+    GtkWidget *game_page = NULL;
+    if (strcmp(game_id, "number_guessing") == 0) {
+        game_page = ng_create_ui();
+    } else if (strcmp(game_id, "rock_paper_scissors") == 0) {
+        game_page = rps_create_ui();
+    } else if (strcmp(game_id, "snake_gun_water") == 0) {
+        game_page = sgw_create_ui();
+    } else if (strcmp(game_id, "tic_tac_toe") == 0) {
+        game_page = ttt_create_ui();
+    }
+    
+    if (game_page) {
+        gtk_stack_add_named(stack, game_page, game_id);
+        gtk_stack_set_visible_child_name(stack, game_id);
+    }
 }
 
-GtkWidget* create_game_entry(const char *icon, const char *title, const char *desc, const char *exe_name)
+GtkWidget* create_game_entry(const char *icon, const char *title, const char *desc, const char *game_id)
 {
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_widget_add_css_class(box, "card");
     
     GtkWidget *lbl_icon = gtk_label_new(icon);
     gtk_widget_set_margin_bottom(lbl_icon, 10);
-    // Use large font for icon
     PangoAttrList *attrs = pango_attr_list_new();
     pango_attr_list_insert(attrs, pango_attr_scale_new(3.0));
     gtk_label_set_attributes(GTK_LABEL(lbl_icon), attrs);
@@ -165,8 +127,7 @@ GtkWidget* create_game_entry(const char *icon, const char *title, const char *de
     
     GtkWidget *btn = gtk_button_new_with_label("Play Now");
     gtk_widget_add_css_class(btn, "btn-primary");
-    // Pass the literal exe_name directly instead of allocating a duplicate string
-    g_signal_connect(btn, "clicked", G_CALLBACK(launch_game), (gpointer)exe_name);
+    g_signal_connect(btn, "clicked", G_CALLBACK(launch_game), (gpointer)game_id);
     
     gtk_box_append(GTK_BOX(box), lbl_icon);
     gtk_box_append(GTK_BOX(box), lbl_title);
@@ -179,27 +140,20 @@ GtkWidget* create_game_entry(const char *icon, const char *title, const char *de
 static void activate(GtkApplication *app, gpointer user_data)
 {
     (void)user_data;
-    // Since apply_theme handles CSS loading dynamically for launcher, we don't need css_data provider here.
-    // Apply theme sets the provider.
-    // But if theme is 0, apply_theme loads 'launcher.css', so we just call apply_theme(theme_id).
     
     GtkWidget *window = gtk_application_window_new(app);
     main_window = window;
-    gtk_window_set_title(GTK_WINDOW(window), "C Games Collection - Launcher");
+    gtk_window_set_title(GTK_WINDOW(window), "C Games Collection");
     gtk_window_set_default_size(GTK_WINDOW(window), 900, 700);
     gtk_window_maximize(GTK_WINDOW(window));
     
-    GtkWidget *header = gtk_header_bar_new();
-    gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), TRUE);
-    gtk_window_set_titlebar(GTK_WINDOW(window), header);
-
-    GtkWidget *title_lbl = gtk_label_new("C Games Collection - Launcher");
-    gtk_widget_add_css_class(title_lbl, "header-title");
-    gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), title_lbl);
-    
-    // Apply Global Theme
     apply_global_theme();
     
+    global_app_stack = gtk_stack_new();
+    gtk_stack_set_transition_type(GTK_STACK(global_app_stack), GTK_STACK_TRANSITION_TYPE_CROSSFADE);
+    gtk_stack_set_transition_duration(GTK_STACK(global_app_stack), 300); // 300ms smooth crossfade
+    
+    // --- BUILD LAUNCHER HOME PAGE ---
     GtkWidget *main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_widget_set_halign(main_vbox, GTK_ALIGN_CENTER);
     
@@ -223,29 +177,23 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_box_append(GTK_BOX(main_vbox), header_box);
     gtk_box_append(GTK_BOX(main_vbox), subtitle);
     
-    // Grid for games
     GtkWidget *grid = gtk_grid_new();
     gtk_grid_set_row_spacing(GTK_GRID(grid), 20);
     gtk_grid_set_column_spacing(GTK_GRID(grid), 20);
     gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
     
-    // Game 1
-    GtkWidget *g1 = create_game_entry("🔢", "Number Guessing", "Read the computer's mind and guess the secret number.", "number-guessing.exe");
+    GtkWidget *g1 = create_game_entry("🔢", "Number Guessing", "Read the computer's mind and guess the secret number.", "number_guessing");
     gtk_grid_attach(GTK_GRID(grid), g1, 0, 0, 1, 1);
     
-    // Game 2
-    GtkWidget *g2 = create_game_entry("✊✋✌️", "Rock Paper Scissors", "The classic battle of wits against an AI opponent.", "rock-paper-scissors.exe");
+    GtkWidget *g2 = create_game_entry("✊✋✌️", "Rock Paper Scissors", "The classic battle of wits against an AI opponent.", "rock_paper_scissors");
     gtk_grid_attach(GTK_GRID(grid), g2, 1, 0, 1, 1);
     
-    // Game 3
-    GtkWidget *g3 = create_game_entry("🐍🔫💧", "Snake Gun Water", "A fun variation of RPS with new rules and emojis.", "snake-gun-water.exe");
+    GtkWidget *g3 = create_game_entry("🐍🔫💧", "Snake Gun Water", "A fun variation of RPS with new rules and emojis.", "snake_gun_water");
     gtk_grid_attach(GTK_GRID(grid), g3, 0, 1, 1, 1);
     
-    // Game 4
-    GtkWidget *g4 = create_game_entry("❌⭕", "Epic Tic Tac Toe", "An enhanced battle version of Tic Tac Toe.", "tic-tac-toe-gui.exe");
+    GtkWidget *g4 = create_game_entry("❌⭕", "Epic Tic Tac Toe", "An enhanced battle version of Tic Tac Toe.", "tic_tac_toe");
     gtk_grid_attach(GTK_GRID(grid), g4, 1, 1, 1, 1);
     
-    // Champions Board
     GtkWidget *champ_frame = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_widget_add_css_class(champ_frame, "card");
     
@@ -253,7 +201,6 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_widget_add_css_class(champ_label, "champ-title");
     gtk_box_append(GTK_BOX(champ_frame), champ_label);
     
-    // Load top scores
     struct { const char *id; const char *name; const char *fmt; } games[] = {
         {"number_guessing", "Number Guessing", "%s: %s (%d guesses)"},
         {"rps", "Rock Paper Scissors", "%s: %s (%d wins)"},
@@ -276,12 +223,13 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_box_append(GTK_BOX(main_vbox), grid);
     gtk_box_append(GTK_BOX(main_vbox), champ_frame);
     
-    // Create a scrollable window just in case
     GtkWidget *scrolled = gtk_scrolled_window_new();
     gtk_scrolled_window_set_min_content_height(GTK_SCROLLED_WINDOW(scrolled), 550);
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), main_vbox);
-    gtk_window_set_child(GTK_WINDOW(window), scrolled);
     
+    gtk_stack_add_named(GTK_STACK(global_app_stack), scrolled, "launcher_home");
+    
+    gtk_window_set_child(GTK_WINDOW(window), global_app_stack);
     gtk_window_present(GTK_WINDOW(window));
 }
 
@@ -291,7 +239,7 @@ static GLogWriterOutput log_writer_func(GLogLevelFlags log_level, const GLogFiel
         if (g_strcmp0(fields[i].key, "GLIB_DOMAIN") == 0) {
             const char *domain = (const char *)fields[i].value;
             if ((g_strcmp0(domain, "Pango") == 0 || g_strcmp0(domain, "Gtk") == 0) && (log_level == G_LOG_LEVEL_WARNING)) {
-                return G_LOG_WRITER_HANDLED; // Ignore these warnings
+                return G_LOG_WRITER_HANDLED;
             }
         }
     }
@@ -301,7 +249,8 @@ static GLogWriterOutput log_writer_func(GLogLevelFlags log_level, const GLogFiel
 int main(int argc, char **argv)
 {
     g_log_set_writer_func(log_writer_func, NULL, NULL);
-    GtkApplication *app = gtk_application_new("org.sujay.gameslauncher", G_APPLICATION_NON_UNIQUE);
+    
+    GtkApplication *app = gtk_application_new("com.sujay.gamescollection", G_APPLICATION_DEFAULT_FLAGS);
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
     int status = g_application_run(G_APPLICATION(app), argc, argv);
     g_object_unref(app);

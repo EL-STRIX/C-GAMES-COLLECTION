@@ -14,6 +14,7 @@
 #include "../common/persistence.h"
 #include "../common/constants.h"
 #include "../common/ui_utils.h"
+#include "../common/games.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -46,12 +47,12 @@ typedef struct
     int attempts;          // Counts how many guesses the player made
     char player_name[100]; // Saves the player's name
 
-} GameApp;
+} NgAppData;
 
 // --- GAME LOGIC FUNCTIONS ---
 
 // Resets the state of the game for a new round
-static void start_game_logic(GameApp *app)
+static void ng_start_game_logic(NgAppData *app)
 {
     // Determine the secret target (1-100 inclusive)
     app->secret_number = (rand() % 100) + 1;
@@ -76,7 +77,7 @@ static void start_game_logic(GameApp *app)
 }
 
 // Triggers when the player starts the game from the login screen
-static void on_start_clicked(GtkButton *btn, GameApp *app)
+static void ng_on_start_clicked(GtkButton *btn, NgAppData *app)
 {
     (void)btn;
     const char *name = gtk_editable_get_text(GTK_EDITABLE(app->name_entry));
@@ -91,21 +92,21 @@ static void on_start_clicked(GtkButton *btn, GameApp *app)
     g_free(trimmed);
     app->player_name[sizeof(app->player_name) - 1] = '\0';
     save_global_settings(app->player_name, -1);
-    start_game_logic(app);
+    ng_start_game_logic(app);
 }
 
-static void on_header_back_clicked(GtkButton *btn, gpointer user_data)
+static void ng_on_header_back_clicked(GtkButton *btn, gpointer user_data)
 {
     (void)btn;
-    GameApp *app = (GameApp *)user_data;
-    handle_header_back_clicked(app->window, app->stack, "page_game");
+    NgAppData *app = (NgAppData *)user_data;
+    switch_to_launcher();
 }
 
 // 3. Called when "SUBMIT GUESS" button is clicked
-static void on_submit_guess(GtkButton *btn, gpointer user_data)
+static void ng_on_submit_guess(GtkButton *btn, gpointer user_data)
 {
     (void)btn;
-    GameApp *app = (GameApp *)user_data; 
+    NgAppData *app = (NgAppData *)user_data; 
     int guess = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(app->guess_spin));
 
     // Check valid range (1-100)
@@ -177,10 +178,10 @@ static void on_submit_guess(GtkButton *btn, gpointer user_data)
 }
 
 // 4. Called when "PLAY AGAIN" is clicked
-static void on_play_again_clicked(GtkButton *btn, GameApp *app)
+static void ng_on_play_again_clicked(GtkButton *btn, NgAppData *app)
 {
     (void)btn;
-    start_game_logic(app); // Restart logic
+    ng_start_game_logic(app); // Restart logic
 }
 
 
@@ -188,7 +189,7 @@ static void on_play_again_clicked(GtkButton *btn, GameApp *app)
 // --- UI BUILDER FUNCTIONS ---
 
 // Build Page 1: Login Screen
-GtkWidget *create_welcome_page(GameApp *app)
+GtkWidget *create_welcome_page(NgAppData *app)
 {
     GtkWidget *box = create_card_box();
 
@@ -208,7 +209,7 @@ GtkWidget *create_welcome_page(GameApp *app)
 
     GtkWidget *start_btn = gtk_button_new_with_label("START ADVENTURE");
     gtk_widget_add_css_class(start_btn, "btn-primary");
-    g_signal_connect(start_btn, "clicked", G_CALLBACK(on_start_clicked), app);
+    g_signal_connect(start_btn, "clicked", G_CALLBACK(ng_on_start_clicked), app);
 
     gtk_box_append(GTK_BOX(box), title_lbl);
     gtk_box_append(GTK_BOX(box), q_lbl);
@@ -220,7 +221,7 @@ GtkWidget *create_welcome_page(GameApp *app)
 }
 
 // Build Page 2: Game Screen
-GtkWidget *create_game_page(GameApp *app)
+GtkWidget *create_game_page(NgAppData *app)
 {
     GtkWidget *box = create_card_box();
 
@@ -240,7 +241,7 @@ GtkWidget *create_game_page(GameApp *app)
 
     GtkWidget *submit_btn = gtk_button_new_with_label("SUBMIT GUESS");
     gtk_widget_add_css_class(submit_btn, "btn-primary");
-    g_signal_connect(submit_btn, "clicked", G_CALLBACK(on_submit_guess), app);
+    g_signal_connect(submit_btn, "clicked", G_CALLBACK(ng_on_submit_guess), app);
 
     app->attempts_label = gtk_label_new("Attempts: 0");
     gtk_widget_add_css_class(app->attempts_label, "score-info");
@@ -269,7 +270,7 @@ GtkWidget *create_game_page(GameApp *app)
 }
 
 // Build Page 3: Result Screen
-GtkWidget *create_result_page(GameApp *app)
+GtkWidget *create_result_page(NgAppData *app)
 {
     GtkWidget *box = create_card_box();
 
@@ -294,8 +295,8 @@ GtkWidget *create_result_page(GameApp *app)
 
     GtkWidget *play_btn = gtk_button_new_with_label("PLAY AGAIN");
     gtk_widget_add_css_class(play_btn, "btn-primary");
-    g_signal_connect(play_btn, "clicked", G_CALLBACK(on_play_again_clicked), app);
-    g_signal_connect(play_btn, "activate", G_CALLBACK(on_play_again_clicked), app);
+    g_signal_connect(play_btn, "clicked", G_CALLBACK(ng_on_play_again_clicked), app);
+    g_signal_connect(play_btn, "activate", G_CALLBACK(ng_on_play_again_clicked), app);
 
     gtk_box_append(GTK_BOX(btn_box), play_btn);
 
@@ -316,58 +317,41 @@ GtkWidget *create_result_page(GameApp *app)
 
 // --- MAIN APPLICATION SETUP ---
 // This runs when the app launches
-static void activate(GtkApplication *app_system, gpointer user_data)
+
+GtkWidget* ng_create_ui(void)
 {
-    (void)user_data;
-    GameApp *app = g_new0(GameApp, 1); // Create data structure
+    static gboolean rng_seeded = FALSE;
+    if (!rng_seeded) {
+        srand((unsigned)time(NULL));
+        rng_seeded = TRUE;
+    }
 
-    // Setup Main Window
-    app->window = gtk_application_window_new(app_system);
-    gtk_window_set_default_size(GTK_WINDOW(app->window), DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
-    gtk_window_maximize(GTK_WINDOW(app->window));
+    NgAppData *app = g_new0(NgAppData, 1);
 
-    GtkWidget *header = gtk_header_bar_new();
-    gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), TRUE);
-    gtk_window_set_titlebar(GTK_WINDOW(app->window), header);
-
-    GtkWidget *title_lbl = gtk_label_new("Guess The Number");
-    gtk_widget_add_css_class(title_lbl, "header-title");
-    gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), title_lbl);
-
-    // Load CSS dynamically
-    apply_global_theme();
-    
-    // Setup "Stack" to switch pages
     app->stack = gtk_stack_new();
-    gtk_stack_set_transition_type(GTK_STACK(app->stack),
-                                  GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
+    gtk_stack_set_transition_type(GTK_STACK(app->stack), GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
 
     int theme_id;
     load_global_settings(app->player_name, sizeof(app->player_name), &theme_id);
-    // apply_theme(theme_id);
 
-    // Create all pages
-    GtkWidget *page1 = create_welcome_page(app);
-    GtkWidget *page2 = create_game_page(app);
-    GtkWidget *page3 = create_result_page(app);
+    GtkWidget *page1 = ng_create_welcome_page(app);
+    GtkWidget *page2 = ng_create_game_page(app);
+    GtkWidget *page3 = ng_create_result_page(app);
 
-    // Add pages to the stack
     gtk_stack_add_named(GTK_STACK(app->stack), page1, "page_welcome");
     gtk_stack_add_named(GTK_STACK(app->stack), page2, "page_game");
     gtk_stack_add_named(GTK_STACK(app->stack), page3, "page_result");
     
-    // Set default player name if available
     if (strlen(app->player_name) > 0) {
         gtk_editable_set_text(GTK_EDITABLE(app->name_entry), app->player_name);
     }
 
     if (strlen(app->player_name) > 0 && strcmp(app->player_name, "Player 1") != 0) {
-        start_game_logic(app);
+        ng_start_game_logic(app);
     } else {
         gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "page_welcome");
     }
 
-    // Global Overlay for the "Return to Main Menu" button
     GtkWidget *overlay = gtk_overlay_new();
     gtk_overlay_set_child(GTK_OVERLAY(overlay), app->stack);
 
@@ -377,24 +361,21 @@ static void activate(GtkApplication *app_system, gpointer user_data)
     gtk_widget_set_margin_top(global_btn_back, 15);
     gtk_widget_set_margin_end(global_btn_back, 15);
     gtk_widget_add_css_class(global_btn_back, "btn-secondary");
-    g_signal_connect(global_btn_back, "clicked", G_CALLBACK(on_header_back_clicked), app);
+    g_signal_connect(global_btn_back, "clicked", G_CALLBACK(ng_on_header_back_clicked), app);
 
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), global_btn_back);
 
-    // Show the overlay in the window
-    gtk_window_set_child(GTK_WINDOW(app->window), overlay);
-    gtk_window_present(GTK_WINDOW(app->window));
-}
+    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    
+    GtkWidget *header = gtk_header_bar_new();
+    gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), FALSE);
+    GtkWidget *title_lbl = gtk_label_new("Guess The Number");
+    gtk_widget_add_css_class(title_lbl, "header-title");
+    gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), title_lbl);
+    
+    gtk_box_append(GTK_BOX(vbox), header);
+    gtk_widget_set_vexpand(overlay, TRUE);
+    gtk_box_append(GTK_BOX(vbox), overlay);
 
-// --- PROGRAM ENTRY POINT ---
-int main(int argc, char **argv)
-{
-    // Seed the RNG exactly once at startup to prevent identical sequences
-    srand((unsigned)time(NULL));
-
-    GtkApplication *app = gtk_application_new("com.sujay.numberguessing", G_APPLICATION_DEFAULT_FLAGS);
-    g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
-    int status = g_application_run(G_APPLICATION(app), argc, argv);
-    g_object_unref(app);
-    return status;
+    return vbox;
 }

@@ -17,6 +17,7 @@
 #include "../common/persistence.h"
 #include "../common/constants.h"
 #include "../common/ui_utils.h"
+#include "../common/games.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -29,7 +30,7 @@
 #define TOTAL_ROUNDS 3
 
 /* --- Data Structure --- */
-// AppData encapsulates the application's runtime state and widget references,
+// SgwAppData encapsulates the application's runtime state and widget references,
 // eliminating globals and ensuring memory safety across callback boundaries.
 typedef struct {
     GtkWidget *window; 
@@ -56,16 +57,16 @@ typedef struct {
     GtkWidget *final_outcome_label; /* large label for final winner */
     GtkWidget *final_score_label;   /* final score display */
     GtkWidget *play_again_btn;      /* restart game button */
-} AppData;
+} SgwAppData;
 
 /* --- Forward Declarations --- */
-static void start_new_game(AppData *data);
-static void start_next_round_ui(AppData *data);
-static void process_round(AppData *data, int user_choice);
+static void sgw_start_new_game(SgwAppData *data);
+static void sgw_start_next_round_ui(SgwAppData *data);
+static void sgw_process_round(SgwAppData *data, int user_choice);
 
 /* --- Helpers --- */
 /* Update the score label text using current names and scores */
-void update_score_display(AppData *data) {
+void update_score_display(SgwAppData *data) {
     char *text = g_strdup_printf("%s: %d  |  Computer: %d",
                                   data->player_name[0] ? data->player_name : "Player",
                                   data->player_score, data->computer_score);
@@ -74,7 +75,7 @@ void update_score_display(AppData *data) {
 }
 
 /* Update the round header label depending on current round */
-void update_round_display(AppData *data) {
+void update_round_display(SgwAppData *data) {
     char *text;
     if (data->current_round <= TOTAL_ROUNDS) {
         text = g_strdup_printf("Round %d: Fight!", data->current_round);
@@ -89,7 +90,7 @@ void update_round_display(AppData *data) {
 /* Timer callback to compute and show final results -- runs in main loop */
 gboolean on_show_final_results(gpointer user_data) {
     (void)user_data;
-    AppData *data = (AppData *)user_data;
+    SgwAppData *data = (SgwAppData *)user_data;
     char *outcome_text;
     char *score_text;
 
@@ -135,7 +136,7 @@ gboolean on_show_final_results(gpointer user_data) {
 
 /* --- Game Logic --- */
 /* Initialize and start a fresh game */
-void start_new_game(AppData *data) {
+void sgw_start_new_game(SgwAppData *data) {
     data->current_round = 1;
     data->player_score = 0;
     data->computer_score = 0;
@@ -161,7 +162,7 @@ void start_new_game(AppData *data) {
 }
 
 /* Prepare UI for the next round (clears previous messages) */
-void start_next_round_ui(AppData *data) {
+void sgw_start_next_round_ui(SgwAppData *data) {
     gtk_label_set_text(GTK_LABEL(data->feedback_label), "Make your move...");
     gtk_label_set_text(GTK_LABEL(data->result_label), "");
     
@@ -177,7 +178,7 @@ void start_next_round_ui(AppData *data) {
 }
 
 /* Process a single round: generate computer choice, decide winner, update UI */
-void process_round(AppData *data, int user_choice) {
+void sgw_process_round(SgwAppData *data, int user_choice) {
     int computer_choice = (rand() % 3) + 1;
     const char *user_str, *comp_str;
     switch (user_choice) {
@@ -244,7 +245,7 @@ void process_round(AppData *data, int user_choice) {
     }
 }
 
-static void on_start_clicked(GtkButton *btn, AppData *data) {
+static void sgw_on_start_clicked(GtkButton *btn, SgwAppData *data) {
     (void)btn;
     const char *name = gtk_editable_get_text(GTK_EDITABLE(data->name_entry));
     char *trimmed = g_strstrip(g_strdup(name));
@@ -259,22 +260,22 @@ static void on_start_clicked(GtkButton *btn, AppData *data) {
     data->player_name[sizeof(data->player_name) - 1] = '\0';
     save_global_settings(data->player_name, -1);
     
-    start_new_game(data);
+    sgw_start_new_game(data);
     gtk_stack_set_visible_child_name(GTK_STACK(data->stack), "game_screen");
 }
 
-/* Simple wrappers connecting each choice button to process_round() */
-void on_snake_clicked(GtkButton *btn, gpointer user_data) { (void)btn; process_round((AppData*)user_data, CHOICE_SNAKE); }
-void on_gun_clicked(GtkButton *btn, gpointer user_data) { (void)btn; process_round((AppData*)user_data, CHOICE_GUN); }
-void on_water_clicked(GtkButton *btn, gpointer user_data) { (void)btn; process_round((AppData*)user_data, CHOICE_WATER); }
-void on_next_round_clicked(GtkButton *btn, gpointer user_data) { (void)btn; start_next_round_ui((AppData*)user_data); }
-void on_play_again_clicked(GtkButton *btn, gpointer user_data) { (void)btn; start_new_game((AppData*)user_data); }
+/* Simple wrappers connecting each choice button to sgw_process_round() */
+void on_snake_clicked(GtkButton *btn, gpointer user_data) { (void)btn; sgw_process_round((SgwAppData*)user_data, CHOICE_SNAKE); }
+void on_gun_clicked(GtkButton *btn, gpointer user_data) { (void)btn; sgw_process_round((SgwAppData*)user_data, CHOICE_GUN); }
+void on_water_clicked(GtkButton *btn, gpointer user_data) { (void)btn; sgw_process_round((SgwAppData*)user_data, CHOICE_WATER); }
+void on_next_round_clicked(GtkButton *btn, gpointer user_data) { (void)btn; sgw_start_next_round_ui((SgwAppData*)user_data); }
+void on_play_again_clicked(GtkButton *btn, gpointer user_data) { (void)btn; sgw_start_new_game((SgwAppData*)user_data); }
 
 /* Back Button Callback - returns to menu with confirmation if playing */
 void on_header_back_clicked(GtkButton *btn, gpointer user_data) {
     (void)btn;
-    AppData *data = (AppData *)user_data;
-    handle_header_back_clicked(data->window, data->stack, "game_screen");
+    SgwAppData *data = (SgwAppData *)user_data;
+    switch_to_launcher();
 }
 
 /* --- CSS Styling --- */
@@ -282,7 +283,7 @@ void on_header_back_clicked(GtkButton *btn, gpointer user_data) {
 /* --- UI Construction --- */
 
 /* Helper to build a choice button with emoji + label */
-GtkWidget* create_choice_button(const char *emoji, const char *label_text, GCallback callback, AppData *data) {
+GtkWidget* create_choice_button(const char *emoji, const char *label_text, GCallback callback, SgwAppData *data) {
     GtkWidget *btn = gtk_button_new();
     gtk_widget_add_css_class(btn, "choice-btn");
     
@@ -305,7 +306,7 @@ GtkWidget* create_choice_button(const char *emoji, const char *label_text, GCall
 }
 
 /* 1. Login Screen */
-GtkWidget* create_login_screen(AppData *data) {
+GtkWidget* create_login_screen(SgwAppData *data) {
     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 20);
     gtk_widget_set_valign(vbox, GTK_ALIGN_CENTER);
     gtk_widget_set_halign(vbox, GTK_ALIGN_CENTER);
@@ -339,7 +340,7 @@ GtkWidget* create_login_screen(AppData *data) {
 
     GtkWidget *start_btn = gtk_button_new_with_label("START BATTLE");
     gtk_widget_add_css_class(start_btn, "btn-primary");
-    g_signal_connect(start_btn, "clicked", G_CALLBACK(on_start_clicked), data);
+    g_signal_connect(start_btn, "clicked", G_CALLBACK(sgw_on_start_clicked), data);
     gtk_box_append(GTK_BOX(card), start_btn);
 
     return vbox;
@@ -347,7 +348,7 @@ GtkWidget* create_login_screen(AppData *data) {
 
 /* 2. Game Screen */
 /* Main gameplay screen: shows rounds, scores, and snake-gun-water buttons. */
-GtkWidget* create_game_screen(AppData *data) {
+GtkWidget* create_game_screen(SgwAppData *data) {
     GtkWidget *center_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_valign(center_box, GTK_ALIGN_CENTER);
     gtk_widget_set_halign(center_box, GTK_ALIGN_CENTER);
@@ -409,7 +410,7 @@ GtkWidget* create_game_screen(AppData *data) {
 
 /* 3. Result Screen (MODIFIED) */
 /* Final summary screen: displays winner, final score, and options to restart or exit. */
-GtkWidget* create_result_screen(AppData *data) {
+GtkWidget* create_result_screen(SgwAppData *data) {
     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 20);
     gtk_widget_set_valign(vbox, GTK_ALIGN_CENTER);
     gtk_widget_set_halign(vbox, GTK_ALIGN_CENTER);
@@ -456,13 +457,13 @@ GtkWidget* create_result_screen(AppData *data) {
 
 void activate(GtkApplication *app, gpointer user_data) {
     (void)user_data;
-    AppData *data = g_slice_new0(AppData);
+    SgwAppData *data = g_slice_new0(SgwAppData);
 
     GtkWidget *window = gtk_application_window_new(app);
     gtk_window_set_default_size(GTK_WINDOW(window), 400, 600);
     gtk_window_maximize(GTK_WINDOW(window));
     
-    /* Store the window in AppData so the Exit button can use it */
+    /* Store the window in SgwAppData so the Exit button can use it */
     data->window = window;
 
     GtkWidget *header = gtk_header_bar_new();
@@ -516,7 +517,7 @@ void activate(GtkApplication *app, gpointer user_data) {
     }
 
     gtk_widget_set_visible(data->next_round_btn, FALSE);
-    start_new_game(data);
+    sgw_start_new_game(data);
 
     if (strlen(data->player_name) > 0 && strcmp(data->player_name, "Player 1") != 0) {
         gtk_stack_set_visible_child_name(GTK_STACK(data->stack), "game_screen");
@@ -536,4 +537,65 @@ int main(int argc, char **argv) {
     int status = g_application_run(G_APPLICATION(app), argc, argv);
     g_object_unref(app);
     return status;
+}
+GtkWidget* sgw_create_ui(void)
+{
+    static gboolean rng_seeded = FALSE;
+    if (!rng_seeded) {
+        srand((unsigned)time(NULL));
+        rng_seeded = TRUE;
+    }
+
+    SgwAppData *app = g_new0(SgwAppData, 1);
+
+    app->stack = gtk_stack_new();
+    gtk_stack_set_transition_type(GTK_STACK(app->stack), GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
+
+    int theme_id;
+    load_global_settings(app->player_name, sizeof(app->player_name), &theme_id);
+
+    GtkWidget *page1 = sgw_create_welcome_page(app);
+    GtkWidget *page2 = sgw_create_game_page(app);
+    GtkWidget *page3 = sgw_create_result_page(app);
+
+    gtk_stack_add_named(GTK_STACK(app->stack), page1, "page_welcome");
+    gtk_stack_add_named(GTK_STACK(app->stack), page2, "page_game");
+    gtk_stack_add_named(GTK_STACK(app->stack), page3, "page_result");
+    
+    if (strlen(app->player_name) > 0) {
+        gtk_editable_set_text(GTK_EDITABLE(app->name_entry), app->player_name);
+    }
+
+    if (strlen(app->player_name) > 0 && strcmp(app->player_name, "Player 1") != 0) {
+        sgw_start_game_logic(app);
+    } else {
+        gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "page_welcome");
+    }
+
+    GtkWidget *overlay = gtk_overlay_new();
+    gtk_overlay_set_child(GTK_OVERLAY(overlay), app->stack);
+
+    GtkWidget *global_btn_back = gtk_button_new_with_label("🔙 Return to Main Menu");
+    gtk_widget_set_halign(global_btn_back, GTK_ALIGN_START);
+    gtk_widget_set_valign(global_btn_back, GTK_ALIGN_START);
+    gtk_widget_set_margin_top(global_btn_back, 15);
+    gtk_widget_set_margin_end(global_btn_back, 15);
+    gtk_widget_add_css_class(global_btn_back, "btn-secondary");
+    g_signal_connect(global_btn_back, "clicked", G_CALLBACK(sgw_on_header_back_clicked), app);
+
+    gtk_overlay_add_overlay(GTK_OVERLAY(overlay), global_btn_back);
+
+    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    
+    GtkWidget *header = gtk_header_bar_new();
+    gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), FALSE);
+    GtkWidget *title_lbl = gtk_label_new("Snake Gun Water");
+    gtk_widget_add_css_class(title_lbl, "header-title");
+    gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), title_lbl);
+    
+    gtk_box_append(GTK_BOX(vbox), header);
+    gtk_widget_set_vexpand(overlay, TRUE);
+    gtk_box_append(GTK_BOX(vbox), overlay);
+
+    return vbox;
 }
