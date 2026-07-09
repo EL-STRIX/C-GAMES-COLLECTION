@@ -136,5 +136,5 @@ button label {
     transform: translateY(-2px); 
     box-shadow: 0 6px 16px rgba(0, 255, 0, 0.2);
 }
-.choice-emoji { font-size: 32pt; margin-bottom: 8px; font-weight: normal; font-family: "Segoe UI Emoji", "Apple Color Emoji", emoji; }
+.choice-emoji { font-size: 32pt; margin-bottom: 8px; font-weight: normal; font-family: "Segoe UI Emoji", "Apple Color Emoji", sans-serif; }
 .choice-label { font-weight: 600; color: #00aa00; font-size: 11pt; }
