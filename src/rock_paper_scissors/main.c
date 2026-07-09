@@ -233,6 +233,7 @@ void process_round(AppData *data, int user_choice) {
 }
 
 static void on_start_clicked(GtkButton *btn, AppData *data) {
+    (void)btn;
     const char *name = gtk_editable_get_text(GTK_EDITABLE(data->name_entry));
     char *trimmed = g_strstrip(g_strdup(name));
     if (g_utf8_strlen(trimmed, -1) == 0) {

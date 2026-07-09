@@ -245,6 +245,7 @@ void process_round(AppData *data, int user_choice) {
 }
 
 static void on_start_clicked(GtkButton *btn, AppData *data) {
+    (void)btn;
     const char *name = gtk_editable_get_text(GTK_EDITABLE(data->name_entry));
     char *trimmed = g_strstrip(g_strdup(name));
     if (g_utf8_strlen(trimmed, -1) == 0) {
@@ -277,7 +278,6 @@ void on_header_back_clicked(GtkButton *btn, gpointer user_data) {
 }
 
 /* --- CSS Styling --- */
-    apply_global_theme();
 
 /* --- UI Construction --- */
 
@@ -503,7 +503,7 @@ void activate(GtkApplication *app, gpointer user_data) {
     gtk_stack_add_named(GTK_STACK(data->stack), create_game_screen(data), "game_screen");
     gtk_stack_add_named(GTK_STACK(data->stack), create_result_screen(data), "result_screen");
 
-    load_css(); /* apply app CSS */
+    apply_global_theme(); /* apply app CSS */
     
     int theme_id;
     load_global_settings(data->player_name, sizeof(data->player_name), &theme_id);

@@ -269,10 +269,9 @@ void on_header_back_clicked(GtkButton *btn, gpointer user_data)
 GtkWidget *create_card_box()
 {
     GtkWidget *card = gtk_box_new(GTK_ORIENTATION_VERTICAL, 15);
-    gtk_widget_add_css_class(card, "login-card"); 
+    gtk_widget_add_css_class(card, "card"); 
     gtk_widget_set_halign(card, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(card, GTK_ALIGN_CENTER);
-    gtk_widget_set_size_request(card, 400, -1);
     return card;
 }
 
@@ -343,7 +342,7 @@ static void activate(GtkApplication *gtk_app, gpointer user_data)
 
     GtkWidget *lbl_p1 = gtk_label_new("What is your name, Challenger?");
     gtk_widget_set_halign(lbl_p1, GTK_ALIGN_START);
-    gtk_widget_add_css_class(lbl_p1, "input-label");
+    gtk_widget_add_css_class(lbl_p1, "subtitle");
     gtk_box_append(GTK_BOX(start_card), lbl_p1);
 
     app->entry_p1 = gtk_entry_new();
@@ -373,7 +372,7 @@ static void activate(GtkApplication *gtk_app, gpointer user_data)
     GtkWidget *game_card = create_card_box();
     
     GtkWidget *lbl_round = gtk_label_new("Battle Arena");
-    gtk_widget_add_css_class(lbl_round, "round-header");
+    gtk_widget_add_css_class(lbl_round, "title-large");
     gtk_box_append(GTK_BOX(game_card), lbl_round);
 
     GtkWidget *box_scores = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 30);
@@ -411,7 +410,7 @@ static void activate(GtkApplication *gtk_app, gpointer user_data)
     
     GtkWidget *lbl_tip_game = gtk_label_new("💡 Hint: Use your brain. It helps.");
     gtk_widget_set_margin_top(lbl_tip_game, 15);
-    gtk_widget_add_css_class(lbl_tip_game, "footer-tip");
+    gtk_widget_add_css_class(lbl_tip_game, "subtitle");
 
     gtk_box_append(GTK_BOX(game_card), box_scores);
     gtk_box_append(GTK_BOX(game_card), grid);
@@ -433,7 +432,7 @@ static void activate(GtkApplication *gtk_app, gpointer user_data)
     GtkWidget *result_card = create_card_box();
 
     app->result_title = gtk_label_new("GAME OVER");
-    gtk_widget_add_css_class(app->result_title, "game-title");
+    gtk_widget_add_css_class(app->result_title, "title-large");
 
     app->result_subtitle = gtk_label_new("");
     gtk_label_set_justify(GTK_LABEL(app->result_subtitle), GTK_JUSTIFY_CENTER);

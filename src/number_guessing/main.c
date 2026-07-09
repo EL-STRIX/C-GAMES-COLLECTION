@@ -78,6 +78,7 @@ static void start_game_logic(GameApp *app)
 // Triggers when the player starts the game from the login screen
 static void on_start_clicked(GtkButton *btn, GameApp *app)
 {
+    (void)btn;
     const char *name = gtk_editable_get_text(GTK_EDITABLE(app->name_entry));
     char *trimmed = g_strstrip(g_strdup(name));
     if (g_utf8_strlen(trimmed, -1) == 0) {
@@ -178,6 +179,7 @@ static void on_submit_guess(GtkButton *btn, gpointer user_data)
 // 4. Called when "PLAY AGAIN" is clicked
 static void on_play_again_clicked(GtkButton *btn, GameApp *app)
 {
+    (void)btn;
     start_game_logic(app); // Restart logic
 }
 
@@ -194,15 +196,15 @@ GtkWidget *create_welcome_page(GameApp *app)
     gtk_widget_add_css_class(title_lbl, "title-large");
 
     GtkWidget *q_lbl = gtk_label_new("What's your name, Challenger?");
-    gtk_widget_add_css_class(q_lbl, "name-question");
+    gtk_widget_add_css_class(q_lbl, "subtitle");
 
     app->name_entry = gtk_entry_new();
     gtk_entry_set_placeholder_text(GTK_ENTRY(app->name_entry), "Type your name here...");
-    gtk_widget_add_css_class(app->name_entry, "input-field");
+    gtk_widget_add_css_class(app->name_entry, "styled-entry");
     gtk_widget_set_halign(app->name_entry, GTK_ALIGN_CENTER);
 
     app->name_warning_label = gtk_label_new("");
-    gtk_widget_add_css_class(app->name_warning_label, "warning-text");
+    gtk_widget_add_css_class(app->name_warning_label, "error-msg");
 
     GtkWidget *start_btn = gtk_button_new_with_label("START ADVENTURE");
     gtk_widget_add_css_class(start_btn, "btn-primary");
@@ -226,14 +228,14 @@ GtkWidget *create_game_page(GameApp *app)
     gtk_widget_add_css_class(header, "header-title");
 
     app->greeting_label = gtk_label_new("Hello, Player!");
-    gtk_widget_add_css_class(app->greeting_label, "success-text");
+    gtk_widget_add_css_class(app->greeting_label, "success");
 
     GtkWidget *instruct = gtk_label_new("What's your first guess?\nTake your best shot!");
-    gtk_widget_add_css_class(instruct, "guess-cheer-text");
+    gtk_widget_add_css_class(instruct, "subtitle");
 
     // Spinner for selecting numbers
     app->guess_spin = gtk_spin_button_new_with_range(0, 150, 1);
-    gtk_widget_add_css_class(app->guess_spin, "input-field");
+    gtk_widget_add_css_class(app->guess_spin, "styled-entry");
     gtk_widget_set_halign(app->guess_spin, GTK_ALIGN_CENTER);
 
     GtkWidget *submit_btn = gtk_button_new_with_label("SUBMIT GUESS");
@@ -241,12 +243,12 @@ GtkWidget *create_game_page(GameApp *app)
     g_signal_connect(submit_btn, "clicked", G_CALLBACK(on_submit_guess), app);
 
     app->attempts_label = gtk_label_new("Attempts: 0");
-    gtk_widget_add_css_class(app->attempts_label, "attempts-text");
+    gtk_widget_add_css_class(app->attempts_label, "score-info");
 
     // Revealer box for showing feedback (Too high/low)
     app->feedback_revealer = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     app->feedback_label = gtk_label_new("");
-    gtk_widget_add_css_class(app->feedback_revealer, "feedback-box");
+    gtk_widget_add_css_class(app->feedback_revealer, "card");
     gtk_box_append(GTK_BOX(app->feedback_revealer), app->feedback_label);
     gtk_widget_set_visible(app->feedback_revealer, FALSE); // Start hidden
 
@@ -260,7 +262,7 @@ GtkWidget *create_game_page(GameApp *app)
 
     // Add developer footer at the very bottom
     GtkWidget *dev_footer = gtk_label_new("Developed by SUJAY PAUL");
-    gtk_widget_add_css_class(dev_footer, "dev-footer");
+    gtk_widget_add_css_class(dev_footer, "footer-credit");
     gtk_box_append(GTK_BOX(box), dev_footer);
 
     return box;
@@ -275,16 +277,16 @@ GtkWidget *create_result_page(GameApp *app)
     gtk_widget_add_css_class(app->congrats_label, "game-title");
 
     GtkWidget *txt1 = gtk_label_new("You guessed the number:");
-    gtk_widget_add_css_class(txt1, "result-small-text");
+    gtk_widget_add_css_class(txt1, "subtitle");
 
     app->secret_number_label = gtk_label_new("0");
-    gtk_widget_add_css_class(app->secret_number_label, "big-number");
+    gtk_widget_add_css_class(app->secret_number_label, "title-large");
 
     app->total_attempts_label = gtk_label_new("Total Attempts: 0");
-    gtk_widget_add_css_class(app->total_attempts_label, "success-text");
+    gtk_widget_add_css_class(app->total_attempts_label, "success");
 
     app->praise_label = gtk_label_new("");
-    gtk_widget_add_css_class(app->praise_label, "result-performance-text");
+    gtk_widget_add_css_class(app->praise_label, "score-info");
 
     // Horizontal box to hold two buttons side-by-side
     GtkWidget *btn_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
@@ -306,7 +308,7 @@ GtkWidget *create_result_page(GameApp *app)
 
     // Add developer footer at the very bottom
     GtkWidget *dev_footer = gtk_label_new("Developed by SUJAY PAUL");
-    gtk_widget_add_css_class(dev_footer, "dev-footer");
+    gtk_widget_add_css_class(dev_footer, "footer-credit");
     gtk_box_append(GTK_BOX(box), dev_footer);
 
     return box;
@@ -374,7 +376,7 @@ static void activate(GtkApplication *app_system, gpointer user_data)
     gtk_widget_set_valign(global_btn_back, GTK_ALIGN_START);
     gtk_widget_set_margin_top(global_btn_back, 15);
     gtk_widget_set_margin_end(global_btn_back, 15);
-    gtk_widget_add_css_class(global_btn_back, "btn-blue");
+    gtk_widget_add_css_class(global_btn_back, "btn-secondary");
     g_signal_connect(global_btn_back, "clicked", G_CALLBACK(on_header_back_clicked), app);
 
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), global_btn_back);

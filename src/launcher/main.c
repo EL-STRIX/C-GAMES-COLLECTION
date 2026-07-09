@@ -18,7 +18,7 @@ static void on_save_settings(GtkButton *btn, gpointer user_data) {
     GtkWidget **widgets = (GtkWidget **)user_data;
     GtkEntryBuffer *buf = gtk_entry_get_buffer(GTK_ENTRY(widgets[0]));
     const char *name = gtk_entry_buffer_get_text(buf);
-    int theme_id = gtk_drop_down_get_selected(GTK_DROP_DOWN(widgets[1]));
+    int theme_id = (int)gtk_drop_down_get_selected(GTK_DROP_DOWN(widgets[1]));
     
     save_global_settings(name, theme_id);
     gtk_window_destroy(GTK_WINDOW(widgets[2]));
@@ -52,7 +52,7 @@ static void open_settings_dialog(GtkButton *btn, gpointer user_data) {
     GtkWidget *lbl_theme = gtk_label_new("Global Theme:");
     const char *themes[] = {"Default (Blue)", "Dark Mode", "Hacker", NULL};
     GtkWidget *dropdown = gtk_drop_down_new_from_strings(themes);
-    gtk_drop_down_set_selected(GTK_DROP_DOWN(dropdown), theme_id);
+    gtk_drop_down_set_selected(GTK_DROP_DOWN(dropdown), (guint)theme_id);
     
     GtkWidget *save_btn = gtk_button_new_with_label("Save & Close");
     gtk_widget_add_css_class(save_btn, "btn-primary");
@@ -131,9 +131,8 @@ static void launch_game(GtkButton *btn, gpointer user_data)
 
 GtkWidget* create_game_entry(const char *icon, const char *title, const char *desc, const char *exe_name)
 {
-    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_widget_add_css_class(box, "card");
-    gtk_widget_set_size_request(box, 250, -1);
     
     GtkWidget *lbl_icon = gtk_label_new(icon);
     gtk_widget_set_margin_bottom(lbl_icon, 10);
@@ -235,9 +234,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     
     // Champions Board
     GtkWidget *champ_frame = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
-    gtk_widget_add_css_class(champ_frame, "champions-panel");
-    gtk_widget_set_halign(champ_frame, GTK_ALIGN_CENTER);
-    gtk_widget_set_size_request(champ_frame, 500, -1);
+    gtk_widget_add_css_class(champ_frame, "card");
     
     GtkWidget *champ_label = gtk_label_new("🏆 HALL OF FAME 🏆");
     gtk_widget_add_css_class(champ_label, "champ-title");
