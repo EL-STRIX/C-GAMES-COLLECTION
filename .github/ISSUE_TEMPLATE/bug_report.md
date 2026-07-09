@@ -1,32 +1,28 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Report a bug or crash in one of the games or the launcher
 title: "[BUG] "
 labels: bug
 assignees: ''
 ---
 
-## Describe the bug
-A clear and concise description of what the bug is.
+## Description
+Provide a detailed description of the bug. Mention whether it occurred in a specific game (e.g., Tic Tac Toe) or the central launcher.
 
-## To Reproduce
-Steps to reproduce the behavior:
-1. Compile using '...'
-2. Run '...'
-3. Click on '....'
-4. See error
+## Reproduction Steps
+1. How was the project compiled? (e.g., MSYS2 UCRT64, Ubuntu apt)
+2. What command was used to launch the game?
+3. What exact sequence of clicks or inputs triggered the issue?
+4. What was the exact error message or terminal output? (Paste logs if available)
 
-## Expected behavior
-A clear and concise description of what you expected to happen.
-
-## Screenshots
-If applicable, add screenshots to help explain your problem.
+## Expected Behavior
+Explain what should have happened instead of the bug.
 
 ## Environment
- - OS: [e.g. Windows 11, Ubuntu 22.04]
- - Compiler: [e.g. GCC 11.2, MinGW64]
- - GTK Version: [e.g. GTK 4.8.0]
- - Project Version: [e.g. v1.0.0]
+ - **OS**: [e.g., Windows 11, Ubuntu 22.04]
+ - **Compiler**: [e.g., GCC 12.2.0, Clang 14]
+ - **GTK4 Version**: [e.g., 4.10.1]
+ - **MSYS2 Environment (if Windows)**: [e.g., UCRT64, MINGW64]
 
-## Additional context
-Add any other context about the problem here (e.g. did a core dump occur?).
+## Additional Context
+Include any additional information, such as whether a core dump was generated or if the issue only occurs after returning to the launcher.

@@ -1,21 +1,22 @@
 ## Description
-Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context.
+Describe the changes introduced by this Pull Request. List the specific games or shared components (`src/common/`) that were modified.
 
-Fixes # (issue)
+Fixes # (issue number)
 
-## Type of change
+## Type of Change
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- [ ] Breaking change (modifies persistence schema or shared boundaries)
 - [ ] Documentation update
+- [ ] CSS/Styling enhancement
 
-## Checklist:
-- [ ] My code strictly follows the `snake_case` style guidelines of this project.
-- [ ] I have ensured that NO global variables were introduced (all state remains inside `AppData`).
-- [ ] I have compiled locally with `make all` and resolved ALL warnings (`-Wall`).
-- [ ] I have passed the persistence security bounds tests via `make test`.
-- [ ] I have updated/added CSS inside `assets/css` (no hardcoded styles in C).
-- [ ] I have updated the documentation accordingly (if applicable).
+## Quality Assurance Checklist
+- [ ] My code strictly follows the `snake_case` conventions of this repository.
+- [ ] I did not introduce any global variables (state is encapsulated in `AppData`).
+- [ ] The code compiles cleanly with `make all` and produces zero warnings (`-Wall`).
+- [ ] I ran `make test` and all headless GLib tests pass successfully.
+- [ ] Any UI styling changes were placed in `assets/css/` rather than hardcoded in C.
+- [ ] Memory dynamically allocated with `g_new0` or `malloc` is properly freed when the window is destroyed.
 
-## Screenshots (if UI is changed):
-Please attach screenshots comparing the UI before and after the change.
+## Visual Changes (if applicable)
+If this PR alters the GTK4 UI, please attach before/after screenshots here.

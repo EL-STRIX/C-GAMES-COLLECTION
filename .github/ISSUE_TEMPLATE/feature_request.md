@@ -1,19 +1,22 @@
 ---
 name: Feature request
-about: Suggest an idea for this project
+about: Propose a new game, UI enhancement, or architecture improvement
 title: "[FEATURE] "
 labels: enhancement
 assignees: ''
 ---
 
-## Is your feature request related to a problem? Please describe.
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+## Description
+Describe the proposed feature or enhancement. If proposing a new game, briefly outline the rules and how the UI would look.
 
-## Describe the solution you'd like
-A clear and concise description of what you want to happen. Explain how this fits into the `AppData` multi-process architecture.
+## Motivation
+Explain why this feature is needed. Does it solve a specific problem or improve the user experience?
 
-## Describe alternatives you've considered
-A clear and concise description of any alternative solutions or features you've considered.
+## Implementation Approach
+Briefly explain how you envision this being implemented. 
+- Does it require changes to the shared `src/common/persistence.c` engine?
+- Can it be fully encapsulated in a new `AppData` struct?
+- Does it require a new GTK dependency?
 
-## Additional context
-Add any other context or mockups/CSS references for the feature request here.
+## Mockups or References
+Provide any CSS references, ASCII layouts, or mockups that help explain the visual aspect of the request.
