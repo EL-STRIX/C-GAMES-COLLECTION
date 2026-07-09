@@ -118,8 +118,7 @@ void update_ui_board(TttAppData *app)
                 gtk_button_set_label(GTK_BUTTON(btn), "O");
                 gtk_widget_add_css_class(btn, "player-o");
             } else {
-                char numStr[2] = {val, '\0'};
-                gtk_button_set_label(GTK_BUTTON(btn), numStr);
+                gtk_button_set_label(GTK_BUTTON(btn), "");
             }
         }
     }
