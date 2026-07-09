@@ -466,8 +466,8 @@ GtkWidget* rps_create_ui(void)
     GtkWidget *page3 = rps_create_result_page(app);
 
     gtk_stack_add_named(GTK_STACK(app->stack), page1, "page_welcome");
-    gtk_stack_add_named(GTK_STACK(app->stack), page2, "page_game");
-    gtk_stack_add_named(GTK_STACK(app->stack), page3, "page_result");
+    gtk_stack_add_named(GTK_STACK(app->stack), page2, "game_screen");
+    gtk_stack_add_named(GTK_STACK(app->stack), page3, "result_screen");
     
     if (strlen(app->player_name) > 0) {
         gtk_editable_set_text(GTK_EDITABLE(app->name_entry), app->player_name);
