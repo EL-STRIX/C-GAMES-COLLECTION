@@ -79,7 +79,16 @@ static void on_child_exit(GPid pid, gint status, gpointer user_data) {
     g_spawn_close_pid(pid);
     if (main_window) {
         gtk_widget_set_visible(main_window, TRUE);
+        gtk_widget_set_sensitive(main_window, TRUE);
     }
+}
+
+static gboolean delayed_hide_launcher(gpointer data) {
+    (void)data;
+    if (main_window) {
+        gtk_widget_set_visible(main_window, FALSE);
+    }
+    return G_SOURCE_REMOVE;
 }
 
 static void launch_game(GtkButton *btn, gpointer user_data)
@@ -122,7 +131,11 @@ static void launch_game(GtkButton *btn, gpointer user_data)
         g_error_free(error);
     } else {
         if (main_window) {
-            gtk_widget_set_visible(main_window, FALSE);
+            // Prevent double clicks
+            gtk_widget_set_sensitive(main_window, FALSE);
+            // Delay hiding the launcher so the game window has time to spawn
+            // and cover the screen, creating a seamless instant transition.
+            g_timeout_add(800, delayed_hide_launcher, NULL);
         }
         g_child_watch_add(pid, on_child_exit, NULL);
     }
