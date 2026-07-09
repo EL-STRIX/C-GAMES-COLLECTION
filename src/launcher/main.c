@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../common/persistence.h"
+#include "../common/constants.h"
+#include "../common/ui_utils.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -27,7 +29,7 @@ void apply_theme(int theme_id) {
     else if (theme_id == 2) css_filename = "theme_hacker.css";
     
     // We can load CSS by filename
-    load_css_from_file(css_filename);
+    current_theme_provider = load_css_from_file(css_filename);
 }
 
 GtkWidget *main_window = NULL;
@@ -172,9 +174,8 @@ GtkWidget* create_game_entry(const char *icon, const char *title, const char *de
     
     GtkWidget *btn = gtk_button_new_with_label("Play Now");
     gtk_widget_add_css_class(btn, "btn-launch");
-    // Allocate string so it persists
-    char *exe_str = g_strdup(exe_name);
-    g_signal_connect(btn, "clicked", G_CALLBACK(launch_game), exe_str);
+    // Pass the literal exe_name directly instead of allocating a duplicate string
+    g_signal_connect(btn, "clicked", G_CALLBACK(launch_game), (gpointer)exe_name);
     
     gtk_box_append(GTK_BOX(box), lbl_icon);
     gtk_box_append(GTK_BOX(box), lbl_title);

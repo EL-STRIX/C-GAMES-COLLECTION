@@ -8,10 +8,10 @@
 #endif
 
 // Helper function to dynamically locate and load CSS from assets/css directory
-void load_css_from_file(const char *filename) {
+GtkCssProvider* load_css_from_file(const char *filename) {
     if (strpbrk(filename, "/\\")) {
         g_warning("Security violation: path traversal detected in css filename '%s'", filename);
-        return;
+        return NULL;
     }
     
     char *base_dir = NULL;
@@ -47,9 +47,10 @@ void load_css_from_file(const char *filename) {
                                                GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
                                                
     g_object_unref(css_file);
-    g_object_unref(provider);
     g_free(assets_dir);
     g_free(base_dir);
+    
+    return provider;
 }
 
 int load_top_score(const char *game_name, char *out_player_name, size_t out_size) {

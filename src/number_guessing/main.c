@@ -12,6 +12,8 @@
 #include <time.h>    // Used to set the random seed based on time
 #include <string.h>  // Used for text/string handling
 #include "../common/persistence.h"
+#include "../common/constants.h"
+#include "../common/ui_utils.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -51,8 +53,6 @@ typedef struct
 // Resets the state of the game for a new round
 static void start_game_logic(GameApp *app)
 {
-    // Seed securely so that the sequence is highly unpredictable
-    srand(time(0));
     // Determine the secret target (1-100 inclusive)
     app->secret_number = (rand() % 100) + 1;
     app->attempts = 0;
@@ -93,45 +93,11 @@ static void on_start_clicked(GtkButton *btn, GameApp *app)
     start_game_logic(app);
 }
 
-// 5. Called when "EXIT" button is clicked
-static void confirm_exit_response(GObject *source_object, GAsyncResult *res, gpointer user_data) {
-    GtkAlertDialog *dialog = GTK_ALERT_DIALOG(source_object);
-    GError *error = NULL;
-    int response = gtk_alert_dialog_choose_finish(dialog, res, &error);
-    if (error) {
-        g_error_free(error);
-        return;
-    }
-    if (response == 1) {
-        if (return_to_launcher()) {
-            GameApp *app = (GameApp *)user_data;
-            GtkWindow *window = GTK_WINDOW(app->window);
-            GtkApplication *gtk_app = gtk_window_get_application(window);
-            g_application_quit(G_APPLICATION(gtk_app));
-        }
-    }
-}
-
 static void on_header_back_clicked(GtkButton *btn, gpointer user_data)
 {
     (void)btn;
     GameApp *app = (GameApp *)user_data;
-    const char *visible_child = gtk_stack_get_visible_child_name(GTK_STACK(app->stack));
-    if (g_strcmp0(visible_child, "page_game") == 0) {
-        GtkAlertDialog *dialog = gtk_alert_dialog_new("Are you sure you want to return to the main menu?");
-        gtk_alert_dialog_set_detail(dialog, "Any unsaved progress will be lost.");
-        const char *buttons[] = {"Cancel", "Return to Menu", NULL};
-        gtk_alert_dialog_set_buttons(dialog, buttons);
-        gtk_alert_dialog_set_cancel_button(dialog, 0);
-        gtk_alert_dialog_set_default_button(dialog, 0);
-        gtk_alert_dialog_choose(dialog, GTK_WINDOW(app->window), NULL, confirm_exit_response, app);
-        g_object_unref(dialog);
-    } else {
-        if (return_to_launcher()) {
-            GtkApplication *gtk_app = gtk_window_get_application(GTK_WINDOW(app->window));
-            g_application_quit(G_APPLICATION(gtk_app));
-        }
-    }
+    handle_header_back_clicked(app->window, app->stack, "page_game");
 }
 
 // 3. Called when "SUBMIT GUESS" button is clicked
@@ -218,17 +184,6 @@ static void on_play_again_clicked(GtkButton *btn, GameApp *app)
 
 
 // --- UI BUILDER FUNCTIONS ---
-
-// Helper: Creates a standard white card container
-GtkWidget *create_card_box(void)
-{
-    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 15);
-    gtk_widget_add_css_class(box, "card");
-    gtk_widget_set_halign(box, GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(box, GTK_ALIGN_CENTER);
-    gtk_widget_set_size_request(box, 320, -1);
-    return box;
-}
 
 // Build Page 1: Login Screen
 GtkWidget *create_welcome_page(GameApp *app)
@@ -366,7 +321,7 @@ static void activate(GtkApplication *app_system, gpointer user_data)
 
     // Setup Main Window
     app->window = gtk_application_window_new(app_system);
-    gtk_window_set_default_size(GTK_WINDOW(app->window), 900, 700);
+    gtk_window_set_default_size(GTK_WINDOW(app->window), DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
     gtk_window_maximize(GTK_WINDOW(app->window));
 
     GtkWidget *header = gtk_header_bar_new();
@@ -432,7 +387,10 @@ static void activate(GtkApplication *app_system, gpointer user_data)
 // --- PROGRAM ENTRY POINT ---
 int main(int argc, char **argv)
 {
-    GtkApplication *app = gtk_application_new("org.sujay.numberguess", G_APPLICATION_NON_UNIQUE);
+    // Seed the RNG exactly once at startup to prevent identical sequences
+    srand((unsigned)time(NULL));
+
+    GtkApplication *app = gtk_application_new("com.sujay.numberguessing", G_APPLICATION_DEFAULT_FLAGS);
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
     int status = g_application_run(G_APPLICATION(app), argc, argv);
     g_object_unref(app);

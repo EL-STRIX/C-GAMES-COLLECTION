@@ -1,66 +1,24 @@
-name: Build and Package Games
+name: CI Build and Test
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ main ]
-  workflow_dispatch:
+    branches: [ "main" ]
 
 jobs:
-  build-windows:
-    runs-on: windows-latest
-    
-    defaults:
-      run:
-        shell: msys2 {0}
-        
+  build-ubuntu:
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     
-    - name: Setup MSYS2
-      uses: msys2/setup-msys2@v2
-      with:
-        msystem: MINGW64
-        update: true
-        install: >-
-          mingw-w64-x86_64-gcc
-          mingw-w64-x86_64-gtk4
-          mingw-w64-x86_64-pkgconf
-          make
-          
-    - name: Build All Games
+    - name: Install Dependencies
       run: |
-        make all
-        
+        sudo apt-get update
+        sudo apt-get install -y gcc make pkg-config libgtk-4-dev xvfb
+
+    - name: Build Project
+      run: make all CFLAGS="-std=c11 -Wall -Wextra -Werror -Wpedantic -O2 $(pkg-config --cflags gtk4)"
+      
     - name: Run Tests
-      run: |
-        make test
-        
-    # On Windows, we need to bundle the required GTK DLLs with the executables
-    - name: Bundle DLLs
-      run: |
-        # Example of grabbing required GTK/glib/etc DLLs into the bin folder
-        # For a truly standalone release, tools like `ldd` or `ntldd` are often used
-        # Here we copy some basic ones or rely on users having GTK installed
-        # For true portability, uncomment and adjust the following line with a script like windeployqt equivalent for GTK:
-        # cp /mingw64/bin/*.dll bin/
-        echo "Build complete. DLL packaging would go here."
-        
-    - name: Debug Output Directory
-      run: |
-        pwd
-        ls -la
-        ls -la bin/ || echo "bin/ not found!"
-        
-    - name: Package Release
-      run: |
-        mkdir release
-        cp -r bin release/
-        cp -r assets release/
-        
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: C-Games-Collection-Windows
-        path: ${{ github.workspace }}/release
+      run: xvfb-run make test

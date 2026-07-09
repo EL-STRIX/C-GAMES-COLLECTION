@@ -15,6 +15,8 @@
 #include <time.h>
 #include <gtk/gtk.h>
 #include "../common/persistence.h"
+#include "../common/constants.h"
+#include "../common/ui_utils.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -267,44 +269,11 @@ void on_water_clicked(GtkButton *btn, gpointer user_data) { (void)btn; process_r
 void on_next_round_clicked(GtkButton *btn, gpointer user_data) { (void)btn; start_next_round_ui((AppData*)user_data); }
 void on_play_again_clicked(GtkButton *btn, gpointer user_data) { (void)btn; start_new_game((AppData*)user_data); }
 
-static void confirm_exit_response(GObject *source_object, GAsyncResult *res, gpointer user_data) {
-    GtkAlertDialog *dialog = GTK_ALERT_DIALOG(source_object);
-    GError *error = NULL;
-    int response = gtk_alert_dialog_choose_finish(dialog, res, &error);
-    if (error) {
-        g_error_free(error);
-        return;
-    }
-    if (response == 1) {
-        if (return_to_launcher()) {
-            AppData *data = (AppData *)user_data;
-            GtkWindow *window = GTK_WINDOW(data->window);
-            GtkApplication *app = gtk_window_get_application(window);
-            g_application_quit(G_APPLICATION(app));
-        }
-    }
-}
-
 /* Back Button Callback - returns to menu with confirmation if playing */
 void on_header_back_clicked(GtkButton *btn, gpointer user_data) {
     (void)btn;
     AppData *data = (AppData *)user_data;
-    const char *visible_child = gtk_stack_get_visible_child_name(GTK_STACK(data->stack));
-    if (g_strcmp0(visible_child, "game_screen") == 0) {
-        GtkAlertDialog *dialog = gtk_alert_dialog_new("Are you sure you want to return to the main menu?");
-        gtk_alert_dialog_set_detail(dialog, "Any unsaved progress will be lost.");
-        const char *buttons[] = {"Cancel", "Return to Menu", NULL};
-        gtk_alert_dialog_set_buttons(dialog, buttons);
-        gtk_alert_dialog_set_cancel_button(dialog, 0);
-        gtk_alert_dialog_set_default_button(dialog, 0);
-        gtk_alert_dialog_choose(dialog, GTK_WINDOW(data->window), NULL, confirm_exit_response, data);
-        g_object_unref(dialog);
-    } else {
-        if (return_to_launcher()) {
-            GtkApplication *app = gtk_window_get_application(GTK_WINDOW(data->window));
-            g_application_quit(G_APPLICATION(app));
-        }
-    }
+    handle_header_back_clicked(data->window, data->stack, "game_screen");
 }
 
 /* --- CSS Styling --- */
@@ -454,9 +423,7 @@ GtkWidget* create_result_screen(AppData *data) {
     gtk_widget_set_vexpand(vbox, TRUE);
     gtk_widget_set_hexpand(vbox, TRUE);
 
-    GtkWidget *card = gtk_box_new(GTK_ORIENTATION_VERTICAL, 20);
-    gtk_widget_add_css_class(card, "login-card");
-    gtk_widget_set_size_request(card, 350, -1);
+    GtkWidget *card = create_card_box();
     gtk_box_append(GTK_BOX(vbox), card);
 
     GtkWidget *title_lbl = gtk_label_new("🎮 SNAKE GUN WATER");
@@ -496,13 +463,10 @@ GtkWidget* create_result_screen(AppData *data) {
 
 void activate(GtkApplication *app, gpointer user_data) {
     (void)user_data;
-    (void)user_data;
     AppData *data = g_slice_new0(AppData);
-    srand((unsigned int)time(NULL)); /* seed RNG for computer choice */
 
     GtkWidget *window = gtk_application_window_new(app);
-    gtk_window_set_default_size(GTK_WINDOW(window), 900, 700);
-    gtk_window_maximize(GTK_WINDOW(window));
+    gtk_window_set_default_size(GTK_WINDOW(window), 400, 600);
     
     /* Store the window in AppData so the Exit button can use it */
     data->window = window;
@@ -570,7 +534,10 @@ void activate(GtkApplication *app, gpointer user_data) {
 }
 
 int main(int argc, char **argv) {
-    GtkApplication *app = gtk_application_new("org.sujay.sgw", G_APPLICATION_NON_UNIQUE);
+    /* Initialize RNG securely */
+    srand((unsigned)time(NULL));
+
+    GtkApplication *app = gtk_application_new("com.sujay.snakegunwater", G_APPLICATION_DEFAULT_FLAGS);
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
     int status = g_application_run(G_APPLICATION(app), argc, argv);
     g_object_unref(app);

@@ -14,6 +14,6 @@ void load_global_settings(char *player_name, size_t out_size, int *theme_id);
 
 // Utility functions
 gboolean return_to_launcher(void);
-void load_css_from_file(const char *filename);
+GtkCssProvider* load_css_from_file(const char *filename);
 
 #endif // PERSISTENCE_H
