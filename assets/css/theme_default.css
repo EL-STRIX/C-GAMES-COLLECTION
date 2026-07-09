@@ -78,7 +78,7 @@ label { color: #334155; }
 
 /* Buttons */
 button { 
-    all: unset; 
+    border: none; outline: none; 
     border-radius: 8px; 
     padding: 10px 20px; 
     font-weight: 600;
