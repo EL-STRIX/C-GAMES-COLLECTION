@@ -196,7 +196,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_widget_add_css_class(title, "header-title");
     gtk_widget_set_hexpand(title, TRUE);
     
-    GtkWidget *btn_settings = gtk_button_new_with_label("⚙️ Settings");
+    GtkWidget *btn_settings = gtk_button_new_with_label("🔧 Settings");
     gtk_widget_add_css_class(btn_settings, "btn-secondary");
     gtk_widget_set_valign(btn_settings, GTK_ALIGN_CENTER);
     g_signal_connect(btn_settings, "clicked", G_CALLBACK(open_settings_dialog), window);
@@ -229,7 +229,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_grid_attach(GTK_GRID(grid), g3, 0, 1, 1, 1);
     
     // Game 4
-    GtkWidget *g4 = create_game_entry("⚔️", "Epic Tic Tac Toe", "An enhanced battle version of Tic Tac Toe.", "tic-tac-toe-gui.exe");
+    GtkWidget *g4 = create_game_entry("❌⭕", "Epic Tic Tac Toe", "An enhanced battle version of Tic Tac Toe.", "tic-tac-toe-gui.exe");
     gtk_grid_attach(GTK_GRID(grid), g4, 1, 1, 1, 1);
     
     // Champions Board
