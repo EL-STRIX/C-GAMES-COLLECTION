@@ -211,6 +211,7 @@ void on_cell_clicked(GtkWidget *widget, gpointer data)
 
 void on_start_clicked(GtkWidget *widget, gpointer data)
 {
+    (void)widget;
     AppData *app = (AppData *)data;
     const char *name = gtk_editable_get_text(GTK_EDITABLE(app->entry_p1));
     char *trimmed = g_strstrip(g_strdup(name));
@@ -237,6 +238,7 @@ void on_start_clicked(GtkWidget *widget, gpointer data)
 
 void on_reset_game_clicked(GtkWidget *widget, gpointer data)
 {
+    (void)widget;
     AppData *app = (AppData *)data;
     reset_board_logic(app);
     update_ui_board(app);
@@ -244,6 +246,7 @@ void on_reset_game_clicked(GtkWidget *widget, gpointer data)
 
 void on_play_again_clicked(GtkWidget *widget, gpointer data)
 {
+    (void)widget;
     AppData *app = (AppData *)data;
     init_game_state(app);
     reset_board_logic(app);
@@ -266,14 +269,7 @@ void on_header_back_clicked(GtkButton *btn, gpointer user_data)
 // BUILD CARD HELPERS
 // ============================================================
 
-GtkWidget *create_card_box()
-{
-    GtkWidget *card = gtk_box_new(GTK_ORIENTATION_VERTICAL, 15);
-    gtk_widget_add_css_class(card, "card"); 
-    gtk_widget_set_halign(card, GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(card, GTK_ALIGN_CENTER);
-    return card;
-}
+
 
 void add_footer(GtkWidget *box)
 {
