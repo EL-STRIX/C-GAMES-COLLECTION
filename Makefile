@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -std=c11 -Wall -Wextra -Wpedantic -Wconversion -Wshadow -O2 -g $(shell pkg-config --cflags gtk4)
+CFLAGS = -std=c11 -Wall -Wextra -Wconversion -Wshadow -O2 -g $(shell pkg-config --cflags gtk4)
 LDFLAGS = $(shell pkg-config --libs gtk4)
 BIN_DIR = bin
 
