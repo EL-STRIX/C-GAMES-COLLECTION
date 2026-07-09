@@ -7,7 +7,6 @@
 
 * {
     font-family: "Inter", "Segoe UI", "Noto Sans", sans-serif;
-    -gtk-icon-theme: "Adwaita";
 }
 
 window { 
@@ -133,5 +132,5 @@ button {
     transform: translateY(-2px); 
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
-.choice-emoji { font-size: 32pt; margin-bottom: 8px; }
+.choice-emoji { font-size: 32pt; margin-bottom: 8px; font-weight: normal; font-family: "Segoe UI Emoji", "Apple Color Emoji", emoji; }
 .choice-label { font-weight: 600; color: #bac2de; font-size: 11pt; }
