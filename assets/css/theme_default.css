@@ -85,6 +85,9 @@ button {
     font-size: 11pt;
     transition: all 0.15s ease; 
 }
+button label {
+    color: inherit;
+}
 .btn-primary { 
     background-color: #2563eb; 
     color: #ffffff; 

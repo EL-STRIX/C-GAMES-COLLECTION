@@ -73,11 +73,15 @@ label { color: #00aa00; }
 
 button { 
     all: unset; 
-    border-radius: 0px; 
+    border-radius: 8px; 
     padding: 10px 20px; 
     font-weight: 600;
     font-size: 11pt;
     transition: all 0.15s ease; 
+    border: 1px solid transparent;
+}
+button label {
+    color: inherit;
 }
 .btn-primary { 
     background-color: #004400; 
