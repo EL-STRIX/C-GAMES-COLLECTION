@@ -460,6 +460,7 @@ void activate(GtkApplication *app, gpointer user_data) {
 
     GtkWidget *window = gtk_application_window_new(app);
     gtk_window_set_default_size(GTK_WINDOW(window), 400, 600);
+    gtk_window_maximize(GTK_WINDOW(window));
     
     /* Store the window in AppData so the Exit button can use it */
     data->window = window;
