@@ -38,8 +38,8 @@ button { border-radius: 0; padding: 10px 20px; font-weight: 600; font-size: 11pt
 .btn-danger:hover { background-color: #220000; border-color: #ff0000; box-shadow: 0 0 10px rgba(255,0,0,0.3); }
 .btn-danger:active { background-color: #ff0000; color: #000000; }
 
-.grid-button { font-size: 28pt; font-weight: 900; min-width: 80px; min-height: 80px; background-color: #000000; border: 1px solid #004400; color: #00ff00; }
-.grid-button:hover { background-color: #001100; border-color: #00ff00; }
+.grid-button { font-size: 36pt; font-weight: 900; min-width: 90px; min-height: 90px; background-color: transparent; border: none; border-radius: 0; box-shadow: none; color: inherit; }
+.grid-button:hover { background-color: rgba(128, 128, 128, 0.1); }
 .player-x { color: #00ff00; text-shadow: 0 0 10px rgba(0,255,0,0.5); }
 .player-o { color: #ff0000; text-shadow: 0 0 10px rgba(255,0,0,0.5); }
 
@@ -47,3 +47,6 @@ button { border-radius: 0; padding: 10px 20px; font-weight: 600; font-size: 11pt
 .choice-btn:hover { background-color: #001100; border-color: #00ff00; }
 .choice-emoji { font-size: 32pt; margin-bottom: 8px; filter: grayscale(100%) brightness(1.5) sepia(100%) hue-rotate(80deg) saturate(300%); }
 .choice-label { font-weight: 600; font-size: 11pt; color: #00cc00; text-transform: uppercase; }
+
+.border-bottom { border-bottom: 4px solid #16a34a !important; }
+.border-right { border-right: 4px solid #16a34a !important; }

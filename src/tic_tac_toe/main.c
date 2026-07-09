@@ -395,8 +395,8 @@ GtkWidget* ttt_create_ui(void)
     gtk_box_append(GTK_BOX(box_scores), app->label_score_p2);
 
     GtkWidget *grid = gtk_grid_new();
-    gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
-    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 0);
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 0);
     gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
     gtk_widget_set_margin_top(grid, 20);
     gtk_widget_set_margin_bottom(grid, 20);
@@ -406,6 +406,8 @@ GtkWidget* ttt_create_ui(void)
         int c = i % 3;
         app->buttons[r][c] = gtk_button_new_with_label("");
         gtk_widget_add_css_class(app->buttons[r][c], "grid-button");
+        if (r < 2) gtk_widget_add_css_class(app->buttons[r][c], "border-bottom");
+        if (c < 2) gtk_widget_add_css_class(app->buttons[r][c], "border-right");
         g_object_set_data(G_OBJECT(app->buttons[r][c]), "cell_id", GINT_TO_POINTER(i));
         g_signal_connect(app->buttons[r][c], "clicked", G_CALLBACK(on_cell_clicked), app);
         gtk_grid_attach(GTK_GRID(grid), app->buttons[r][c], c, r, 1, 1);
