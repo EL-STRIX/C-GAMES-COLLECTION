@@ -183,8 +183,21 @@ void load_global_settings(char *player_name, size_t out_size, int *theme_id) {
             player_name[out_size - 1] = '\0';
             g_free(name);
         } else if (out_size > 0) {
-            snprintf(player_name, out_size, "Player 1");
+            // Fallback: try to recover name from game history
+            char temp_player[50];
+            if (load_top_score("rps", temp_player, sizeof(temp_player)) != -1 && strcmp(temp_player, "Unknown") != 0 && strcmp(temp_player, "Guest") != 0) {
+                snprintf(player_name, out_size, "%s", temp_player);
+            } else if (load_top_score("number_guessing", temp_player, sizeof(temp_player)) != -1 && strcmp(temp_player, "Unknown") != 0 && strcmp(temp_player, "Guest") != 0) {
+                snprintf(player_name, out_size, "%s", temp_player);
+            } else if (load_top_score("sgw", temp_player, sizeof(temp_player)) != -1 && strcmp(temp_player, "Unknown") != 0 && strcmp(temp_player, "Guest") != 0) {
+                snprintf(player_name, out_size, "%s", temp_player);
+            } else if (load_top_score("ttt_gui", temp_player, sizeof(temp_player)) != -1 && strcmp(temp_player, "Unknown") != 0 && strcmp(temp_player, "Guest") != 0) {
+                snprintf(player_name, out_size, "%s", temp_player);
+            } else {
+                snprintf(player_name, out_size, "Player 1");
+            }
         }
+
         
         GError *err = NULL;
         int t = g_key_file_get_integer(kf, "Settings", "ThemeID", &err);
@@ -197,7 +210,23 @@ void load_global_settings(char *player_name, size_t out_size, int *theme_id) {
     } else {
         // Removed g_message here to prevent spamming the console on first launch
         if (error) g_error_free(error);
-        if (out_size > 0) snprintf(player_name, out_size, "Player 1");
+
+        if (out_size > 0) {
+            // Fallback: try to recover name from game history
+            char temp_player[50];
+            if (load_top_score("rps", temp_player, sizeof(temp_player)) != -1 && strcmp(temp_player, "Unknown") != 0 && strcmp(temp_player, "Guest") != 0) {
+                snprintf(player_name, out_size, "%s", temp_player);
+            } else if (load_top_score("number_guessing", temp_player, sizeof(temp_player)) != -1 && strcmp(temp_player, "Unknown") != 0 && strcmp(temp_player, "Guest") != 0) {
+                snprintf(player_name, out_size, "%s", temp_player);
+            } else if (load_top_score("sgw", temp_player, sizeof(temp_player)) != -1 && strcmp(temp_player, "Unknown") != 0 && strcmp(temp_player, "Guest") != 0) {
+                snprintf(player_name, out_size, "%s", temp_player);
+            } else if (load_top_score("ttt_gui", temp_player, sizeof(temp_player)) != -1 && strcmp(temp_player, "Unknown") != 0 && strcmp(temp_player, "Guest") != 0) {
+                snprintf(player_name, out_size, "%s", temp_player);
+            } else {
+                snprintf(player_name, out_size, "Player 1");
+            }
+        }
+
         if (theme_id) *theme_id = 0;
     }
     g_key_file_free(kf);
