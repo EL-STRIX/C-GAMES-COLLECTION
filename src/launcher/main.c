@@ -239,7 +239,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     GtkWidget *g1 = create_game_entry("\U0001f522", "Number Guessing", "Read the computer's mind and guess the secret number.", "number_guessing");
     gtk_grid_attach(GTK_GRID(grid), g1, 0, 0, 1, 1);
     
-    GtkWidget *g2 = create_game_entry("\u270a\u270b\u270c\ufe0f", "Rock Paper Scissors", "The classic battle of wits against an AI opponent.", "rock_paper_scissors");
+    GtkWidget *g2 = create_game_entry("\u270a\u270b\u270c", "Rock Paper Scissors", "The classic battle of wits against an AI opponent.", "rock_paper_scissors");
     gtk_grid_attach(GTK_GRID(grid), g2, 1, 0, 1, 1);
     
     GtkWidget *g3 = create_game_entry("\U0001f40d\U0001f52b\U0001f4a7", "Snake Gun Water", "A fun variation of RPS with new rules and emojis.", "snake_gun_water");

@@ -371,7 +371,7 @@ static GtkWidget* rps_create_game_page(RpsAppData *data) {
     /* Custom Buttons - USING EMOJIS */
     GtkWidget *btn_rock = rps_create_choice_button("\u270a", "Rock", G_CALLBACK(on_rock_clicked), data);
     GtkWidget *btn_paper = rps_create_choice_button("\u270b", "Paper", G_CALLBACK(on_paper_clicked), data);
-    GtkWidget *btn_scissors = rps_create_choice_button("\u270c\ufe0f", "Scissors", G_CALLBACK(on_scissors_clicked), data);
+    GtkWidget *btn_scissors = rps_create_choice_button("\u270c", "Scissors", G_CALLBACK(on_scissors_clicked), data);
     
     gtk_widget_set_size_request(btn_rock, 80, 80);
     gtk_widget_set_size_request(btn_paper, 80, 80);
