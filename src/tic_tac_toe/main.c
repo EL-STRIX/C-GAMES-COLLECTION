@@ -224,7 +224,32 @@ void on_cell_clicked(GtkWidget *widget, gpointer data)
     }
 }
 
+void on_start_clicked(GtkWidget *widget, gpointer data)
+{
+    (void)widget;
+    TttAppData *app = (TttAppData *)data;
+    const char *name = gtk_editable_get_text(GTK_EDITABLE(app->entry_p1));
+    char *trimmed = g_strstrip(g_strdup(name));
+    if (g_utf8_strlen(trimmed, -1) == 0) {
+        gtk_label_set_text(GTK_LABEL(app->lbl_start_error), "Please enter your name to play!");
+        g_free(trimmed);
+        return;
+    }
+    gtk_label_set_text(GTK_LABEL(app->lbl_start_error), "");
+    
+    strncpy(app->game.name1, trimmed, sizeof(app->game.name1) - 1);
+    g_free(trimmed);
+    app->game.name1[sizeof(app->game.name1) - 1] = '\0';
+    save_global_settings(app->game.name1, -1);
+    
+    snprintf(app->game.name2, sizeof(app->game.name2), "Guest");
 
+    init_game_state(app);
+    reset_board_logic(app);
+    update_ui_board(app);
+    
+    gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "game_page");
+}
 
 void on_reset_game_clicked(GtkWidget *widget, gpointer data)
 {
@@ -319,6 +344,45 @@ GtkWidget* ttt_create_ui(void)
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), global_btn_back);
 
     gtk_box_append(GTK_BOX(vbox), overlay);
+
+    // ============================================================
+    // PAGE 1: START SCREEN
+    // ============================================================
+    GtkWidget *start_page_wrapper = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(start_page_wrapper, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(start_page_wrapper, GTK_ALIGN_CENTER);
+
+    GtkWidget *start_card = create_card_box();
+    
+    GtkWidget *lbl_title = gtk_label_new("\U0001f3ae TIC TAC TOE");
+    gtk_widget_add_css_class(lbl_title, "title-large");
+    gtk_box_append(GTK_BOX(start_card), lbl_title);
+
+    GtkWidget *lbl_subtitle = gtk_label_new("Welcome to the Arena");
+    gtk_widget_add_css_class(lbl_subtitle, "subtitle");
+    gtk_box_append(GTK_BOX(start_card), lbl_subtitle);
+
+    GtkWidget *lbl_p1 = gtk_label_new("What is your name, Challenger?");
+    gtk_widget_set_halign(lbl_p1, GTK_ALIGN_START);
+    gtk_widget_add_css_class(lbl_p1, "subtitle");
+    gtk_box_append(GTK_BOX(start_card), lbl_p1);
+
+    app->entry_p1 = gtk_entry_new();
+    gtk_widget_add_css_class(app->entry_p1, "styled-entry");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(app->entry_p1), "Type name here...");
+    gtk_box_append(GTK_BOX(start_card), app->entry_p1);
+    
+    app->lbl_start_error = gtk_label_new("");
+    gtk_widget_add_css_class(app->lbl_start_error, "error-msg");
+    gtk_box_append(GTK_BOX(start_card), app->lbl_start_error);
+
+    GtkWidget *btn_start = gtk_button_new_with_label("Start Battle");
+    gtk_widget_add_css_class(btn_start, "btn-primary");
+    g_signal_connect(btn_start, "clicked", G_CALLBACK(on_start_clicked), app);
+    gtk_box_append(GTK_BOX(start_card), btn_start);
+
+    gtk_box_append(GTK_BOX(start_page_wrapper), start_card);
+    gtk_stack_add_named(GTK_STACK(app->stack), start_page_wrapper, "start_page");
 
     // ============================================================
     // PAGE 2: GAME BOARD
@@ -433,17 +497,22 @@ GtkWidget* ttt_create_ui(void)
     // apply_theme(theme_id); - Already applied globally
     
     /* Set default player name if available */
-    if (strlen(player_name) == 0) {
-        strncpy(player_name, "Player 1", sizeof(player_name));
+    if (strlen(player_name) > 0) {
+        gtk_editable_set_text(GTK_EDITABLE(app->entry_p1), player_name);
     }
-    strncpy(app->game.name1, player_name, sizeof(app->game.name1) - 1);
-    app->game.name1[sizeof(app->game.name1) - 1] = '\0';
-    snprintf(app->game.name2, sizeof(app->game.name2), "Guest");
     
-    init_game_state(app);
-    reset_board_logic(app);
-    update_ui_board(app);
-    gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "game_page");
+    if (strlen(player_name) > 0 && strcmp(player_name, "Player 1") != 0) {
+        strncpy(app->game.name1, player_name, sizeof(app->game.name1) - 1);
+        app->game.name1[sizeof(app->game.name1) - 1] = '\0';
+        snprintf(app->game.name2, sizeof(app->game.name2), "Guest");
+        
+        init_game_state(app);
+        reset_board_logic(app);
+        update_ui_board(app);
+        gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "game_page");
+    } else {
+        gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "start_page");
+    }
 
     return vbox;
 }
