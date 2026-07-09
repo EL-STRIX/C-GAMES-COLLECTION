@@ -1,5 +1,6 @@
 #include "ui_utils.h"
 #include "persistence.h"
+#include <stdio.h>
 
 static GtkCssProvider *current_theme_provider = NULL;
 
@@ -55,6 +56,11 @@ void handle_header_back_clicked(GtkWidget *window, GtkWidget *stack, const char 
 }
 
 void apply_global_theme(void) {
+#ifdef _WIN32
+    // Suppress MSYS2 GTK/Pango/Fontconfig terminal spam
+    freopen("nul", "w", stderr);
+#endif
+
     char dummy_name[50];
     int theme_id;
     load_global_settings(dummy_name, sizeof(dummy_name), &theme_id);
