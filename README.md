@@ -1,6 +1,6 @@
 # C Games Collection
 
-[![CI Build](https://github.com/sujay/c-games-collection/actions/workflows/build.yml/badge.svg)](https://github.com/sujay/c-games-collection/actions)
+[![CI Build](https://github.com/EL-STRIX/C-GAMES-COLLECTION/actions/workflows/build.yml/badge.svg)](https://github.com/EL-STRIX/C-GAMES-COLLECTION/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 A curated collection of classic mini-games developed in C, featuring modern Graphical User Interfaces (GUIs) powered by GTK4. 
@@ -79,7 +79,7 @@ To compile and run from source, you need:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/sujay/C-GAMES-COLLECTION.git
+   git clone https://github.com/EL-STRIX/C-GAMES-COLLECTION.git
    cd C-GAMES-COLLECTION
    ```
 
