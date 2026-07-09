@@ -9,28 +9,7 @@
 #include <windows.h>
 #endif
 
-static GtkCssProvider *current_theme_provider = NULL;
-
-void apply_theme(int theme_id) {
-    if (current_theme_provider != NULL) {
-        gtk_style_context_remove_provider_for_display(gdk_display_get_default(), GTK_STYLE_PROVIDER(current_theme_provider));
-        g_object_unref(current_theme_provider);
-        current_theme_provider = NULL;
-    }
-
-    if (theme_id == 1 || theme_id == 2) {
-        g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", TRUE, NULL);
-    } else {
-        g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", TRUE, NULL);
-    }
-
-    const char *css_filename = "launcher.css"; // Default
-    if (theme_id == 1) css_filename = "theme_dark.css";
-    else if (theme_id == 2) css_filename = "theme_hacker.css";
-    
-    // We can load CSS by filename
-    current_theme_provider = load_css_from_file(css_filename);
-}
+// apply_theme moved to ui_utils
 
 GtkWidget *main_window = NULL;
 
@@ -46,7 +25,7 @@ static void on_save_settings(GtkButton *btn, gpointer user_data) {
     g_free(widgets);
     
     // Automatically apply theme to launcher if changed
-    apply_theme(theme_id);
+    apply_global_theme();
 }
 
 static void open_settings_dialog(GtkButton *btn, gpointer user_data) {
@@ -76,7 +55,7 @@ static void open_settings_dialog(GtkButton *btn, gpointer user_data) {
     gtk_drop_down_set_selected(GTK_DROP_DOWN(dropdown), theme_id);
     
     GtkWidget *save_btn = gtk_button_new_with_label("Save & Close");
-    gtk_widget_add_css_class(save_btn, "btn-launch");
+    gtk_widget_add_css_class(save_btn, "btn-primary");
     
     GtkWidget **widgets = g_new(GtkWidget*, 3);
     widgets[0] = entry_name;
@@ -173,7 +152,7 @@ GtkWidget* create_game_entry(const char *icon, const char *title, const char *de
     gtk_label_set_justify(GTK_LABEL(lbl_desc), GTK_JUSTIFY_CENTER);
     
     GtkWidget *btn = gtk_button_new_with_label("Play Now");
-    gtk_widget_add_css_class(btn, "btn-launch");
+    gtk_widget_add_css_class(btn, "btn-primary");
     // Pass the literal exe_name directly instead of allocating a duplicate string
     g_signal_connect(btn, "clicked", G_CALLBACK(launch_game), (gpointer)exe_name);
     
@@ -207,10 +186,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), title_lbl);
     
     // Apply Global Theme
-    char dummy_name[50];
-    int theme_id;
-    load_global_settings(dummy_name, sizeof(dummy_name), &theme_id);
-    apply_theme(theme_id);
+    apply_global_theme();
     
     GtkWidget *main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_widget_set_halign(main_vbox, GTK_ALIGN_CENTER);
@@ -222,7 +198,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_widget_set_hexpand(title, TRUE);
     
     GtkWidget *btn_settings = gtk_button_new_with_label("⚙️ Settings");
-    gtk_widget_add_css_class(btn_settings, "btn-settings");
+    gtk_widget_add_css_class(btn_settings, "btn-secondary");
     gtk_widget_set_valign(btn_settings, GTK_ALIGN_CENTER);
     g_signal_connect(btn_settings, "clicked", G_CALLBACK(open_settings_dialog), window);
     

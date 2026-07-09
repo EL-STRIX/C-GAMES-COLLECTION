@@ -291,7 +291,7 @@ static void activate(GtkApplication *gtk_app, gpointer user_data)
 {
     (void)user_data;
     AppData *app = g_new0(AppData, 1);
-    load_css_from_file("theme_white_blue.css");
+    apply_global_theme();
 
     app->window = gtk_application_window_new(gtk_app);
     gtk_window_set_default_size(GTK_WINDOW(app->window), DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
@@ -317,7 +317,7 @@ static void activate(GtkApplication *gtk_app, gpointer user_data)
     gtk_widget_set_valign(global_btn_back, GTK_ALIGN_START);
     gtk_widget_set_margin_top(global_btn_back, 15);
     gtk_widget_set_margin_end(global_btn_back, 15);
-    gtk_widget_add_css_class(global_btn_back, "btn-exit");
+    gtk_widget_add_css_class(global_btn_back, "btn-secondary");
     g_signal_connect(global_btn_back, "clicked", G_CALLBACK(on_header_back_clicked), app);
 
     gtk_overlay_add_overlay(GTK_OVERLAY(overlay), global_btn_back);
@@ -334,11 +334,11 @@ static void activate(GtkApplication *gtk_app, gpointer user_data)
     GtkWidget *start_card = create_card_box();
     
     GtkWidget *lbl_title = gtk_label_new("🎮 TIC TAC TOE");
-    gtk_widget_add_css_class(lbl_title, "game-title");
+    gtk_widget_add_css_class(lbl_title, "title-large");
     gtk_box_append(GTK_BOX(start_card), lbl_title);
 
     GtkWidget *lbl_subtitle = gtk_label_new("Welcome to the Arena");
-    gtk_widget_add_css_class(lbl_subtitle, "welcome-text");
+    gtk_widget_add_css_class(lbl_subtitle, "subtitle");
     gtk_box_append(GTK_BOX(start_card), lbl_subtitle);
 
     GtkWidget *lbl_p1 = gtk_label_new("What is your name, Challenger?");
@@ -356,7 +356,7 @@ static void activate(GtkApplication *gtk_app, gpointer user_data)
     gtk_box_append(GTK_BOX(start_card), app->lbl_start_error);
 
     GtkWidget *btn_start = gtk_button_new_with_label("START BATTLE");
-    gtk_widget_set_name(btn_start, "start_btn"); 
+    gtk_widget_add_css_class(btn_start, "btn-primary");
     g_signal_connect(btn_start, "clicked", G_CALLBACK(on_start_clicked), app);
     gtk_box_append(GTK_BOX(start_card), btn_start);
 
@@ -406,7 +406,7 @@ static void activate(GtkApplication *gtk_app, gpointer user_data)
 
     GtkWidget *btn_reset = gtk_button_new_with_label("RUN IT BACK 🔄");
     gtk_widget_set_margin_top(btn_reset, 10);
-    gtk_widget_set_name(btn_reset, "start_btn"); 
+    gtk_widget_add_css_class(btn_reset, "btn-primary");
     g_signal_connect(btn_reset, "clicked", G_CALLBACK(on_reset_game_clicked), app);
     
     GtkWidget *lbl_tip_game = gtk_label_new("💡 Hint: Use your brain. It helps.");
@@ -438,7 +438,7 @@ static void activate(GtkApplication *gtk_app, gpointer user_data)
     app->result_subtitle = gtk_label_new("");
     gtk_label_set_justify(GTK_LABEL(app->result_subtitle), GTK_JUSTIFY_CENTER);
     gtk_widget_set_margin_bottom(app->result_subtitle, 10);
-    gtk_widget_add_css_class(app->result_subtitle, "welcome-text");
+    gtk_widget_add_css_class(app->result_subtitle, "subtitle");
 
     app->result_score_label = gtk_label_new("Final Score: 0 - 0");
     gtk_widget_add_css_class(app->result_score_label, "score-info");
@@ -447,7 +447,7 @@ static void activate(GtkApplication *gtk_app, gpointer user_data)
     gtk_widget_set_halign(box_actions, GTK_ALIGN_CENTER);
 
     GtkWidget *btn_rematch = gtk_button_new_with_label("Rematch?");
-    gtk_widget_set_name(btn_rematch, "start_btn"); 
+    gtk_widget_add_css_class(btn_rematch, "btn-primary");
     g_signal_connect(btn_rematch, "clicked", G_CALLBACK(on_play_again_clicked), app);
 
     gtk_box_append(GTK_BOX(box_actions), btn_rematch);
@@ -464,7 +464,7 @@ static void activate(GtkApplication *gtk_app, gpointer user_data)
     int theme_id;
     char player_name[50];
     load_global_settings(player_name, sizeof(player_name), &theme_id);
-    // apply_theme(theme_id);
+    // apply_theme(theme_id); - Already applied globally
     
     /* Set default player name if available */
     if (strlen(player_name) > 0) {

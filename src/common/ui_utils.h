@@ -13,4 +13,7 @@ void confirm_exit_response(GObject *source_object, GAsyncResult *res, gpointer u
 // Standard back button logic
 void handle_header_back_clicked(GtkWidget *window, GtkWidget *stack, const char *game_page_name);
 
+// Universal Theme Loader
+void apply_global_theme(void);
+
 #endif // UI_UTILS_H

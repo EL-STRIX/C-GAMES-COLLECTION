@@ -190,8 +190,8 @@ GtkWidget *create_welcome_page(GameApp *app)
 {
     GtkWidget *box = create_card_box();
 
-    GtkWidget *welcome_lbl = gtk_label_new("Ready to guess?");
-    gtk_widget_add_css_class(welcome_lbl, "welcome-text");
+    GtkWidget *title_lbl = gtk_label_new("🔢 Number Guessing");
+    gtk_widget_add_css_class(title_lbl, "title-large");
 
     GtkWidget *q_lbl = gtk_label_new("What's your name, Challenger?");
     gtk_widget_add_css_class(q_lbl, "name-question");
@@ -205,10 +205,10 @@ GtkWidget *create_welcome_page(GameApp *app)
     gtk_widget_add_css_class(app->name_warning_label, "warning-text");
 
     GtkWidget *start_btn = gtk_button_new_with_label("START ADVENTURE");
-    gtk_widget_add_css_class(start_btn, "btn-blue");
+    gtk_widget_add_css_class(start_btn, "btn-primary");
     g_signal_connect(start_btn, "clicked", G_CALLBACK(on_start_clicked), app);
 
-    gtk_box_append(GTK_BOX(box), welcome_lbl);
+    gtk_box_append(GTK_BOX(box), title_lbl);
     gtk_box_append(GTK_BOX(box), q_lbl);
     gtk_box_append(GTK_BOX(box), app->name_entry);
     gtk_box_append(GTK_BOX(box), app->name_warning_label);
@@ -237,7 +237,7 @@ GtkWidget *create_game_page(GameApp *app)
     gtk_widget_set_halign(app->guess_spin, GTK_ALIGN_CENTER);
 
     GtkWidget *submit_btn = gtk_button_new_with_label("SUBMIT GUESS");
-    gtk_widget_add_css_class(submit_btn, "btn-blue");
+    gtk_widget_add_css_class(submit_btn, "btn-primary");
     g_signal_connect(submit_btn, "clicked", G_CALLBACK(on_submit_guess), app);
 
     app->attempts_label = gtk_label_new("Attempts: 0");
@@ -291,7 +291,7 @@ GtkWidget *create_result_page(GameApp *app)
     gtk_widget_set_halign(btn_box, GTK_ALIGN_CENTER);
 
     GtkWidget *play_btn = gtk_button_new_with_label("PLAY AGAIN");
-    gtk_widget_add_css_class(play_btn, "btn-blue");
+    gtk_widget_add_css_class(play_btn, "btn-primary");
     g_signal_connect(play_btn, "clicked", G_CALLBACK(on_play_again_clicked), app);
     g_signal_connect(play_btn, "activate", G_CALLBACK(on_play_again_clicked), app);
 
@@ -333,7 +333,7 @@ static void activate(GtkApplication *app_system, gpointer user_data)
     gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), title_lbl);
 
     // Load CSS dynamically
-    load_css_from_file("theme_white_blue.css");
+    apply_global_theme();
     
     // Setup "Stack" to switch pages
     app->stack = gtk_stack_new();

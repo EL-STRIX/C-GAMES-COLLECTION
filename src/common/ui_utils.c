@@ -1,6 +1,8 @@
 #include "ui_utils.h"
 #include "persistence.h"
 
+static GtkCssProvider *current_theme_provider = NULL;
+
 GtkWidget* create_card_box(void)
 {
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 15);
@@ -50,4 +52,28 @@ void handle_header_back_clicked(GtkWidget *window, GtkWidget *stack, const char 
             g_application_quit(G_APPLICATION(gtk_app));
         }
     }
+}
+
+void apply_global_theme(void) {
+    char dummy_name[50];
+    int theme_id;
+    load_global_settings(dummy_name, sizeof(dummy_name), &theme_id);
+
+    if (current_theme_provider != NULL) {
+        gtk_style_context_remove_provider_for_display(gdk_display_get_default(), GTK_STYLE_PROVIDER(current_theme_provider));
+        g_object_unref(current_theme_provider);
+        current_theme_provider = NULL;
+    }
+
+    if (theme_id == 1 || theme_id == 2) {
+        g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", TRUE, NULL);
+    } else {
+        g_object_set(gtk_settings_get_default(), "gtk-application-prefer-dark-theme", FALSE, NULL);
+    }
+
+    const char *css_filename = "theme_default.css"; // Default
+    if (theme_id == 1) css_filename = "theme_dark.css";
+    else if (theme_id == 2) css_filename = "theme_hacker.css";
+    
+    current_theme_provider = load_css_from_file(css_filename);
 }

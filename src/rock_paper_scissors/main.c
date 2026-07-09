@@ -265,7 +265,7 @@ static void on_header_back_clicked(GtkButton *btn, gpointer user_data) {
 /* --- CSS Styling --- */
 /* Loads application CSS into the GTK style context */
 void load_css(void) {
-    load_css_from_file("theme_white_blue.css");
+    apply_global_theme();
 }
 
 /* --- UI Construction --- */
@@ -301,17 +301,15 @@ GtkWidget* create_login_screen(AppData *data) {
     gtk_widget_set_vexpand(vbox, TRUE);
     gtk_widget_set_hexpand(vbox, TRUE);
 
-    GtkWidget *card = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
-    gtk_widget_add_css_class(card, "login-card");
-    gtk_widget_set_size_request(card, 350, -1);
+    GtkWidget *card = create_card_box();
     gtk_box_append(GTK_BOX(vbox), card);
 
     GtkWidget *title_lbl = gtk_label_new("🎮 ROCK PAPER SCISSORS");
-    gtk_widget_add_css_class(title_lbl, "game-title");
+    gtk_widget_add_css_class(title_lbl, "title-large");
     gtk_box_append(GTK_BOX(card), title_lbl);
 
     GtkWidget *welcome_lbl = gtk_label_new("Welcome to the Arena");
-    gtk_widget_add_css_class(welcome_lbl, "welcome-text");
+    gtk_widget_add_css_class(welcome_lbl, "subtitle");
     gtk_box_append(GTK_BOX(card), welcome_lbl);
 
     GtkWidget *input_lbl = gtk_label_new("What is your name, Challenger?");
@@ -329,7 +327,7 @@ GtkWidget* create_login_screen(AppData *data) {
     gtk_box_append(GTK_BOX(card), data->name_error_label);
 
     GtkWidget *start_btn = gtk_button_new_with_label("START BATTLE");
-    gtk_widget_set_name(start_btn, "start_btn");
+    gtk_widget_add_css_class(start_btn, "btn-primary");
     g_signal_connect(start_btn, "clicked", G_CALLBACK(on_start_clicked), data);
     gtk_box_append(GTK_BOX(card), start_btn);
 
@@ -344,9 +342,7 @@ GtkWidget* create_game_screen(AppData *data) {
     gtk_widget_set_vexpand(center_box, TRUE);
     gtk_widget_set_hexpand(center_box, TRUE);
 
-    GtkWidget *card = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
-    gtk_widget_add_css_class(card, "login-card"); 
-    gtk_widget_set_size_request(card, 380, -1);
+    GtkWidget *card = create_card_box();
     gtk_box_append(GTK_BOX(center_box), card);
 
     GtkWidget *title_lbl = gtk_label_new("🎮 ROCK PAPER SCISSORS");
@@ -388,7 +384,7 @@ GtkWidget* create_game_screen(AppData *data) {
     gtk_box_append(GTK_BOX(card), data->result_label);
 
     data->next_round_btn = gtk_button_new_with_label("Next");
-    gtk_widget_set_name(data->next_round_btn, "start_btn");
+    gtk_widget_add_css_class(data->next_round_btn, "btn-primary");
     g_signal_connect(data->next_round_btn, "clicked", G_CALLBACK(on_next_round_clicked), data);
     gtk_box_append(GTK_BOX(card), data->next_round_btn);
 
@@ -408,9 +404,7 @@ GtkWidget* create_result_screen(AppData *data) {
     gtk_widget_set_vexpand(vbox, TRUE);
     gtk_widget_set_hexpand(vbox, TRUE);
 
-    GtkWidget *card = gtk_box_new(GTK_ORIENTATION_VERTICAL, 20);
-    gtk_widget_add_css_class(card, "login-card");
-    gtk_widget_set_size_request(card, 350, -1);
+    GtkWidget *card = create_card_box();
     gtk_box_append(GTK_BOX(vbox), card);
 
     GtkWidget *title_lbl = gtk_label_new("🎮 ROCK PAPER SCISSORS");
@@ -432,7 +426,7 @@ GtkWidget* create_result_screen(AppData *data) {
 
     /* 1. Play Again Button */
     data->play_again_btn = gtk_button_new_with_label("Rematch?");
-    gtk_widget_set_name(data->play_again_btn, "start_btn");
+    gtk_widget_add_css_class(data->play_again_btn, "btn-primary");
     gtk_widget_set_hexpand(data->play_again_btn, TRUE);
     g_signal_connect(data->play_again_btn, "clicked", G_CALLBACK(on_play_again_clicked), data);
     gtk_box_append(GTK_BOX(button_box), data->play_again_btn);
@@ -475,6 +469,7 @@ void activate(GtkApplication *app, gpointer user_data) {
     gtk_overlay_set_child(GTK_OVERLAY(overlay), main_box);
 
     GtkWidget *global_btn_back = gtk_button_new_with_label("🔙 Return to Main Menu");
+    gtk_widget_add_css_class(global_btn_back, "btn-secondary");
     gtk_widget_set_halign(global_btn_back, GTK_ALIGN_START);
     gtk_widget_set_valign(global_btn_back, GTK_ALIGN_START);
     gtk_widget_set_margin_top(global_btn_back, 15);
