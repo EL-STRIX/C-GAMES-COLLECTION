@@ -317,7 +317,7 @@ static GtkWidget* sgw_create_welcome_page(SgwAppData *data) {
     GtkWidget *card = create_card_box();
     gtk_box_append(GTK_BOX(vbox), card);
 
-    GtkWidget *title_lbl = gtk_label_new("🎮 SNAKE GUN WATER");
+    GtkWidget *title_lbl = gtk_label_new("\U0001f3ae SNAKE GUN WATER");
     gtk_widget_add_css_class(title_lbl, "title-large");
     gtk_box_append(GTK_BOX(card), title_lbl);
 
@@ -359,7 +359,7 @@ static GtkWidget* sgw_create_game_page(SgwAppData *data) {
     GtkWidget *card = create_card_box();
     gtk_box_append(GTK_BOX(center_box), card);
 
-    GtkWidget *title_lbl = gtk_label_new("🎮 SNAKE GUN WATER");
+    GtkWidget *title_lbl = gtk_label_new("\U0001f3ae SNAKE GUN WATER");
     gtk_widget_add_css_class(title_lbl, "title-large");
     gtk_box_append(GTK_BOX(card), title_lbl);
 
@@ -380,9 +380,9 @@ static GtkWidget* sgw_create_game_page(SgwAppData *data) {
     gtk_widget_set_margin_bottom(data->choices_box, 10);
 
     /* Custom Buttons - USING EMOJIS */
-    GtkWidget *btn_snake = sgw_create_choice_button("🐍", "SNAKE", G_CALLBACK(on_snake_clicked), data);
-    GtkWidget *btn_gun = sgw_create_choice_button("🔫", "GUN", G_CALLBACK(on_gun_clicked), data);
-    GtkWidget *btn_water = sgw_create_choice_button("💧", "WATER", G_CALLBACK(on_water_clicked), data);
+    GtkWidget *btn_snake = sgw_create_choice_button("\U0001f40d", "SNAKE", G_CALLBACK(on_snake_clicked), data);
+    GtkWidget *btn_gun = sgw_create_choice_button("\U0001f52b", "GUN", G_CALLBACK(on_gun_clicked), data);
+    GtkWidget *btn_water = sgw_create_choice_button("\U0001f4a7", "WATER", G_CALLBACK(on_water_clicked), data);
     
     gtk_widget_set_size_request(btn_snake, 80, 80);
     gtk_widget_set_size_request(btn_gun, 80, 80);
@@ -421,7 +421,7 @@ static GtkWidget* sgw_create_result_page(SgwAppData *data) {
     GtkWidget *card = create_card_box();
     gtk_box_append(GTK_BOX(vbox), card);
 
-    GtkWidget *title_lbl = gtk_label_new("🎮 SNAKE GUN WATER");
+    GtkWidget *title_lbl = gtk_label_new("\U0001f3ae SNAKE GUN WATER");
     gtk_widget_add_css_class(title_lbl, "title-large");
     gtk_box_append(GTK_BOX(card), title_lbl);
 
@@ -495,7 +495,7 @@ GtkWidget* sgw_create_ui(void)
 
     GtkWidget *btn_box_back = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
     gtk_widget_set_halign(btn_box_back, GTK_ALIGN_CENTER);
-    GtkWidget *back_icon = gtk_label_new("◀");
+    GtkWidget *back_icon = gtk_label_new("\u25c0");
     GtkWidget *back_lbl = gtk_label_new("Main Menu");
     gtk_box_append(GTK_BOX(btn_box_back), back_icon);
     gtk_box_append(GTK_BOX(btn_box_back), back_lbl);

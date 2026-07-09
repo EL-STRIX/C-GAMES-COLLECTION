@@ -168,7 +168,7 @@ GtkWidget* create_game_entry(const char *icon, const char *title, const char *de
     
     GtkWidget *btn_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
     gtk_widget_set_halign(btn_box, GTK_ALIGN_CENTER);
-    GtkWidget *play_icon = gtk_label_new("▶");
+    GtkWidget *play_icon = gtk_label_new("\u25b6");
     GtkWidget *play_lbl = gtk_label_new("Play Now");
     gtk_box_append(GTK_BOX(btn_box), play_icon);
     gtk_box_append(GTK_BOX(btn_box), play_lbl);
@@ -236,16 +236,16 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_grid_set_column_spacing(GTK_GRID(grid), 20);
     gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
     
-    GtkWidget *g1 = create_game_entry("🔢", "Number Guessing", "Read the computer's mind and guess the secret number.", "number_guessing");
+    GtkWidget *g1 = create_game_entry("\U0001f522", "Number Guessing", "Read the computer's mind and guess the secret number.", "number_guessing");
     gtk_grid_attach(GTK_GRID(grid), g1, 0, 0, 1, 1);
     
-    GtkWidget *g2 = create_game_entry("✊✋✌️", "Rock Paper Scissors", "The classic battle of wits against an AI opponent.", "rock_paper_scissors");
+    GtkWidget *g2 = create_game_entry("\u270a\u270b\u270c\ufe0f", "Rock Paper Scissors", "The classic battle of wits against an AI opponent.", "rock_paper_scissors");
     gtk_grid_attach(GTK_GRID(grid), g2, 1, 0, 1, 1);
     
-    GtkWidget *g3 = create_game_entry("🐍🔫💧", "Snake Gun Water", "A fun variation of RPS with new rules and emojis.", "snake_gun_water");
+    GtkWidget *g3 = create_game_entry("\U0001f40d\U0001f52b\U0001f4a7", "Snake Gun Water", "A fun variation of RPS with new rules and emojis.", "snake_gun_water");
     gtk_grid_attach(GTK_GRID(grid), g3, 0, 1, 1, 1);
     
-    GtkWidget *g4 = create_game_entry("❌⭕", "Epic Tic Tac Toe", "An enhanced battle version of Tic Tac Toe.", "tic_tac_toe");
+    GtkWidget *g4 = create_game_entry("\u274c\u2b55", "Epic Tic Tac Toe", "An enhanced battle version of Tic Tac Toe.", "tic_tac_toe");
     gtk_grid_attach(GTK_GRID(grid), g4, 1, 1, 1, 1);
     
     GtkWidget *champ_frame = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);

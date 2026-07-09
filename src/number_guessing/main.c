@@ -67,7 +67,7 @@ static void ng_start_game_logic(NgAppData *app)
     // Create the greeting message
     char greet[200];
     snprintf(greet, sizeof(greet),
-             "Welcome, %s!\nI'm thinking of a secret number (1–100).\nCan you read my mind?",
+             "Welcome, %s!\nI'm thinking of a secret number (1\u2013100).\nCan you read my mind?",
              app->player_name);
 
     gtk_label_set_text(GTK_LABEL(app->greeting_label), greet);
@@ -194,7 +194,7 @@ static GtkWidget *ng_create_welcome_page(NgAppData *app)
 {
     GtkWidget *box = create_card_box();
 
-    GtkWidget *title_lbl = gtk_label_new("🔢 Number Guessing");
+    GtkWidget *title_lbl = gtk_label_new("\U0001f522 Number Guessing");
     gtk_widget_add_css_class(title_lbl, "title-large");
 
     GtkWidget *q_lbl = gtk_label_new("What's your name, Challenger?");
@@ -226,7 +226,7 @@ static GtkWidget *ng_create_game_page(NgAppData *app)
 {
     GtkWidget *box = create_card_box();
 
-    GtkWidget *header = gtk_label_new("🎮 NUMBER GUESSING GAME");
+    GtkWidget *header = gtk_label_new("\U0001f3ae NUMBER GUESSING GAME");
     gtk_widget_add_css_class(header, "header-title");
 
     app->greeting_label = gtk_label_new("Hello, Player!");
@@ -358,7 +358,7 @@ GtkWidget* ng_create_ui(void)
 
     GtkWidget *btn_box_back = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
     gtk_widget_set_halign(btn_box_back, GTK_ALIGN_CENTER);
-    GtkWidget *back_icon = gtk_label_new("◀");
+    GtkWidget *back_icon = gtk_label_new("\u25c0");
     GtkWidget *back_lbl = gtk_label_new("Main Menu");
     gtk_box_append(GTK_BOX(btn_box_back), back_icon);
     gtk_box_append(GTK_BOX(btn_box_back), back_lbl);

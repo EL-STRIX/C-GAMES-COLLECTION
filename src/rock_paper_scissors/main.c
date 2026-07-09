@@ -307,7 +307,7 @@ static GtkWidget* rps_create_welcome_page(RpsAppData *data) {
     GtkWidget *card = create_card_box();
     gtk_box_append(GTK_BOX(vbox), card);
 
-    GtkWidget *title_lbl = gtk_label_new("🎮 ROCK PAPER SCISSORS");
+    GtkWidget *title_lbl = gtk_label_new("\U0001f3ae ROCK PAPER SCISSORS");
     gtk_widget_add_css_class(title_lbl, "title-large");
     gtk_box_append(GTK_BOX(card), title_lbl);
 
@@ -348,7 +348,7 @@ static GtkWidget* rps_create_game_page(RpsAppData *data) {
     GtkWidget *card = create_card_box();
     gtk_box_append(GTK_BOX(center_box), card);
 
-    GtkWidget *title_lbl = gtk_label_new("🎮 ROCK PAPER SCISSORS");
+    GtkWidget *title_lbl = gtk_label_new("\U0001f3ae ROCK PAPER SCISSORS");
     gtk_widget_add_css_class(title_lbl, "game-title");
     gtk_box_append(GTK_BOX(card), title_lbl);
 
@@ -369,9 +369,9 @@ static GtkWidget* rps_create_game_page(RpsAppData *data) {
     gtk_widget_set_margin_bottom(data->choices_box, 10);
 
     /* Custom Buttons - USING EMOJIS */
-    GtkWidget *btn_rock = rps_create_choice_button("✊", "Rock", G_CALLBACK(on_rock_clicked), data);
-    GtkWidget *btn_paper = rps_create_choice_button("✋", "Paper", G_CALLBACK(on_paper_clicked), data);
-    GtkWidget *btn_scissors = rps_create_choice_button("✌️", "Scissors", G_CALLBACK(on_scissors_clicked), data);
+    GtkWidget *btn_rock = rps_create_choice_button("\u270a", "Rock", G_CALLBACK(on_rock_clicked), data);
+    GtkWidget *btn_paper = rps_create_choice_button("\u270b", "Paper", G_CALLBACK(on_paper_clicked), data);
+    GtkWidget *btn_scissors = rps_create_choice_button("\u270c\ufe0f", "Scissors", G_CALLBACK(on_scissors_clicked), data);
     
     gtk_widget_set_size_request(btn_rock, 80, 80);
     gtk_widget_set_size_request(btn_paper, 80, 80);
@@ -410,7 +410,7 @@ static GtkWidget* rps_create_result_page(RpsAppData *data) {
     GtkWidget *card = create_card_box();
     gtk_box_append(GTK_BOX(vbox), card);
 
-    GtkWidget *title_lbl = gtk_label_new("🎮 ROCK PAPER SCISSORS");
+    GtkWidget *title_lbl = gtk_label_new("\U0001f3ae ROCK PAPER SCISSORS");
     gtk_widget_add_css_class(title_lbl, "game-title");
     gtk_box_append(GTK_BOX(card), title_lbl);
 
@@ -484,7 +484,7 @@ GtkWidget* rps_create_ui(void)
 
     GtkWidget *btn_box_back = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
     gtk_widget_set_halign(btn_box_back, GTK_ALIGN_CENTER);
-    GtkWidget *back_icon = gtk_label_new("◀");
+    GtkWidget *back_icon = gtk_label_new("\u25c0");
     GtkWidget *back_lbl = gtk_label_new("Main Menu");
     gtk_box_append(GTK_BOX(btn_box_back), back_icon);
     gtk_box_append(GTK_BOX(btn_box_back), back_lbl);

@@ -313,7 +313,7 @@ GtkWidget* ttt_create_ui(void)
 
     GtkWidget *btn_box_back = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
     gtk_widget_set_halign(btn_box_back, GTK_ALIGN_CENTER);
-    GtkWidget *back_icon = gtk_label_new("◀");
+    GtkWidget *back_icon = gtk_label_new("\u25c0");
     GtkWidget *back_lbl = gtk_label_new("Main Menu");
     gtk_box_append(GTK_BOX(btn_box_back), back_icon);
     gtk_box_append(GTK_BOX(btn_box_back), back_lbl);
@@ -340,7 +340,7 @@ GtkWidget* ttt_create_ui(void)
 
     GtkWidget *start_card = create_card_box();
     
-    GtkWidget *lbl_title = gtk_label_new("≡ƒÄ« TIC TAC TOE");
+    GtkWidget *lbl_title = gtk_label_new("\U0001f3ae TIC TAC TOE");
     gtk_widget_add_css_class(lbl_title, "title-large");
     gtk_box_append(GTK_BOX(start_card), lbl_title);
 
@@ -416,7 +416,7 @@ GtkWidget* ttt_create_ui(void)
     gtk_widget_add_css_class(btn_reset, "btn-primary");
     g_signal_connect(btn_reset, "clicked", G_CALLBACK(on_reset_game_clicked), app);
     
-    GtkWidget *lbl_tip_game = gtk_label_new("≡ƒÆí Hint: Use your brain. It helps.");
+    GtkWidget *lbl_tip_game = gtk_label_new("\U0001f4a1 Hint: Use your brain. It helps.");
     gtk_widget_set_margin_top(lbl_tip_game, 15);
     gtk_widget_add_css_class(lbl_tip_game, "subtitle");
 
