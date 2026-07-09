@@ -8,9 +8,50 @@
 
 GtkWidget *main_window = NULL;
 GtkWidget *global_app_stack = NULL;
+GtkWidget *global_champ_list = NULL;
+
+void refresh_hall_of_fame(void) {
+    if (!global_champ_list) return;
+    
+    GtkWidget *child = gtk_widget_get_first_child(global_champ_list);
+    while (child != NULL) {
+        GtkWidget *next = gtk_widget_get_next_sibling(child);
+        gtk_box_remove(GTK_BOX(global_champ_list), child);
+        child = next;
+    }
+
+    struct { const char *id; const char *name; const char *fmt; } games[] = {
+        {"number_guessing", "Number Guessing", "%s: %s (%d guesses)"},
+        {"rps", "Rock Paper Scissors", "%s: %s (%d wins)"},
+        {"sgw", "Snake Gun Water", "%s: %s (%d wins)"},
+        {"ttt_gui", "Epic Tic Tac Toe", "%s: %s (%d wins)"}
+    };
+    
+    int added = 0;
+    for (int i = 0; i < 4; i++) {
+        char player[50];
+        int score = load_top_score(games[i].id, player, sizeof(player));
+        if (score != -1) {
+            char txt[100];
+            snprintf(txt, sizeof(txt), games[i].fmt, games[i].name, player, score);
+            GtkWidget *l = gtk_label_new(txt);
+            gtk_widget_add_css_class(l, "champ-item");
+            gtk_box_append(GTK_BOX(global_champ_list), l);
+            added = 1;
+        }
+    }
+    
+    if (!added) {
+        GtkWidget *l = gtk_label_new("No high scores yet. Play a game!");
+        gtk_widget_add_css_class(l, "champ-item");
+        gtk_box_append(GTK_BOX(global_champ_list), l);
+    }
+}
+
 
 void switch_to_launcher(void) {
     if (global_app_stack) {
+        refresh_hall_of_fame();
         gtk_stack_set_visible_child_name(GTK_STACK(global_app_stack), "launcher_home");
     }
 }
@@ -214,24 +255,9 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_widget_add_css_class(champ_label, "champ-title");
     gtk_box_append(GTK_BOX(champ_frame), champ_label);
     
-    struct { const char *id; const char *name; const char *fmt; } games[] = {
-        {"number_guessing", "Number Guessing", "%s: %s (%d guesses)"},
-        {"rps", "Rock Paper Scissors", "%s: %s (%d wins)"},
-        {"sgw", "Snake Gun Water", "%s: %s (%d wins)"},
-        {"ttt_gui", "Epic Tic Tac Toe", "%s: %s (%d wins)"}
-    };
-    
-    for (int i = 0; i < 4; i++) {
-        char player[50];
-        int score = load_top_score(games[i].id, player, sizeof(player));
-        if (score != -1) {
-            char txt[100];
-            snprintf(txt, sizeof(txt), games[i].fmt, games[i].name, player, score);
-            GtkWidget *l = gtk_label_new(txt);
-            gtk_widget_add_css_class(l, "champ-item");
-            gtk_box_append(GTK_BOX(champ_frame), l);
-        }
-    }
+    global_champ_list = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    gtk_box_append(GTK_BOX(champ_frame), global_champ_list);
+    refresh_hall_of_fame();
     
     gtk_box_append(GTK_BOX(main_vbox), grid);
     gtk_box_append(GTK_BOX(main_vbox), champ_frame);
