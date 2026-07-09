@@ -484,7 +484,7 @@ GtkWidget* rps_create_ui(void)
 
     GtkWidget *btn_box_back = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
     gtk_widget_set_halign(btn_box_back, GTK_ALIGN_CENTER);
-    GtkWidget *back_icon = gtk_image_new_from_icon_name("go-previous-symbolic");
+    GtkWidget *back_icon = gtk_label_new("◀");
     GtkWidget *back_lbl = gtk_label_new("Main Menu");
     gtk_box_append(GTK_BOX(btn_box_back), back_icon);
     gtk_box_append(GTK_BOX(btn_box_back), back_lbl);

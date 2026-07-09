@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -std=c11 -Wall -Wextra -Wconversion -Wshadow -O2 -g $(shell pkg-config --cflags gtk4)
+CFLAGS = -std=c11 -Wall -Wextra -Wconversion -Wshadow -O2 -g -finput-charset=UTF-8 -fexec-charset=UTF-8 $(shell pkg-config --cflags gtk4)
 LDFLAGS = $(shell pkg-config --libs gtk4)
 BIN_DIR = bin
 

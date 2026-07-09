@@ -168,7 +168,7 @@ GtkWidget* create_game_entry(const char *icon, const char *title, const char *de
     
     GtkWidget *btn_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
     gtk_widget_set_halign(btn_box, GTK_ALIGN_CENTER);
-    GtkWidget *play_icon = gtk_image_new_from_icon_name("media-playback-start-symbolic");
+    GtkWidget *play_icon = gtk_label_new("▶");
     GtkWidget *play_lbl = gtk_label_new("Play Now");
     gtk_box_append(GTK_BOX(btn_box), play_icon);
     gtk_box_append(GTK_BOX(btn_box), play_lbl);
