@@ -66,7 +66,7 @@ static void sgw_process_round(SgwAppData *data, int user_choice);
 
 /* --- Helpers --- */
 /* Update the score label text using current names and scores */
-void sgw_update_score_display(SgwAppData *data) {
+static void sgw_update_score_display(SgwAppData *data) {
     char *text = g_strdup_printf("%s: %d  |  Computer: %d",
                                   data->player_name[0] ? data->player_name : "Player",
                                   data->player_score, data->computer_score);
@@ -75,7 +75,7 @@ void sgw_update_score_display(SgwAppData *data) {
 }
 
 /* Update the round header label depending on current round */
-void sgw_update_round_display(SgwAppData *data) {
+static void sgw_update_round_display(SgwAppData *data) {
     char *text;
     if (data->current_round <= TOTAL_ROUNDS) {
         text = g_strdup_printf("Round %d: Fight!", data->current_round);
@@ -88,7 +88,7 @@ void sgw_update_round_display(SgwAppData *data) {
 }
 
 /* Timer callback to compute and show final results -- runs in main loop */
-gboolean sgw_on_show_final_results(gpointer user_data) {
+static gboolean sgw_on_show_final_results(gpointer user_data) {
     SgwAppData *data = (SgwAppData *)user_data;
     char *outcome_text;
     char *score_text;
@@ -135,7 +135,7 @@ gboolean sgw_on_show_final_results(gpointer user_data) {
 
 /* --- Game Logic --- */
 /* Initialize and start a fresh game */
-void sgw_start_new_game(SgwAppData *data) {
+static void sgw_start_new_game(SgwAppData *data) {
     data->current_round = 1;
     data->player_score = 0;
     data->computer_score = 0;
@@ -161,7 +161,7 @@ void sgw_start_new_game(SgwAppData *data) {
 }
 
 /* Prepare UI for the next round (clears previous messages) */
-void sgw_start_next_round_ui(SgwAppData *data) {
+static void sgw_start_next_round_ui(SgwAppData *data) {
     gtk_label_set_text(GTK_LABEL(data->feedback_label), "Make your move...");
     gtk_label_set_text(GTK_LABEL(data->result_label), "");
     
@@ -177,7 +177,7 @@ void sgw_start_next_round_ui(SgwAppData *data) {
 }
 
 /* Process a single round: generate computer choice, decide winner, update UI */
-void sgw_process_round(SgwAppData *data, int user_choice) {
+static void sgw_process_round(SgwAppData *data, int user_choice) {
     int computer_choice = (rand() % 3) + 1;
     const char *user_str, *comp_str;
     switch (user_choice) {
@@ -264,11 +264,11 @@ static void sgw_on_start_clicked(GtkButton *btn, SgwAppData *data) {
 }
 
 /* Simple wrappers connecting each choice button to sgw_process_round() */
-void on_snake_clicked(GtkButton *btn, gpointer user_data) { (void)btn; sgw_process_round((SgwAppData*)user_data, CHOICE_SNAKE); }
-void on_gun_clicked(GtkButton *btn, gpointer user_data) { (void)btn; sgw_process_round((SgwAppData*)user_data, CHOICE_GUN); }
-void on_water_clicked(GtkButton *btn, gpointer user_data) { (void)btn; sgw_process_round((SgwAppData*)user_data, CHOICE_WATER); }
-void sgw_on_next_round_clicked(GtkButton *btn, gpointer user_data) { (void)btn; sgw_start_next_round_ui((SgwAppData*)user_data); }
-void sgw_on_play_again_clicked(GtkButton *btn, gpointer user_data) { (void)btn; sgw_start_new_game((SgwAppData*)user_data); }
+static void on_snake_clicked(GtkButton *btn, gpointer user_data) { (void)btn; sgw_process_round((SgwAppData*)user_data, CHOICE_SNAKE); }
+static void on_gun_clicked(GtkButton *btn, gpointer user_data) { (void)btn; sgw_process_round((SgwAppData*)user_data, CHOICE_GUN); }
+static void on_water_clicked(GtkButton *btn, gpointer user_data) { (void)btn; sgw_process_round((SgwAppData*)user_data, CHOICE_WATER); }
+static void sgw_on_next_round_clicked(GtkButton *btn, gpointer user_data) { (void)btn; sgw_start_next_round_ui((SgwAppData*)user_data); }
+static void sgw_on_play_again_clicked(GtkButton *btn, gpointer user_data) { (void)btn; sgw_start_new_game((SgwAppData*)user_data); }
 
 /* Back Button Callback - returns to menu with confirmation if playing */
 static void sgw_on_header_back_clicked(GtkButton *btn, gpointer user_data) {
@@ -283,7 +283,7 @@ static void sgw_on_header_back_clicked(GtkButton *btn, gpointer user_data) {
 /* --- UI Construction --- */
 
 /* Helper to build a choice button with emoji + label */
-GtkWidget* sgw_create_choice_button(const char *emoji, const char *label_text, GCallback callback, SgwAppData *data) {
+static GtkWidget* sgw_create_choice_button(const char *emoji, const char *label_text, GCallback callback, SgwAppData *data) {
     GtkWidget *btn = gtk_button_new();
     gtk_widget_add_css_class(btn, "choice-btn");
     

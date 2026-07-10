@@ -10,9 +10,9 @@ GtkWidget *main_window = NULL;
 GtkWidget *global_app_stack = NULL;
 GtkWidget *global_champ_list = NULL;
 
-void refresh_hall_of_fame(void) {
+static void refresh_hall_of_fame(void) {
     if (!global_champ_list) return;
-    
+
     GtkWidget *child = gtk_widget_get_first_child(global_champ_list);
     while (child != NULL) {
         GtkWidget *next = gtk_widget_get_next_sibling(child);
@@ -20,27 +20,29 @@ void refresh_hall_of_fame(void) {
         child = next;
     }
 
-    struct { const char *id; const char *name; const char *fmt; } games[] = {
-        {"number_guessing", "Number Guessing", "%s: %s (%d guesses)"},
-        {"rps", "Rock Paper Scissors", "%s: %s (%d wins)"},
-        {"sgw", "Snake Gun Water", "%s: %s (%d wins)"},
-        {"ttt_gui", "Epic Tic Tac Toe", "%s: %s (%d wins)"}
+    struct { const char *id; const char *name; const char *unit; } games[] = {
+        {"number_guessing", "Number Guessing", "guesses"},
+        {"rps",             "Rock Paper Scissors", "wins"},
+        {"sgw",             "Snake Gun Water",     "wins"},
+        {"ttt_gui",         "Epic Tic Tac Toe",   "wins"}
     };
-    
+
     int added = 0;
     for (int i = 0; i < 4; i++) {
         char player[50];
         int score = load_top_score(games[i].id, player, sizeof(player));
         if (score != -1) {
-            char txt[100];
-            snprintf(txt, sizeof(txt), games[i].fmt, games[i].name, player, score);
+            /* Build the label text with a fixed format string (no -Wformat-nonliteral) */
+            char *txt = g_strdup_printf("%s: %s (%d %s)",
+                                        games[i].name, player, score, games[i].unit);
             GtkWidget *l = gtk_label_new(txt);
+            g_free(txt);
             gtk_widget_add_css_class(l, "champ-item");
             gtk_box_append(GTK_BOX(global_champ_list), l);
             added = 1;
         }
     }
-    
+
     if (!added) {
         GtkWidget *l = gtk_label_new("No high scores yet. Play a game!");
         gtk_widget_add_css_class(l, "champ-item");
@@ -146,7 +148,7 @@ static void launch_game(GtkButton *btn, gpointer user_data)
     }
 }
 
-GtkWidget* create_game_entry(const char *icon, const char *title, const char *desc, const char *game_id)
+static GtkWidget* create_game_entry(const char *icon, const char *title, const char *desc, const char *game_id)
 {
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_widget_add_css_class(box, "card");

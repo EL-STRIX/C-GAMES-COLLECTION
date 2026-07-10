@@ -1,5 +1,5 @@
 CC      = gcc
-CFLAGS  = -std=c11 -Wall -Wextra -Wconversion -Wshadow -Wpedantic \
+CFLAGS  = -std=c11 -Wall -Wextra -Wconversion -Wshadow \
            -Wstrict-prototypes -Wmissing-prototypes -Wformat=2 \
            -O2 -g -finput-charset=UTF-8 -fexec-charset=UTF-8 \
            $(shell pkg-config --cflags gtk4)
@@ -24,7 +24,7 @@ TARGETS = $(BIN_DIR)/c-games-collection.exe \
 all: $(TARGETS)
 
 $(BIN_DIR):
-	-mkdir $(BIN_DIR)
+	mkdir -p $(BIN_DIR)
 
 # Unified Binary
 $(BIN_DIR)/c-games-collection.exe: $(ALL_SRC) | $(BIN_DIR)
@@ -38,5 +38,5 @@ test: $(BIN_DIR)/test_persistence.exe
 	./$(BIN_DIR)/test_persistence.exe
 
 clean:
-	-del /Q $(BIN_DIR)\*.exe 2>NUL
+	rm -f $(BIN_DIR)/*.exe
 	@echo Clean complete.

@@ -46,7 +46,7 @@ typedef struct {
 // GAME LOGIC
 // ============================================================
 
-void init_game_state(TttAppData *app)
+static void init_game_state(TttAppData *app)
 {
     app->game.current_round = 1;
     app->game.score1 = 0;
@@ -57,7 +57,7 @@ void init_game_state(TttAppData *app)
         app->game.round_winners[i] = -1;
 }
 
-void reset_board_logic(TttAppData *app)
+static void reset_board_logic(TttAppData *app)
 {
     char num = '1';
     for (int r = 0; r < 3; ++r)
@@ -71,7 +71,7 @@ void reset_board_logic(TttAppData *app)
     app->game.game_over = 0;
 }
 
-int check_winner(TttAppData *app)
+static int check_winner(TttAppData *app)
 {
     for (int i = 0; i < 3; i++)
     {
@@ -83,7 +83,7 @@ int check_winner(TttAppData *app)
     return 0;
 }
 
-int check_draw(TttAppData *app)
+static int check_draw(TttAppData *app)
 {
     for (int r = 0; r < 3; r++)
         for (int c = 0; c < 3; c++)
@@ -95,7 +95,7 @@ int check_draw(TttAppData *app)
 // UI UPDATES
 // ============================================================
 
-void update_ui_board(TttAppData *app)
+static void update_ui_board(TttAppData *app)
 {
     char s1[100], s2[100];
     snprintf(s1, sizeof(s1), "%s: %d", app->game.name1, app->game.score1);
@@ -138,7 +138,7 @@ void update_ui_board(TttAppData *app)
     }
 }
 
-void show_result_screen(TttAppData *app)
+static void show_result_screen(TttAppData *app)
 {
     gtk_label_set_text(GTK_LABEL(app->result_title), "GAME OVER");
 
@@ -173,7 +173,7 @@ void show_result_screen(TttAppData *app)
     gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "result_page");
 }
 
-void handle_round_end(TttAppData *app, int winner_id)
+static void handle_round_end(TttAppData *app, int winner_id)
 {
     app->game.game_over = 1;
     if (winner_id == 1) {
@@ -199,7 +199,7 @@ void handle_round_end(TttAppData *app, int winner_id)
 // SIGNALS
 // ============================================================
 
-void on_cell_clicked(GtkWidget *widget, gpointer data)
+static void on_cell_clicked(GtkWidget *widget, gpointer data)
 {
     TttAppData *app = (TttAppData *)data;
     if (app->game.game_over) return;
@@ -223,7 +223,7 @@ void on_cell_clicked(GtkWidget *widget, gpointer data)
     }
 }
 
-void on_start_clicked(GtkWidget *widget, gpointer data)
+static void on_start_clicked(GtkWidget *widget, gpointer data)
 {
     (void)widget;
     TttAppData *app = (TttAppData *)data;
@@ -250,7 +250,7 @@ void on_start_clicked(GtkWidget *widget, gpointer data)
     gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "game_page");
 }
 
-void on_reset_game_clicked(GtkWidget *widget, gpointer data)
+static void on_reset_game_clicked(GtkWidget *widget, gpointer data)
 {
     (void)widget;
     TttAppData *app = (TttAppData *)data;
@@ -258,7 +258,7 @@ void on_reset_game_clicked(GtkWidget *widget, gpointer data)
     update_ui_board(app);
 }
 
-void ttt_on_play_again_clicked(GtkWidget *widget, gpointer data)
+static void ttt_on_play_again_clicked(GtkWidget *widget, gpointer data)
 {
     (void)widget;
     TttAppData *app = (TttAppData *)data;
@@ -282,7 +282,7 @@ void ttt_on_play_again_clicked(GtkWidget *widget, gpointer data)
 
 
 
-void add_footer(GtkWidget *box)
+static void add_footer(GtkWidget *box)
 {
     GtkWidget *footer = gtk_label_new("Developed by SUJAY PAUL");
     gtk_widget_add_css_class(footer, "footer-credit");

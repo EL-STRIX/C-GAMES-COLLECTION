@@ -66,7 +66,7 @@ static void rps_process_round(RpsAppData *data, int user_choice);
 
 /* --- Helpers --- */
 /* Update the score label text using current names and scores */
-void rps_update_score_display(RpsAppData *data) {
+static void rps_update_score_display(RpsAppData *data) {
     char *text = g_strdup_printf("%s: %d  |  Computer: %d",
                                   data->player_name[0] ? data->player_name : "Player",
                                   data->player_score, data->computer_score);
@@ -75,7 +75,7 @@ void rps_update_score_display(RpsAppData *data) {
 }
 
 /* Update the round header label depending on current round */
-void rps_update_round_display(RpsAppData *data) {
+static void rps_update_round_display(RpsAppData *data) {
     char *text;
     if (data->current_round <= TOTAL_ROUNDS) {
         text = g_strdup_printf("Round %d: Fight!", data->current_round);
@@ -88,7 +88,7 @@ void rps_update_round_display(RpsAppData *data) {
 }
 
 /* Timer callback to compute and show final results -- runs in main loop */
-gboolean rps_on_show_final_results(gpointer user_data) {
+static gboolean rps_on_show_final_results(gpointer user_data) {
     RpsAppData *data = (RpsAppData *)user_data;
     char *outcome_text;
     char *score_text;
@@ -135,7 +135,7 @@ gboolean rps_on_show_final_results(gpointer user_data) {
 
 /* --- Game Logic --- */
 /* Initialize and start a fresh game */
-void rps_start_new_game(RpsAppData *data) {
+static void rps_start_new_game(RpsAppData *data) {
     data->current_round = 1;
     data->player_score = 0;
     data->computer_score = 0;
@@ -161,7 +161,7 @@ void rps_start_new_game(RpsAppData *data) {
 }
 
 /* Prepare UI for the next round (clears previous messages) */
-void rps_start_next_round_ui(RpsAppData *data) {
+static void rps_start_next_round_ui(RpsAppData *data) {
     gtk_label_set_text(GTK_LABEL(data->feedback_label), "Make your move...");
     gtk_label_set_text(GTK_LABEL(data->result_label), "");
     
@@ -177,7 +177,7 @@ void rps_start_next_round_ui(RpsAppData *data) {
 }
 
 /* Process a single round: generate computer choice, decide winner, update UI */
-void rps_process_round(RpsAppData *data, int user_choice) {
+static void rps_process_round(RpsAppData *data, int user_choice) {
     int computer_choice = (rand() % 3) + 1; /* random int in 1..3 */
     const char *user_str = (user_choice == 1) ? "ROCK" : (user_choice == 2) ? "PAPER" : "SCISSORS";
     const char *comp_str = (computer_choice == 1) ? "ROCK" : (computer_choice == 2) ? "PAPER" : "SCISSORS";
@@ -252,11 +252,11 @@ static void rps_on_start_clicked(GtkButton *btn, RpsAppData *data) {
 }
 
 /* Simple wrappers connecting each choice button to rps_process_round() */
-void on_rock_clicked(GtkButton *btn, gpointer user_data) { (void)btn; rps_process_round((RpsAppData*)user_data, CHOICE_ROCK); }
-void on_paper_clicked(GtkButton *btn, gpointer user_data) { (void)btn; rps_process_round((RpsAppData*)user_data, CHOICE_PAPER); }
-void on_scissors_clicked(GtkButton *btn, gpointer user_data) { (void)btn; rps_process_round((RpsAppData*)user_data, CHOICE_SCISSORS); }
-void rps_on_next_round_clicked(GtkButton *btn, gpointer user_data) { (void)btn; rps_start_next_round_ui((RpsAppData*)user_data); }
-void rps_on_play_again_clicked(GtkButton *btn, gpointer user_data) { (void)btn; rps_start_new_game((RpsAppData*)user_data); }
+static void on_rock_clicked(GtkButton *btn, gpointer user_data) { (void)btn; rps_process_round((RpsAppData*)user_data, CHOICE_ROCK); }
+static void on_paper_clicked(GtkButton *btn, gpointer user_data) { (void)btn; rps_process_round((RpsAppData*)user_data, CHOICE_PAPER); }
+static void on_scissors_clicked(GtkButton *btn, gpointer user_data) { (void)btn; rps_process_round((RpsAppData*)user_data, CHOICE_SCISSORS); }
+static void rps_on_next_round_clicked(GtkButton *btn, gpointer user_data) { (void)btn; rps_start_next_round_ui((RpsAppData*)user_data); }
+static void rps_on_play_again_clicked(GtkButton *btn, gpointer user_data) { (void)btn; rps_start_new_game((RpsAppData*)user_data); }
 static void rps_on_header_back_clicked(GtkButton *btn, gpointer user_data) {
     (void)btn;
     RpsAppData *data = (RpsAppData *)user_data;
@@ -264,12 +264,10 @@ static void rps_on_header_back_clicked(GtkButton *btn, gpointer user_data) {
     switch_to_launcher();
 }
 
-void load_css(void) { apply_global_theme(); }
-
 /* --- UI Construction --- */
 
 /* Helper to build a choice button with emoji + label */
-GtkWidget* rps_create_choice_button(const char *emoji, const char *label_text, GCallback callback, RpsAppData *data) {
+static GtkWidget* rps_create_choice_button(const char *emoji, const char *label_text, GCallback callback, RpsAppData *data) {
     GtkWidget *btn = gtk_button_new();
     gtk_widget_add_css_class(btn, "choice-btn");
     
