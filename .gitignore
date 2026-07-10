@@ -7,6 +7,7 @@
 *.out
 *.app
 bin/
+release/
 
 # Temporary and IDE files
 .vscode/
