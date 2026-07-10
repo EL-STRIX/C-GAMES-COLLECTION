@@ -32,7 +32,6 @@ typedef struct {
     GtkWidget *window;
     GtkWidget *stack;
     GtkWidget *entry_p1;
-    GtkWidget *entry_p2;
     GtkWidget *label_score_p1;
     GtkWidget *label_score_p2;
     GtkWidget *buttons[3][3];
@@ -230,7 +229,7 @@ void on_start_clicked(GtkWidget *widget, gpointer data)
     TttAppData *app = (TttAppData *)data;
     const char *name = gtk_editable_get_text(GTK_EDITABLE(app->entry_p1));
     char *trimmed = g_strstrip(g_strdup(name));
-    if (g_utf8_strlen(trimmed, -1) == 0) {
+    if (g_utf8_strlen(trimmed, -1) < 1) {
         gtk_label_set_text(GTK_LABEL(app->lbl_start_error), "Please enter your name to play!");
         g_free(trimmed);
         return;
@@ -273,12 +272,9 @@ void ttt_on_play_again_clicked(GtkWidget *widget, gpointer data)
 // UI NAVIGATION
 // ============================================================
 
-void on_header_back_clicked(GtkButton *btn, gpointer user_data)
-{
-    (void)btn;
-    TttAppData *app = (TttAppData *)user_data;
-    handle_header_back_clicked(app->window, app->stack, "game_page");
-}
+
+/* Note: back navigation for TTT is handled by ttt_on_header_back_clicked (static, below) */
+
 
 // ============================================================
 // BUILD CARD HELPERS

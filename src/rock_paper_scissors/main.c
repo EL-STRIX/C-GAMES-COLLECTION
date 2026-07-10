@@ -89,7 +89,6 @@ void rps_update_round_display(RpsAppData *data) {
 
 /* Timer callback to compute and show final results -- runs in main loop */
 gboolean rps_on_show_final_results(gpointer user_data) {
-    (void)user_data;
     RpsAppData *data = (RpsAppData *)user_data;
     char *outcome_text;
     char *score_text;
@@ -237,7 +236,7 @@ static void rps_on_start_clicked(GtkButton *btn, RpsAppData *data) {
     (void)btn;
     const char *name = gtk_editable_get_text(GTK_EDITABLE(data->name_entry));
     char *trimmed = g_strstrip(g_strdup(name));
-    if (g_utf8_strlen(trimmed, -1) == 0) {
+    if (g_utf8_strlen(trimmed, -1) < 1) {
         gtk_label_set_text(GTK_LABEL(data->name_error_label), "Please enter your name to play!");
         g_free(trimmed);
         return;
@@ -265,11 +264,7 @@ static void rps_on_header_back_clicked(GtkButton *btn, gpointer user_data) {
     switch_to_launcher();
 }
 
-/* --- CSS Styling --- */
-/* Loads application CSS into the GTK style context */
-void load_css(void) {
-    apply_global_theme();
-}
+void load_css(void) { apply_global_theme(); }
 
 /* --- UI Construction --- */
 

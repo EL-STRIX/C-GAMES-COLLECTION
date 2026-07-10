@@ -82,7 +82,7 @@ static void ng_on_start_clicked(GtkButton *btn, NgAppData *app)
     (void)btn;
     const char *name = gtk_editable_get_text(GTK_EDITABLE(app->name_entry));
     char *trimmed = g_strstrip(g_strdup(name));
-    if (g_utf8_strlen(trimmed, -1) == 0) {
+    if (g_utf8_strlen(trimmed, -1) < 1) {
         gtk_label_set_text(GTK_LABEL(app->name_warning_label), "Please enter your name to play!");
         g_free(trimmed);
         return;

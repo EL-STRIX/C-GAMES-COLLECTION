@@ -89,7 +89,6 @@ void sgw_update_round_display(SgwAppData *data) {
 
 /* Timer callback to compute and show final results -- runs in main loop */
 gboolean sgw_on_show_final_results(gpointer user_data) {
-    (void)user_data;
     SgwAppData *data = (SgwAppData *)user_data;
     char *outcome_text;
     char *score_text;
@@ -249,7 +248,7 @@ static void sgw_on_start_clicked(GtkButton *btn, SgwAppData *data) {
     (void)btn;
     const char *name = gtk_editable_get_text(GTK_EDITABLE(data->name_entry));
     char *trimmed = g_strstrip(g_strdup(name));
-    if (g_utf8_strlen(trimmed, -1) == 0) {
+    if (g_utf8_strlen(trimmed, -1) < 1) {
         gtk_label_set_text(GTK_LABEL(data->name_error_label), "Please enter your name to play!");
         g_free(trimmed);
         return;
