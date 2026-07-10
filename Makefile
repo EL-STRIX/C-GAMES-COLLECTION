@@ -40,3 +40,7 @@ test: $(BIN_DIR)/test_persistence.exe
 clean:
 	rm -f $(BIN_DIR)/*.exe
 	@echo Clean complete.
+
+package: all
+	@echo "Invoking packaging script..."
+	bash scripts/package-windows.sh
