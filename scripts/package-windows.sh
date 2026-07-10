@@ -18,7 +18,8 @@ rm -rf release/
 mkdir -p "$RELEASE_DIR"
 
 echo "[3/7] Copying Executable and Project Resources..."
-cp bin/c-games-collection.exe "$RELEASE_DIR/"
+mkdir -p "$RELEASE_DIR/bin"
+cp bin/c-games-collection.exe "$RELEASE_DIR/bin/"
 cp -r assets "$RELEASE_DIR/"
 cp README.md LICENSE CHANGELOG.md "$RELEASE_DIR/"
 echo "${VERSION}" > "$RELEASE_DIR/VERSION"
@@ -29,8 +30,10 @@ mkdir -p "$RELEASE_DIR/data"
 echo "[4/7] Collecting Dynamic Dependencies (DLLs)..."
 # Find all dependent DLLs from the UCRT64 environment (ignore Windows system DLLs)
 ldd bin/c-games-collection.exe | grep "=> /ucrt64" | awk '{print $3}' | while read -r dll_path; do
-    cp "$dll_path" "$RELEASE_DIR/"
+    cp "$dll_path" "$RELEASE_DIR/bin/"
 done
+# Also include gdbus.exe to prevent GIO dbus warnings
+cp /ucrt64/bin/gdbus.exe "$RELEASE_DIR/bin/" 2>/dev/null || true
 
 # We also need to copy GTK specific loaded DLLs that aren't statically linked (e.g., gdk-pixbuf loaders, icon themes)
 echo "[5/7] Copying GTK Runtime Assets..."
@@ -54,13 +57,13 @@ cp /ucrt64/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.dll "$RELEASE_DIR/lib/gdk-pixbuf-
 gdk-pixbuf-query-loaders > "$RELEASE_DIR/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache" 2>/dev/null || true
 # Need to copy DLLs that loaders depend on too (like libjpeg, libpng)
 ldd "$RELEASE_DIR"/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.dll 2>/dev/null | grep "=> /ucrt64" | awk '{print $3}' | sort -u | while read -r dll_path; do
-    cp -n "$dll_path" "$RELEASE_DIR/" 2>/dev/null || true
+    cp -n "$dll_path" "$RELEASE_DIR/bin/" 2>/dev/null || true
 done
 
 echo "[6/7] Creating Environment Wrapper Batch Script..."
-# Create a robust runner script for users just in case they need explicit paths, 
-# but GTK relocates automatically. We include it anyway for absolute portability.
-cat << 'EOF' > "$RELEASE_DIR/run-games.bat"
+# Create a robust runner script for users
+# GTK will automatically resolve ../share and ../lib relative to bin/
+cat << 'EOF' > "$RELEASE_DIR/Play.bat"
 @echo off
 setlocal
 set "BASE_DIR=%~dp0"
@@ -69,7 +72,7 @@ set "GTK_DATA_PREFIX=%BASE_DIR%"
 set "XDG_DATA_DIRS=%BASE_DIR%share"
 set "GDK_PIXBUF_MODULEDIR=%BASE_DIR%lib\gdk-pixbuf-2.0\2.10.0\loaders"
 set "GDK_PIXBUF_MODULE_FILE=%BASE_DIR%lib\gdk-pixbuf-2.0\2.10.0\loaders.cache"
-start "" "%BASE_DIR%c-games-collection.exe"
+start "" "%BASE_DIR%bin\c-games-collection.exe"
 EOF
 
 cd release
