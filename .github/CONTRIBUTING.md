@@ -10,27 +10,16 @@ Thank you for your interest in contributing. By participating, you agree to foll
 - **Dependencies**: GTK4 (`libgtk-4-dev` on Linux, `mingw-w64-ucrt-x86_64-gtk4` on MSYS2).
 
 ### Local Setup
-1. Fork and clone the repository.
-2. Run `make clean && make all` (or `build.bat`) to verify your environment builds cleanly.
-3. Review `ARCHITECTURE.md` to understand the unified binary design and `AppData` encapsulation pattern.
+Please refer to our comprehensive [Developer Setup Guide](../docs/DEVELOPMENT.md) for instructions on provisioning your environment (Windows, macOS, or Linux) and running the test suites.
+
+Before writing code, please review the [Architecture Document](../docs/ARCHITECTURE.md) to understand the unified binary design and state encapsulation patterns.
+
+If you are adding a new game, please follow the [Adding a New Game Tutorial](../docs/ADDING_A_GAME.md) step-by-step.
 
 ## 2. Coding Standards
 
-### C Style & Formatting
-- **Naming Conventions**: Use `snake_case` for all files, directories, functions, and variables (e.g., `src/tic_tac_toe`, `process_round`).
-- **Constants**: Use `UPPER_SNAKE_CASE` (e.g., `CHOICE_SNAKE`).
-- **Structs**: Use `PascalCase` for typedefs (e.g., `AppData`, `GameState`).
-- **State Management**: Do not use global variables for state or UI widgets. All state must be encapsulated within an `AppData` context object and passed down to GTK signal handlers via `user_data` pointers.
-- **Linkage**: Define all internal module functions as `static` to prevent namespace pollution and compiler warnings.
-
-### Comments & Documentation
-- Comments should explain **why** a decision was made, not **what** the code is doing. Assume the reader understands standard C and GTK4.
-- Use standard Doxygen notation (`/** ... */`) for public APIs in header files.
-
-### Error Handling & Logging
-- Handle errors explicitly.
-- Use GTK's native structured logging (`g_warning`, `g_message`, `g_critical`) for persistence failures or I/O bounds.
-- Always verify pointers returned by GTK builder functions or `g_new0` before accessing them.
+We enforce strict coding conventions to ensure memory safety and maintainability in C11. 
+All contributions **must** adhere to our [Style Guide](../docs/STYLE_GUIDE.md). This includes our zero-global-variable policy and naming conventions.
 
 ## 3. Workflow & Collaboration Strategy
 

@@ -43,13 +43,20 @@ This repository serves as a reference implementation for:
 
 The project uses a unified binary architecture driven by the GTK event loop. The central launcher manages a `GtkStack` to seamlessly transition between the main menu and individual game views while maintaining strict memory isolation via decoupled state structs.
 
-For an in-depth breakdown of view management, UI state encapsulation, and the persistence engine, see [ARCHITECTURE.md](ARCHITECTURE.md).
+For an in-depth breakdown of view management, UI state encapsulation, and the persistence engine, see our [Architecture Documentation](docs/ARCHITECTURE.md).
 
 ## CI/CD Pipeline
 
 The project implements a robust Continuous Integration and Continuous Deployment (CI/CD) pipeline using GitHub Actions to ensure code quality and portability across platforms (Linux, Windows, macOS).
 
 For detailed information on the pipeline stages, automated tests (including `cppcheck` and `valgrind`), and release generation, please see our [CI/CD Documentation](docs/CI_CD.md).
+
+## Developer Documentation
+
+To get started with local development or if you wish to contribute, please refer to our comprehensive technical guides:
+- [**Developer Setup Guide**](docs/DEVELOPMENT.md): Instructions for provisioning MSYS2, Homebrew, and apt environments.
+- [**Adding a New Game**](docs/ADDING_A_GAME.md): A step-by-step tutorial on how to integrate a new game module into the unified launcher.
+- [**Style Guide**](docs/STYLE_GUIDE.md): Our strict C11 and GTK4 coding standards.
 
 ## Project Structure
 
