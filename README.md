@@ -45,6 +45,12 @@ The project uses a unified binary architecture driven by the GTK event loop. The
 
 For an in-depth breakdown of view management, UI state encapsulation, and the persistence engine, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
+## CI/CD Pipeline
+
+The project implements a robust Continuous Integration and Continuous Deployment (CI/CD) pipeline using GitHub Actions to ensure code quality and portability across platforms (Linux, Windows, macOS).
+
+For detailed information on the pipeline stages, automated tests (including `cppcheck` and `valgrind`), and release generation, please see our [CI/CD Documentation](docs/CI_CD.md).
+
 ## Project Structure
 
 ```text

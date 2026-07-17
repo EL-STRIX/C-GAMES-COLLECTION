@@ -9,7 +9,7 @@ on:
     branches: [ "main" ]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build-ubuntu:
@@ -20,16 +20,35 @@ jobs:
     - name: Install Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y gcc make pkg-config libgtk-4-dev xvfb
+        sudo apt-get install -y gcc make pkg-config libgtk-4-dev xvfb cppcheck valgrind
+
+    - name: Static Analysis
+      run: cppcheck --enable=warning,performance,portability --suppress=missingIncludeSystem --error-exitcode=1 src/
 
     - name: Build Project
       run: make all CFLAGS="-std=c11 -Wall -Wextra -Werror -O2 $(pkg-config --cflags gtk4)"
       
+    - name: Run Tests (Memory Check)
+      run: xvfb-run valgrind --leak-check=full --error-exitcode=1 ./bin/test_persistence.exe
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Dependencies
+      run: brew update && brew install gtk4 pkg-config
+      
+    - name: Build Project
+      run: make all CFLAGS="-std=c11 -Wall -Wextra -Werror -O2 $(pkg-config --cflags gtk4)"
+
     - name: Run Tests
-      run: xvfb-run make test
+      run: make test
 
   package-windows:
     runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
     - uses: actions/checkout@v4
 
