@@ -3,11 +3,15 @@ on:
   pull_request_target:
     types: [opened, synchronize, reopened, ready_for_review]
 
+permissions:
+  pull-requests: write
+
 jobs:
   auto-approve:
     runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]'
-    permissions:
-      pull-requests: write
     steps:
-      - uses: hmarr/auto-approve-action@v4
+      - name: Auto approve
+        uses: hmarr/auto-approve-action@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
