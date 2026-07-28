@@ -16,40 +16,6 @@
  */
 void switch_to_launcher(void) { /* no-op in test context */ }
 
-/* Helper to resolve the data directory properly */
-static char* get_test_data_dir(void) {
-    char *base_dir = NULL;
-
-#ifdef _WIN32
-    char path[MAX_PATH];
-    if (GetModuleFileNameA(NULL, path, MAX_PATH)) {
-        base_dir = g_path_get_dirname(path);
-    }
-#else
-    char *exe_path = g_file_read_link("/proc/self/exe", NULL);
-    if (exe_path) {
-        base_dir = g_path_get_dirname(exe_path);
-        g_free(exe_path);
-    }
-#endif
-
-    if (!base_dir) {
-        base_dir = g_get_current_dir(); /* fallback */
-    }
-
-    char *data_dir = g_build_filename(base_dir, "..", "data", NULL);
-    g_free(base_dir);
-    return data_dir;
-}
-
-static void remove_test_file(const char* filename) {
-    char *data_dir = get_test_data_dir();
-    char *filepath = g_build_filename(data_dir, filename, NULL);
-    remove(filepath);
-    g_free(filepath);
-    g_free(data_dir);
-}
-
 /* -----------------------------------------------------------------------
  * test_settings
  *
@@ -63,15 +29,11 @@ static void test_settings(void) {
     /* Save whatever currently exists so we can restore it after the test */
     char original_name[50] = {0};
     int  original_theme    = 0;
-
-    char *data_dir = get_test_data_dir();
-    char *settings_path = g_build_filename(data_dir, "settings.ini", NULL);
-    int had_settings = g_file_test(settings_path, G_FILE_TEST_EXISTS);
+    int had_settings = g_file_test("data/settings.ini", G_FILE_TEST_EXISTS);
 
     if (had_settings) {
         load_global_settings(original_name, sizeof(original_name), &original_theme);
     }
-
 
     /* Write test data */
     save_global_settings("TestPlayer", 2);
@@ -87,11 +49,8 @@ static void test_settings(void) {
     if (had_settings) {
         save_global_settings(original_name, original_theme);
     } else {
-        remove(settings_path);
+        remove("data/settings.ini");
     }
-
-    g_free(settings_path);
-    g_free(data_dir);
 }
 
 /* -----------------------------------------------------------------------
@@ -102,7 +61,7 @@ static void test_settings(void) {
  * production. The cleanup remove() is therefore safe for this file only.
  * ----------------------------------------------------------------------- */
 static void test_scores(void) {
-    remove_test_file("test_game_score.ini");
+    remove("data/test_game_score.ini");
 
     /* is_lower_better = 0 (higher is better) */
     save_score("test_game", "Alice", 100, 0);
@@ -125,7 +84,7 @@ static void test_scores(void) {
     g_assert_cmpint(top_score,  ==, 200);
 
     /* Cleanup test artefact only */
-    remove_test_file("test_game_score.ini");
+    remove("data/test_game_score.ini");
 }
 
 /* -----------------------------------------------------------------------
@@ -133,7 +92,7 @@ static void test_scores(void) {
  * NEW: Verify is_lower_better logic (Number Guessing uses this).
  * ----------------------------------------------------------------------- */
 static void test_scores_lower_better(void) {
-    remove_test_file("test_game_lb_score.ini");
+    remove("data/test_game_lb_score.ini");
 
     /* is_lower_better = 1 (fewer guesses is better) */
     save_score("test_game_lb", "Alice", 10, 1);
@@ -155,7 +114,7 @@ static void test_scores_lower_better(void) {
     g_assert_cmpstr(top_player, ==, "Charlie");
     g_assert_cmpint(top_score,  ==, 3);
 
-    remove_test_file("test_game_lb_score.ini");
+    remove("data/test_game_lb_score.ini");
 }
 
 /* -----------------------------------------------------------------------
@@ -163,7 +122,7 @@ static void test_scores_lower_better(void) {
  * NEW: Ensure load_top_score returns -1 when no file exists.
  * ----------------------------------------------------------------------- */
 static void test_load_missing_score(void) {
-    remove_test_file("definitely_missing_game_score.ini");
+    remove("data/definitely_missing_game_score.ini");
     char player[50] = {0};
     int score = load_top_score("definitely_missing_game", player, sizeof(player));
     g_assert_cmpint(score, ==, -1);
@@ -177,10 +136,7 @@ static void test_theme_preservation(void) {
     /* Save whatever currently exists so we can restore it after the test */
     char original_name[50] = {0};
     int  original_theme    = 0;
-
-    char *data_dir = get_test_data_dir();
-    char *settings_path = g_build_filename(data_dir, "settings.ini", NULL);
-    int had_settings = g_file_test(settings_path, G_FILE_TEST_EXISTS);
+    int had_settings = g_file_test("data/settings.ini", G_FILE_TEST_EXISTS);
 
     if (had_settings) {
         load_global_settings(original_name, sizeof(original_name), &original_theme);
@@ -203,11 +159,8 @@ static void test_theme_preservation(void) {
     if (had_settings) {
         save_global_settings(original_name, original_theme);
     } else {
-        remove(settings_path);
+        remove("data/settings.ini");
     }
-
-    g_free(settings_path);
-    g_free(data_dir);
 }
 
 int main(int argc, char **argv) {
