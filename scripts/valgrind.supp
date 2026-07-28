@@ -1,16 +1,25 @@
 {
    fontconfig_leak
    Memcheck:Leak
-   match-leak-kinds: definite
+   match-leak-kinds: definite,possible,indirect
    fun:malloc
    ...
    obj:*/libfontconfig.so.*
    ...
 }
 {
+   expat_leak
+   Memcheck:Leak
+   match-leak-kinds: definite,possible,indirect
+   fun:malloc
+   ...
+   obj:*/libexpat.so.*
+   ...
+}
+{
    glib_leak
    Memcheck:Leak
-   match-leak-kinds: definite
+   match-leak-kinds: definite,possible,indirect
    fun:malloc
    ...
    obj:*/libglib-2.0.so.*
@@ -19,7 +28,7 @@
 {
    gtk4_leak
    Memcheck:Leak
-   match-leak-kinds: definite
+   match-leak-kinds: definite,possible,indirect
    fun:malloc
    ...
    obj:*/libgtk-4.so.*
@@ -28,7 +37,7 @@
 {
    pango_leak
    Memcheck:Leak
-   match-leak-kinds: definite
+   match-leak-kinds: definite,possible,indirect
    fun:malloc
    ...
    obj:*/libpangocairo-1.0.so.*
@@ -37,7 +46,7 @@
 {
    gio_leak
    Memcheck:Leak
-   match-leak-kinds: definite
+   match-leak-kinds: definite,possible,indirect
    fun:malloc
    ...
    obj:*/libgio-2.0.so.*
@@ -46,7 +55,7 @@
 {
    gio_calloc_leak
    Memcheck:Leak
-   match-leak-kinds: definite
+   match-leak-kinds: definite,possible,indirect
    fun:calloc
    ...
    obj:*/libgio-2.0.so.*
@@ -55,9 +64,18 @@
 {
    glib_realloc_leak
    Memcheck:Leak
-   match-leak-kinds: definite
+   match-leak-kinds: definite,possible,indirect
    fun:realloc
    ...
    obj:*/libglib-2.0.so.*
+   ...
+}
+{
+   gallium_leak
+   Memcheck:Leak
+   match-leak-kinds: definite,possible,indirect
+   fun:malloc
+   ...
+   obj:*/libgallium*.so.*
    ...
 }
