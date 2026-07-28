@@ -146,6 +146,14 @@ static void test_theme_preservation(void) {
     }
 }
 
+/* -----------------------------------------------------------------------
+ * test_return_to_launcher
+ * NEW: Ensure return_to_launcher always returns TRUE.
+ * ----------------------------------------------------------------------- */
+static void test_return_to_launcher(void) {
+    g_assert_cmpint(return_to_launcher(), ==, TRUE);
+}
+
 int main(int argc, char **argv) {
     g_test_init(&argc, &argv, NULL);
     g_test_add_func("/persistence/settings",          test_settings);
@@ -153,5 +161,6 @@ int main(int argc, char **argv) {
     g_test_add_func("/persistence/scores_lower_better", test_scores_lower_better);
     g_test_add_func("/persistence/load_missing_score",  test_load_missing_score);
     g_test_add_func("/persistence/theme_preservation",  test_theme_preservation);
+    g_test_add_func("/persistence/return_to_launcher",  test_return_to_launcher);
     return g_test_run();
 }
