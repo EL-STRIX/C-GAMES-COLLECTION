@@ -3,7 +3,7 @@
 [![CI Build](https://github.com/EL-STRIX/C-GAMES-COLLECTION/actions/workflows/build.yml/badge.svg)](https://github.com/EL-STRIX/C-GAMES-COLLECTION/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-A collection of classic mini-games developed in C, featuring native Graphical User Interfaces (GUIs) powered by GTK4. 
+A collection of mini-games developed in C, featuring native Graphical User Interfaces (GUIs) powered by GTK4.
 
 ## Project Overview
 
@@ -13,7 +13,7 @@ This repository serves as a reference implementation for:
 - Managing GTK4 application lifecycles and view transitions (`GtkStack`).
 - Event-driven programming and signal handling in C.
 - Applying CSS styling to native C desktop applications.
-- Managing application state securely using encapsulated structs instead of global variables.
+- Managing application state securely using encapsulated structs instead of global variables to prevent memory leaks and state contamination.
 
 ## Features
 
@@ -41,19 +41,19 @@ This repository serves as a reference implementation for:
 
 ## Architecture
 
-The project uses a unified binary architecture driven by the GTK event loop. The central launcher manages a `GtkStack` to seamlessly transition between the main menu and individual game views while maintaining strict memory isolation via decoupled state structs.
+The project uses a unified binary architecture driven by the GTK event loop. The central launcher manages a `GtkStack` to transition between the main menu and individual game views while maintaining strict memory isolation via decoupled state structs. This approach avoids the performance overhead of managing multiple processes.
 
-For an in-depth breakdown of view management, UI state encapsulation, and the persistence engine, see our [Architecture Documentation](docs/ARCHITECTURE.md).
+For a detailed explanation of view management, UI state encapsulation, and the persistence engine, see the [Architecture Documentation](docs/ARCHITECTURE.md).
 
 ## CI/CD Pipeline
 
-The project implements a robust Continuous Integration and Continuous Deployment (CI/CD) pipeline using GitHub Actions to ensure code quality and portability across platforms (Linux, Windows, macOS).
+The project implements a Continuous Integration and Continuous Deployment (CI/CD) pipeline using GitHub Actions to enforce code quality and portability across platforms (Linux, Windows, macOS).
 
-For detailed information on the pipeline stages, automated tests (including `cppcheck` and `valgrind`), and release generation, please see our [CI/CD Documentation](docs/CI_CD.md).
+For information on the pipeline stages, automated tests (including `cppcheck` and `valgrind`), and release generation, refer to the [CI/CD Documentation](docs/CI_CD.md).
 
 ## Developer Documentation
 
-To get started with local development or if you wish to contribute, please refer to our comprehensive technical guides:
+To set up your local development environment or to contribute, please refer to our technical guides:
 - [**Developer Setup Guide**](docs/DEVELOPMENT.md): Instructions for provisioning MSYS2, Homebrew, and apt environments.
 - [**Adding a New Game**](docs/ADDING_A_GAME.md): A step-by-step tutorial on how to integrate a new game module into the unified launcher.
 - [**Style Guide**](docs/STYLE_GUIDE.md): Our strict C11 and GTK4 coding standards.

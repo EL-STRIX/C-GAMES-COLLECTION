@@ -1,10 +1,10 @@
 # Continuous Integration and Continuous Deployment (CI/CD) Architecture
 
-This document details the CI/CD pipeline infrastructure for the C Games Collection. The pipeline is engineered to meet professional industry standards, focusing on **security (least privilege)**, **reliability (strict fail-fast mechanisms)**, and **automated distribution**.
+This document outlines the CI/CD pipeline infrastructure for the C Games Collection. The pipeline is designed around the principles of least privilege, strict fail-fast mechanisms, and automated distribution.
 
 ## Overview
 
-The pipeline utilizes GitHub Actions and is defined in `.github/workflows/build.yml`. It is triggered automatically on:
+The pipeline uses GitHub Actions and is defined in `.github/workflows/build.yml`. It triggers on:
 - Pushes to the `main` branch.
 - Pull Requests targeting the `main` branch.
 - Tags matching the version pattern `v*`.
@@ -35,31 +35,31 @@ graph TD
 
 ## Security Posture & Permissions
 
-Following the principle of **least privilege**, the pipeline is designed to minimize attack vectors in the event of compromised dependencies:
-- **Global Permissions**: Set to `contents: read`. The CI jobs (`build-ubuntu`, `build-macos`) have no ability to modify the repository or create releases.
-- **Job-Specific Permissions**: Only the `package-windows` job is explicitly granted `contents: write`, and this is strictly utilized for cutting automated releases via the `softprops/action-gh-release@v2` action.
+Following the principle of least privilege, the pipeline minimizes access to reduce attack vectors if dependencies are compromised:
+- **Global Permissions**: Set to `contents: read`. The CI jobs (`build-ubuntu`, `build-macos`) cannot modify the repository or create releases.
+- **Job-Specific Permissions**: Only the `package-windows` job receives `contents: write`. This permission is used exclusively for generating automated releases via the `softprops/action-gh-release@v2` action.
 
 ## CI: Code Quality & Testing
 
-The Continuous Integration (CI) process strictly enforces code quality standards. If any step fails, the build is immediately halted.
+The Continuous Integration (CI) pipeline enforces code quality. If any step fails, the pipeline halts immediately.
 
 ### Ubuntu Build & Test (`build-ubuntu`)
-This job acts as the primary quality gate:
-1. **Static Analysis**: `cppcheck` is configured with `--enable=warning,performance,portability` and `--error-exitcode=1`. This guarantees that the build will fail immediately if potential bugs, memory safety issues, or non-portable code are detected, preventing flawed code from being merged.
-2. **Compilation**: Verifies successful compilation under Linux using GCC with strict flags (`-Wall -Wextra -Werror`).
-3. **Memory Testing**: The persistence unit test suite is executed under `valgrind --leak-check=full --error-exitcode=1`. This ensures there are zero memory leaks in the core logic layers.
+This job serves as the primary verification gate:
+1. **Static Analysis**: Executes `cppcheck` with `--enable=warning,performance,portability` and `--error-exitcode=1`. This step fails the build if potential bugs, memory safety issues, or non-portable code are detected.
+2. **Compilation**: Verifies successful compilation on Linux using GCC with strict compiler flags (`-Wall -Wextra -Werror`).
+3. **Memory Testing**: Runs the persistence unit test suite using `valgrind --leak-check=full --error-exitcode=1`. This step verifies that the core logic layers contain no memory leaks.
 
 ### macOS Build (`build-macos`)
-This job ensures continuous cross-platform portability for Apple Silicon and Intel architectures. 
-- Homebrew is used to provision GTK4.
-- The pipeline utilizes `brew update` to prevent flakiness associated with outdated Homebrew package indexes.
+This job validates cross-platform compilation on Apple Silicon and Intel architectures.
+- The pipeline uses Homebrew to provision GTK4.
+- It executes `brew update` before installation to mitigate build failures caused by outdated Homebrew package indexes.
 
 ## CD: Automated Packaging and Release
 
-The Continuous Deployment (CD) pipeline abstracts away the complexity of GTK4 distribution on Windows, producing a portable, zero-install artifact.
+The Continuous Deployment (CD) pipeline automates GTK4 distribution on Windows, outputting a portable artifact that requires no installation.
 
 ### Windows Packaging (`package-windows`)
-1. **Environment Setup**: A pristine MSYS2 UCRT64 environment is provisioned on demand.
-2. **Packaging Script**: The `scripts/package-windows.sh` script compiles the executable and recursively collects all necessary GTK4 DLLs, GSettings schemas, and icon themes required to run the game natively on Windows without an existing GTK installation.
-3. **Artifact Retention**: A ZIP archive (e.g., `C-GAMES-COLLECTION-v2.0.0-Windows.zip`) is generated and attached to the workflow run as a downloadable build artifact.
-4. **Automated Releases**: If the pipeline execution was triggered by a version tag (e.g., `git tag v2.0.0`), the workflow automatically drafts a new GitHub Release and attaches the Windows portable archive.
+1. **Environment Setup**: Provisions an MSYS2 UCRT64 environment.
+2. **Packaging Script**: Executes `scripts/package-windows.sh`. This script compiles the binary and bundles the necessary GTK4 DLLs, GSettings schemas, and icon themes. This allows the application to execute on a Windows machine without an existing GTK installation.
+3. **Artifact Retention**: Generates a ZIP archive (e.g., `C-GAMES-COLLECTION-v2.0.0-Windows.zip`) and attaches it to the workflow run for download.
+4. **Automated Releases**: If a version tag (e.g., `git tag v2.0.0`) triggered the run, the workflow drafts a GitHub Release and attaches the ZIP archive automatically.

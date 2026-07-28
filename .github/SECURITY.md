@@ -11,7 +11,7 @@ Only the current major version of the C-GAMES-COLLECTION is actively supported w
 
 ## Architecture & Local Security Bounds
 
-This desktop application does not expose network attack surfaces (no remote APIs or open ports). However, the following local security practices are observed to ensure safe execution:
+This desktop application does not expose network attack surfaces (no remote APIs or open ports). However, the following local security practices apply to ensure safe execution:
 
 1. **Bounds Checking**: String operations and file parsing limit buffer sizes to prevent overflow vulnerabilities when reading configuration files.
 2. **Path Traversal Protection**: The storage engine sanitizes filename inputs against directory traversal characters (`/`, `\`, `.`) during `GKeyFile` operations.

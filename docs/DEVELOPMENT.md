@@ -1,10 +1,10 @@
 # Developer Setup Guide
 
-This guide details how to set up your local development environment to compile, debug, and test the **C Games Collection** across different operating systems.
+This guide details how to set up your local development environment to compile, debug, and test the **C Games Collection** across Windows, Linux, and macOS.
 
 ## 1. Prerequisites
 
-Regardless of your operating system, you will need the following toolchain:
+To compile the codebase, you will need the following toolchain:
 - A C11-compliant compiler (`gcc` or `clang`).
 - `pkg-config` (for resolving GTK4 build flags).
 - GNU Make.
@@ -12,10 +12,10 @@ Regardless of your operating system, you will need the following toolchain:
 
 ## 2. Environment Setup
 
-### Windows (Primary Target)
+### Windows
 Windows development requires MSYS2 to provide a Unix-like build environment and native Windows GTK4 libraries.
 1. Download and install [MSYS2](https://www.msys2.org/).
-2. Open the **MSYS2 UCRT64** terminal (not the MinGW64 or MSYS terminals).
+2. Open the **MSYS2 UCRT64** terminal (do not use the MinGW64 or MSYS terminals).
 3. Install the required toolchain:
    ```bash
    pacman -Syu
@@ -23,14 +23,14 @@ Windows development requires MSYS2 to provide a Unix-like build environment and 
    ```
 
 ### Linux (Ubuntu/Debian)
-Linux is the easiest environment to configure as GTK4 is natively supported.
+Linux natively supports GTK4 development. Install the required packages via `apt`:
 ```bash
 sudo apt update
 sudo apt install build-essential gcc make pkg-config libgtk-4-dev valgrind cppcheck
 ```
 
 ### macOS
-For macOS, Homebrew is strictly recommended.
+For macOS, use Homebrew to install the toolchain:
 ```bash
 brew update
 brew install gcc make pkg-config gtk4
@@ -38,12 +38,18 @@ brew install gcc make pkg-config gtk4
 
 ## 3. Building the Project
 
-The project is built entirely via `make`.
+The build system relies on `make`.
 
-- **Clean the build directory**: `make clean`
-- **Build the unified binary**: `make all`
+- **Clean the build directory**:
+  ```bash
+  make clean
+  ```
+- **Build the unified binary**:
+  ```bash
+  make all
+  ```
 
-The resulting executable will be placed in the `bin/` directory. You can run it directly:
+The resulting executable is generated in the `bin/` directory. Execute it directly:
 ```bash
 # On Linux/macOS
 ./bin/c-games-collection.exe
@@ -54,32 +60,35 @@ bin\c-games-collection.exe
 
 ## 4. Local Testing & Verification
 
-Before submitting a Pull Request, you must verify that your code adheres to our strict quality gates.
+Before submitting a Pull Request, verify that your code passes the project's quality checks.
 
 ### Static Analysis
-Run `cppcheck` to statically analyze the source code for memory safety issues and bugs:
+Run `cppcheck` to analyze the source code for memory safety issues, bugs, and portability problems:
 ```bash
 cppcheck --enable=warning,performance,portability --suppress=missingIncludeSystem --error-exitcode=1 src/
 ```
 
 ### Memory Leak Testing (Linux Only)
-Since standard C does not have a garbage collector, we rely on Valgrind to ensure our non-GUI logic doesn't leak memory.
-1. Build the test suite: `make test`
-2. Run Valgrind on the output:
-```bash
-valgrind --leak-check=full --error-exitcode=1 ./bin/test_persistence.exe
-```
-If Valgrind reports *any* definitively lost bytes, your build will fail in CI.
+Standard C requires manual memory management. Run Valgrind to verify that the non-GUI logic is free of memory leaks.
+1. Build the test suite:
+   ```bash
+   make test
+   ```
+2. Run Valgrind on the compiled test binary:
+   ```bash
+   valgrind --leak-check=full --error-exitcode=1 ./bin/test_persistence.exe
+   ```
+If Valgrind detects memory leaks, the CI pipeline will fail.
 
 ## 5. UI Debugging with GTK Inspector
 
-If you are developing a new game or modifying CSS, you do not need to guess widget bounds. GTK4 includes a powerful built-in inspector.
+GTK4 includes a built-in inspector tool for debugging UI layouts and CSS styling.
 
-To run the application with the inspector attached:
+To run the application with the inspector attached, prefix the execution command with `GTK_DEBUG`:
 ```bash
 GTK_DEBUG=interactive ./bin/c-games-collection.exe
 ```
-This tool allows you to:
-- Inspect the live widget hierarchy (`GtkStack`, `GtkBox`, etc.).
-- Dynamically inject and modify CSS on the fly.
+This tool allows developers to:
+- Inspect the live widget hierarchy (e.g., `GtkStack`, `GtkBox`).
+- Inject and modify CSS dynamically.
 - Monitor signal emissions in real-time.
