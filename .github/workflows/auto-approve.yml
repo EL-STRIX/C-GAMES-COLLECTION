@@ -6,8 +6,8 @@ on:
 jobs:
   auto-approve:
     runs-on: ubuntu-latest
-    if: github.actor != 'github-actions[bot]'
     permissions:
       pull-requests: write
     steps:
       - uses: hmarr/auto-approve-action@v4
+        continue-on-error: true
