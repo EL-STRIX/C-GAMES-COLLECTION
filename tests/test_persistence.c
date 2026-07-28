@@ -118,6 +118,24 @@ static void test_load_missing_score(void) {
 }
 
 /* -----------------------------------------------------------------------
+ * test_css_path_traversal
+ * NEW: Ensure load_css_from_file rejects path traversal attempts.
+ * ----------------------------------------------------------------------- */
+static void test_css_path_traversal(void) {
+    /* Test forward slash */
+    g_test_expect_message(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "*path traversal detected*");
+    GtkCssProvider* provider1 = load_css_from_file("../styles.css");
+    g_assert_null(provider1);
+    g_test_assert_expected_messages();
+
+    /* Test backslash */
+    g_test_expect_message(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "*path traversal detected*");
+    GtkCssProvider* provider2 = load_css_from_file("folder\\styles.css");
+    g_assert_null(provider2);
+    g_test_assert_expected_messages();
+}
+
+/* -----------------------------------------------------------------------
  * test_theme_preservation
  * NEW: Ensure save_global_settings(name, -1) preserves the existing theme.
  * ----------------------------------------------------------------------- */
@@ -153,5 +171,6 @@ int main(int argc, char **argv) {
     g_test_add_func("/persistence/scores_lower_better", test_scores_lower_better);
     g_test_add_func("/persistence/load_missing_score",  test_load_missing_score);
     g_test_add_func("/persistence/theme_preservation",  test_theme_preservation);
+    g_test_add_func("/persistence/css_path_traversal",  test_css_path_traversal);
     return g_test_run();
 }
