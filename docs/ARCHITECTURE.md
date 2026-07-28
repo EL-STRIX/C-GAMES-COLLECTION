@@ -1,20 +1,20 @@
 # System Architecture & Design
 
-This document details the internal architecture, design boundaries, and state-management protocols of the **C Games Collection**. It serves as the primary technical reference for contributors maintaining or scaling the system.
+This document details the internal architecture, design boundaries, and state-management protocols of the **C Games Collection**. It serves as a technical reference for contributors maintaining or extending the system.
 
 ## 1. Unified Binary & View Management
 
-The repository employs a **Unified Binary Architecture** managed by a central GTK event loop. Rather than spawning independent executables for each game, all modules are compiled into a single application (`c-games-collection.exe`).
+The project uses a **Unified Binary Architecture** managed by a single GTK event loop. Instead of spawning independent executables for each game, all modules are compiled into one application (`c-games-collection.exe`).
 
 ### View Navigation Flow
-When a user launches the application:
+The view navigation operates as follows:
 1. The main entry point initializes the GTK4 application and constructs a global `GtkStack`.
-2. The `GtkStack` acts as a container, holding the launcher menu and every game as separate child views.
-3. When a user selects a game from the launcher menu, the application invokes `gtk_stack_set_visible_child_name` to transition the view smoothly.
-4. When the user clicks "Return to Main Menu" from within a game, the game invokes the `switch_to_launcher()` shared function (transitioning the stack back to the menu) and resets its internal logic cleanly.
+2. The `GtkStack` acts as a container. It holds the launcher menu and each game as separate child views.
+3. When a user selects a game from the launcher menu, the application calls `gtk_stack_set_visible_child_name` to transition the view.
+4. When the user clicks "Return to Main Menu" from within a game, the game invokes the `switch_to_launcher()` shared function. This transitions the stack back to the menu and resets the game's internal logic.
 
 **Design Rationale:**
-A unified binary eliminates the overhead of managing OS-level processes. It provides instant, seamless transitions between games, mimicking a monolithic engine while keeping the distribution to a single, portable executable.
+A unified binary eliminates the overhead of managing OS-level processes. It provides immediate transitions between games, simulating a monolithic engine while keeping the distribution to a single executable.
 
 ### Architecture Diagram
 ```mermaid
@@ -38,9 +38,9 @@ graph TD
 
 ## 2. Strict State Encapsulation (`AppData`)
 
-In legacy C GUI development, global variables are frequently abused to track widgets and state across callback scopes. This repository enforces a **zero-global-state policy** for game modules.
+To avoid the memory leaks and cross-contamination issues common in legacy C GUI development, this repository enforces a **zero-global-state policy** for game modules.
 
-Every game module must define an `AppData` struct inside its `main.c` to encapsulate its internal state exclusively:
+Every game module must define an `AppData` struct inside its `main.c` file. This struct must encapsulate its internal state exclusively:
 
 ```c
 // Example AppData Pattern Definition
@@ -55,24 +55,25 @@ typedef struct {
 } AppData;
 ```
 
-During module initialization, `AppData` is allocated dynamically on the heap using `g_new0`, and a pointer to this context object is passed explicitly into every GTK signal handler as the `user_data` argument. 
-This guarantees that memory from one game module cannot leak or interfere with another session, simulating strict process isolation within a unified binary.
+During module initialization, `AppData` is allocated dynamically on the heap using `g_new0`. A pointer to this context object is passed explicitly into every GTK signal handler as the `user_data` argument.
+
+**Design Rationale:**
+This approach guarantees that memory from one game module cannot leak into or interfere with another session, establishing effective process isolation within the unified binary.
 
 ## 3. Data Persistence Engine
 
-The project implements a centralized, decoupled data storage layer located in `src/common/persistence.c`. 
-It utilizes the `GKeyFile` engine provided by GLib to parse and safely write standard INI configuration files to the local disk (specifically the `data/` directory).
+The project implements a centralized, decoupled data storage layer in `src/common/persistence.c`.
+It uses the `GKeyFile` engine provided by GLib to parse and write standard INI configuration files to the local disk (specifically the `data/` directory).
 
-**Engine Guarantees:**
-- Provides atomic, safe saves for high scores and application configurations.
-- Integrates automatically with GTK-compliant structured logging (`g_message`, `g_warning`) for all I/O operations.
-- Strictly decouples file I/O thread operations from UI rendering logic.
+**Engine Characteristics:**
+- Provides atomic saves for high scores and application configurations.
+- Integrates with GTK-compliant structured logging (`g_message`, `g_warning`) for all I/O operations.
+- Decouples file I/O operations from UI rendering logic.
 
 ## 4. UI Rendering & CSS Decoupling
 
-GTK4 supports XML (`.ui` files) or programmatic C instantiation for constructing the widget tree. 
-This repository opts exclusively for **programmatic instantiation** in C to keep build dependencies minimal and compilation speeds high.
+While GTK4 supports XML (`.ui` files) for constructing the widget tree, this repository uses **programmatic instantiation** in C. This decision keeps build dependencies minimal and compilation times short.
 
-Styling, however, is strictly decoupled from the source code into `.css` assets located in `assets/css/`.
+Styling is decoupled from the source code and stored in `.css` assets located in `assets/css/`.
 
-When the application starts, `load_css_from_file()` calculates an absolute path to the styling assets, dynamically streams the CSS into a global `GtkCssProvider`, and binds it natively to the `GdkDisplay`. This enables rapid, hot-reloadable styling iteration across all integrated modules without requiring a recompilation step.
+When the application starts, `load_css_from_file()` calculates an absolute path to the styling assets. It loads the CSS into a global `GtkCssProvider` and binds it natively to the `GdkDisplay`. This enables styling iteration across all integrated modules without requiring recompilation.

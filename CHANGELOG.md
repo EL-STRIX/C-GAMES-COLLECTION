@@ -8,16 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 - Extracted CSS themes into `assets/css/` to decouple styles from binaries.
-- Introduced `load_css_from_file()` in the persistence module to dynamically inject styles at runtime.
-- Added structured GTK error logging (`g_warning`, `g_message`) across the `src/common/persistence.c` IO boundary.
+- Introduced `load_css_from_file()` in the persistence module to inject styles dynamically at runtime.
+- Implemented structured GTK error logging (`g_warning`, `g_message`) across the `src/common/persistence.c` I/O boundary.
 - Added standard open-source documentation (`CONTRIBUTING.md`, `ARCHITECTURE.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`).
 
 ### Changed
-- Restructured the root directory by renaming `games/` to `src/` and organizing source files into specific game directories.
-- Refactored global states into isolated `AppData` structs to adhere to best practices for state management.
-- Updated GTK callback signatures to receive local `AppData` state via the `user_data` pointer.
-- Standardized code conventions across the repository (`UPPER_SNAKE_CASE` for constants, `snake_case` for variables).
-- Updated code comments to focus on implementation logic and design decisions.
+- Restructured the root directory by renaming `games/` to `src/` and organizing source files into module-specific directories.
+- Refactored global state logic into isolated `AppData` structs to adhere to memory management constraints.
+- Updated GTK callback signatures to reference local `AppData` state via the `user_data` pointer.
+- Standardized codebase conventions (`UPPER_SNAKE_CASE` for constants, `snake_case` for variables).
+- Revised code comments to focus strictly on architectural decisions and implementation logic.
 
 ### Removed
 - Removed inline `css_data` C-strings from UI source files.
