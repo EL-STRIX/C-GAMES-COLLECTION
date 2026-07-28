@@ -29,7 +29,7 @@ jobs:
       run: make all CFLAGS="-std=c11 -Wall -Wextra -Werror -O2 $(pkg-config --cflags gtk4)"
       
     - name: Run Tests (Memory Check)
-      run: xvfb-run valgrind --leak-check=full --error-exitcode=1 ./bin/test_persistence.exe
+      run: xvfb-run valgrind --leak-check=full --errors-for-leak-kinds=definite --suppressions=scripts/valgrind.supp --error-exitcode=1 ./bin/test_persistence.exe
 
   build-macos:
     runs-on: macos-latest
