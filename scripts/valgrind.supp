@@ -79,3 +79,38 @@
    obj:*/libgallium*.so.*
    ...
 }
+{
+   dlopen_leak
+   Memcheck:Leak
+   match-leak-kinds: definite,possible,indirect
+   fun:malloc
+   ...
+   fun:dlopen@@GLIBC_*
+}
+{
+   dlopen_leak_worker
+   Memcheck:Leak
+   match-leak-kinds: definite,possible,indirect
+   fun:malloc
+   ...
+   fun:dl_open_worker
+   ...
+}
+{
+   dl_map_object_leak
+   Memcheck:Leak
+   match-leak-kinds: definite,possible,indirect
+   fun:malloc
+   ...
+   fun:_dl_map_object_deps
+   ...
+}
+{
+   catch_exception_leak
+   Memcheck:Leak
+   match-leak-kinds: definite,possible,indirect
+   fun:malloc
+   ...
+   fun:_dl_catch_exception
+   ...
+}
