@@ -307,13 +307,8 @@ GtkWidget* ttt_create_ui(void)
     TttAppData *app = g_new0(TttAppData, 1);
 
 
-    GtkWidget *header = gtk_header_bar_new();
-    gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), TRUE);
+    GtkWidget *header = create_game_header("Epic Tic Tac Toe Battle", TRUE);
     gtk_box_append(GTK_BOX(vbox), header);
-    
-    GtkWidget *title_lbl = gtk_label_new("Epic Tic Tac Toe Battle");
-    gtk_widget_add_css_class(title_lbl, "header-title");
-    gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), title_lbl);
 
     app->stack = gtk_stack_new();
     gtk_stack_set_transition_type(GTK_STACK(app->stack), GTK_STACK_TRANSITION_TYPE_CROSSFADE);

@@ -495,11 +495,7 @@ GtkWidget* rps_create_ui(void)
 
     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     
-    GtkWidget *header = gtk_header_bar_new();
-    gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), FALSE);
-    GtkWidget *title_lbl = gtk_label_new("Rock Paper Scissors");
-    gtk_widget_add_css_class(title_lbl, "header-title");
-    gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), title_lbl);
+    GtkWidget *header = create_game_header("Rock Paper Scissors", FALSE);
     
     gtk_box_append(GTK_BOX(vbox), header);
     gtk_widget_set_vexpand(overlay, TRUE);
