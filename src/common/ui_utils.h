@@ -40,4 +40,12 @@ void apply_global_theme(void);
 /* Defined in launcher/main.c; declared here so ui_utils.c can call it. */
 void switch_to_launcher(void);
 
+/**
+ * @brief Create a standardized header bar for a game screen.
+ * @param title The text to display in the header bar.
+ * @param show_title_buttons Whether to show the standard window title buttons.
+ * @return A new GtkWidget (GtkHeaderBar).
+ */
+GtkWidget* create_game_header(const char *title, gboolean show_title_buttons);
+
 #endif /* UI_UTILS_H */

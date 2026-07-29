@@ -74,3 +74,15 @@ void apply_global_theme(void) {
     
     current_theme_provider = load_css_from_file(css_filename);
 }
+
+GtkWidget* create_game_header(const char *title, gboolean show_title_buttons)
+{
+    GtkWidget *header = gtk_header_bar_new();
+    gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), show_title_buttons);
+
+    GtkWidget *title_lbl = gtk_label_new(title);
+    gtk_widget_add_css_class(title_lbl, "header-title");
+    gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), title_lbl);
+
+    return header;
+}
