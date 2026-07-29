@@ -123,7 +123,32 @@ static void test_load_missing_score(void) {
  * ----------------------------------------------------------------------- */
 static void test_load_css_success(void) {
     /* Create a valid dummy CSS file to test successful load without triggering theme parser warnings */
-    FILE *f = fopen("assets/css/test_dummy.css", "w");
+    char *base_dir = NULL;
+
+#ifdef _WIN32
+    char path[MAX_PATH];
+    if (GetModuleFileNameA(NULL, path, MAX_PATH)) {
+        base_dir = g_path_get_dirname(path);
+    }
+#else
+    char *exe_path = g_file_read_link("/proc/self/exe", NULL);
+    if (exe_path) {
+        base_dir = g_path_get_dirname(exe_path);
+        g_free(exe_path);
+    }
+#endif
+
+    if (!base_dir) {
+        base_dir = g_get_current_dir(); // fallback
+    }
+
+    char *assets_dir = g_build_filename(base_dir, "..", "assets", "css", "test_dummy.css", NULL);
+
+    char *dir = g_path_get_dirname(assets_dir);
+    g_mkdir_with_parents(dir, 0700);
+    g_free(dir);
+
+    FILE *f = fopen(assets_dir, "w");
     if (f) {
         fputs("window { background-color: #ffffff; }", f);
         fclose(f);
@@ -135,7 +160,10 @@ static void test_load_css_success(void) {
         g_object_unref(provider);
     }
 
-    remove("assets/css/test_dummy.css");
+    remove(assets_dir);
+
+    g_free(assets_dir);
+    g_free(base_dir);
 }
 
 /* -----------------------------------------------------------------------
@@ -184,8 +212,8 @@ static void test_theme_preservation(void) {
 }
 
 int main(int argc, char **argv) {
-    gtk_init();
-    g_test_init(&argc, &argv, NULL);
+    /* Required for GTK/GDK tests. Call gtk_test_init to handle display headless */
+    gtk_test_init(&argc, &argv, NULL);
     g_test_add_func("/persistence/settings",          test_settings);
     g_test_add_func("/persistence/scores",            test_scores);
     g_test_add_func("/persistence/scores_lower_better", test_scores_lower_better);
