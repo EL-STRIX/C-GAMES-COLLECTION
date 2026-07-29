@@ -178,7 +178,7 @@ static void rps_start_next_round_ui(RpsAppData *data) {
 
 /* Process a single round: generate computer choice, decide winner, update UI */
 static void rps_process_round(RpsAppData *data, int user_choice) {
-    int computer_choice = (rand() % 3) + 1; /* random int in 1..3 */
+    int computer_choice = g_random_int_range(1, 4); /* random int in 1..3 */
     const char *user_str = (user_choice == 1) ? "ROCK" : (user_choice == 2) ? "PAPER" : "SCISSORS";
     const char *comp_str = (computer_choice == 1) ? "ROCK" : (computer_choice == 2) ? "PAPER" : "SCISSORS";
     int result = 0; /* 0 draw, 1 player win, 2 computer win */
@@ -440,12 +440,6 @@ static GtkWidget* rps_create_result_page(RpsAppData *data) {
 
 GtkWidget* rps_create_ui(void)
 {
-    static gboolean rng_seeded = FALSE;
-    if (!rng_seeded) {
-        srand((unsigned)time(NULL));
-        rng_seeded = TRUE;
-    }
-
     RpsAppData *app = g_new0(RpsAppData, 1);
 
     app->stack = gtk_stack_new();
