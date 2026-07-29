@@ -88,10 +88,57 @@ static const char* get_data_dir(void) {
     return cached_data_dir;
 }
 
+typedef struct {
+    char game_name[32];
+    char player_name[50];
+    int score;
+    gboolean is_cached;
+} CachedScore;
+
+#define MAX_CACHED_SCORES 10
+static CachedScore score_cache[MAX_CACHED_SCORES];
+
+static void update_score_cache(const char *game_name, const char *player_name, int score) {
+    int empty_slot = -1;
+    for (int i = 0; i < MAX_CACHED_SCORES; i++) {
+        if (score_cache[i].is_cached && strcmp(score_cache[i].game_name, game_name) == 0) {
+            strncpy(score_cache[i].player_name, player_name ? player_name : "Unknown", sizeof(score_cache[i].player_name) - 1);
+            score_cache[i].player_name[sizeof(score_cache[i].player_name) - 1] = '\0';
+            score_cache[i].score = score;
+            return;
+        }
+        if (!score_cache[i].is_cached && empty_slot == -1) {
+            empty_slot = i;
+        }
+    }
+    if (empty_slot != -1) {
+        strncpy(score_cache[empty_slot].game_name, game_name, sizeof(score_cache[empty_slot].game_name) - 1);
+        score_cache[empty_slot].game_name[sizeof(score_cache[empty_slot].game_name) - 1] = '\0';
+        strncpy(score_cache[empty_slot].player_name, player_name ? player_name : "Unknown", sizeof(score_cache[empty_slot].player_name) - 1);
+        score_cache[empty_slot].player_name[sizeof(score_cache[empty_slot].player_name) - 1] = '\0';
+        score_cache[empty_slot].score = score;
+        score_cache[empty_slot].is_cached = TRUE;
+    }
+}
+
 int load_top_score(const char *game_name, char *out_player_name, size_t out_size) {
     if (strpbrk(game_name, "/\\.")) {
         g_warning("Security violation: path traversal detected in game_name '%s'", game_name);
         return -1;
+    }
+
+    for (int i = 0; i < MAX_CACHED_SCORES; i++) {
+        if (score_cache[i].is_cached && strcmp(score_cache[i].game_name, game_name) == 0) {
+            if (out_player_name && out_size > 0) {
+                if (score_cache[i].score == -1) {
+                    snprintf(out_player_name, out_size, "None");
+                } else {
+                    strncpy(out_player_name, score_cache[i].player_name, out_size - 1);
+                    out_player_name[out_size - 1] = '\0';
+                }
+            }
+            return score_cache[i].score;
+        }
     }
 
     const char *data_dir = get_data_dir();
@@ -108,11 +155,15 @@ int load_top_score(const char *game_name, char *out_player_name, size_t out_size
         }
         g_key_file_free(kf);
         g_free(filename);
+        update_score_cache(game_name, "None", -1);
         return -1;
     }
     
     int score = g_key_file_get_integer(kf, "Score", "Value", NULL);
     gchar *name = g_key_file_get_string(kf, "Score", "Player", NULL);
+
+    update_score_cache(game_name, name ? name : "Unknown", score);
+
     if (name && out_player_name && out_size > 0) {
         strncpy(out_player_name, name, out_size - 1);
         out_player_name[out_size - 1] = '\0';
@@ -148,6 +199,7 @@ void save_score(const char *game_name, const char *player_name, int score, int i
             if (error) g_error_free(error);
         } else {
             g_message("Saved new top score to %s", filename);
+            update_score_cache(game_name, player_name, score);
         }
         g_key_file_free(kf);
         g_free(filename);
