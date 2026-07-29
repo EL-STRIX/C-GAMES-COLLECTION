@@ -239,6 +239,3 @@ void load_global_settings(char *player_name, size_t out_size, int *theme_id) {
     g_free(filename);
 }
 
-gboolean return_to_launcher(void) {
-    return TRUE;
-}

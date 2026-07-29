@@ -50,12 +50,6 @@ void save_global_settings(const char *player_name, int theme_id);
 void load_global_settings(char *player_name, size_t out_size, int *theme_id);
 
 /**
- * @brief Signals the launcher to become the active view (no-op stub for future use).
- * @return Always TRUE.
- */
-gboolean return_to_launcher(void);
-
-/**
  * @brief Load a CSS file from the assets/css directory and apply it to the display.
  * @param filename  Basename only (e.g. "theme_dark.css"). Path separators are rejected.
  * @return A new GtkCssProvider already applied, or NULL on security violation.
