@@ -118,6 +118,22 @@ static void test_load_missing_score(void) {
 }
 
 /* -----------------------------------------------------------------------
+ * test_load_css_path_traversal
+ * NEW: Ensure load_css_from_file returns NULL and logs a warning on path traversal attempt.
+ * ----------------------------------------------------------------------- */
+static void test_load_css_path_traversal(void) {
+    g_test_expect_message(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "*Security violation: path traversal detected in css filename '../style.css'*");
+    GtkCssProvider* provider1 = load_css_from_file("../style.css");
+    g_assert_null(provider1);
+    g_test_assert_expected_messages();
+
+    g_test_expect_message(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "*Security violation: path traversal detected in css filename 'subdir?style.css'*");
+    GtkCssProvider* provider2 = load_css_from_file("subdir\\style.css");
+    g_assert_null(provider2);
+    g_test_assert_expected_messages();
+}
+
+/* -----------------------------------------------------------------------
  * test_return_to_launcher
  * NEW: Ensure return_to_launcher returns TRUE.
  * ----------------------------------------------------------------------- */
@@ -161,6 +177,7 @@ int main(int argc, char **argv) {
     g_test_add_func("/persistence/scores",            test_scores);
     g_test_add_func("/persistence/scores_lower_better", test_scores_lower_better);
     g_test_add_func("/persistence/load_missing_score",  test_load_missing_score);
+    g_test_add_func("/persistence/css_path_traversal",  test_load_css_path_traversal);
     g_test_add_func("/persistence/theme_preservation",  test_theme_preservation);
     g_test_add_func("/persistence/return_to_launcher",  test_return_to_launcher);
     return g_test_run();
