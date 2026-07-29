@@ -1,12 +1,23 @@
-name: Auto Approve Pull Requests
+name: Auto Approve
+
 on:
   pull_request_target:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 jobs:
-  auto-approve:
+  approve:
+    if: >
+      github.actor == 'dependabot[bot]' ||
+      github.actor == 'renovate[bot]'
+
     runs-on: ubuntu-latest
+
     permissions:
+      contents: read
       pull-requests: write
+
     steps:
       - uses: hmarr/auto-approve-action@v4
