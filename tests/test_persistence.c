@@ -118,6 +118,27 @@ static void test_load_missing_score(void) {
 }
 
 /* -----------------------------------------------------------------------
+ * test_load_css_success
+ * NEW: Ensure load_css_from_file successfully loads a valid CSS file.
+ * ----------------------------------------------------------------------- */
+static void test_load_css_success(void) {
+    /* Create a valid dummy CSS file to test successful load without triggering theme parser warnings */
+    FILE *f = fopen("assets/css/test_dummy.css", "w");
+    if (f) {
+        fputs("window { background-color: #ffffff; }", f);
+        fclose(f);
+    }
+
+    GtkCssProvider* provider = load_css_from_file("test_dummy.css");
+    g_assert_nonnull(provider);
+    if (provider) {
+        g_object_unref(provider);
+    }
+
+    remove("assets/css/test_dummy.css");
+}
+
+/* -----------------------------------------------------------------------
  * test_load_css_path_traversal
  * NEW: Ensure load_css_from_file returns NULL and logs a warning on path traversal attempt.
  * ----------------------------------------------------------------------- */
@@ -163,11 +184,13 @@ static void test_theme_preservation(void) {
 }
 
 int main(int argc, char **argv) {
+    gtk_init();
     g_test_init(&argc, &argv, NULL);
     g_test_add_func("/persistence/settings",          test_settings);
     g_test_add_func("/persistence/scores",            test_scores);
     g_test_add_func("/persistence/scores_lower_better", test_scores_lower_better);
     g_test_add_func("/persistence/load_missing_score",  test_load_missing_score);
+    g_test_add_func("/persistence/css_success",         test_load_css_success);
     g_test_add_func("/persistence/css_path_traversal",  test_load_css_path_traversal);
     g_test_add_func("/persistence/theme_preservation",  test_theme_preservation);
     return g_test_run();
