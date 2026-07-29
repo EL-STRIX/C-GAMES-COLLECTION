@@ -118,6 +118,39 @@ static void test_load_missing_score(void) {
 }
 
 /* -----------------------------------------------------------------------
+ * test_load_css_success
+ * NEW: Ensure load_css_from_file correctly loads a valid CSS file.
+ * ----------------------------------------------------------------------- */
+static void test_load_css_success(void) {
+    const char *dummy_css_name = "test_dummy.css";
+    char *base_dir = g_get_current_dir(); // fallback
+    char *exe_path = g_file_read_link("/proc/self/exe", NULL);
+    if (exe_path) {
+        g_free(base_dir);
+        base_dir = g_path_get_dirname(exe_path);
+        g_free(exe_path);
+    }
+
+    char *assets_dir = g_build_filename(base_dir, "..", "assets", "css", dummy_css_name, NULL);
+    g_free(base_dir);
+
+    // Create the dummy file
+    FILE *f = fopen(assets_dir, "w");
+    g_assert_nonnull(f);
+    fprintf(f, "/* dummy css */\n* { color: red; }");
+    fclose(f);
+
+    // Test loading
+    GtkCssProvider* provider = load_css_from_file(dummy_css_name);
+    g_assert_nonnull(provider);
+
+    // Cleanup
+    remove(assets_dir);
+    g_free(assets_dir);
+    g_object_unref(provider);
+}
+
+/* -----------------------------------------------------------------------
  * test_load_css_path_traversal
  * NEW: Ensure load_css_from_file returns NULL and logs a warning on path traversal attempt.
  * ----------------------------------------------------------------------- */
@@ -172,11 +205,13 @@ static void test_theme_preservation(void) {
 }
 
 int main(int argc, char **argv) {
+    gtk_init();
     g_test_init(&argc, &argv, NULL);
     g_test_add_func("/persistence/settings",          test_settings);
     g_test_add_func("/persistence/scores",            test_scores);
     g_test_add_func("/persistence/scores_lower_better", test_scores_lower_better);
     g_test_add_func("/persistence/load_missing_score",  test_load_missing_score);
+    g_test_add_func("/persistence/css_success",         test_load_css_success);
     g_test_add_func("/persistence/css_path_traversal",  test_load_css_path_traversal);
     g_test_add_func("/persistence/theme_preservation",  test_theme_preservation);
     g_test_add_func("/persistence/return_to_launcher",  test_return_to_launcher);
