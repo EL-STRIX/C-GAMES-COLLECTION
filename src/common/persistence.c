@@ -55,7 +55,12 @@ GtkCssProvider* load_css_from_file(const char *filename) {
 
 
 // Helper function to dynamically locate the data directory relative to the executable
-static char* get_data_dir(void) {
+static const char* get_data_dir(void) {
+    static char *cached_data_dir = NULL;
+    if (cached_data_dir) {
+        return cached_data_dir;
+    }
+
     char *base_dir = NULL;
     
 #ifdef _WIN32
@@ -76,11 +81,11 @@ static char* get_data_dir(void) {
     }
     
     // Construct path: base_dir/../data
-    char *data_dir = g_build_filename(base_dir, "..", "data", NULL);
+    cached_data_dir = g_build_filename(base_dir, "..", "data", NULL);
     g_free(base_dir);
     
-    g_mkdir_with_parents(data_dir, 0700);
-    return data_dir;
+    g_mkdir_with_parents(cached_data_dir, 0700);
+    return cached_data_dir;
 }
 
 int load_top_score(const char *game_name, char *out_player_name, size_t out_size) {
@@ -89,9 +94,8 @@ int load_top_score(const char *game_name, char *out_player_name, size_t out_size
         return -1;
     }
 
-    char *data_dir = get_data_dir();
+    const char *data_dir = get_data_dir();
     char *filename = g_strdup_printf("%s/%s_score.ini", data_dir, game_name);
-    g_free(data_dir);
     
     GKeyFile *kf = g_key_file_new();
     GError *error = NULL;
@@ -133,9 +137,8 @@ void save_score(const char *game_name, const char *player_name, int score, int i
     int is_new_record = (top_score == -1) || (is_lower_better ? (score < top_score) : (score > top_score));
     
     if (is_new_record) {
-        char *data_dir = get_data_dir();
+        const char *data_dir = get_data_dir();
         char *filename = g_strdup_printf("%s/%s_score.ini", data_dir, game_name);
-        g_free(data_dir);
         GKeyFile *kf = g_key_file_new();
         g_key_file_set_string(kf, "Score", "Player", player_name);
         g_key_file_set_integer(kf, "Score", "Value", score);
@@ -165,9 +168,8 @@ void save_global_settings(const char *player_name, int theme_id) {
     g_key_file_set_string(kf, "Settings", "PlayerName", player_name);
     g_key_file_set_integer(kf, "Settings", "ThemeID", theme_id);
     GError *error = NULL;
-    char *data_dir = get_data_dir();
+    const char *data_dir = get_data_dir();
     char *filename = g_strdup_printf("%s/settings.ini", data_dir);
-    g_free(data_dir);
     if (!g_key_file_save_to_file(kf, filename, &error)) {
         g_warning("Failed to save global settings: %s", error ? error->message : "Unknown error");
         if (error) g_error_free(error);
@@ -181,9 +183,8 @@ void save_global_settings(const char *player_name, int theme_id) {
 void load_global_settings(char *player_name, size_t out_size, int *theme_id) {
     GKeyFile *kf = g_key_file_new();
     GError *error = NULL;
-    char *data_dir = get_data_dir();
+    const char *data_dir = get_data_dir();
     char *filename = g_strdup_printf("%s/settings.ini", data_dir);
-    g_free(data_dir);
     if (g_key_file_load_from_file(kf, filename, G_KEY_FILE_NONE, &error)) {
         /* settings.ini found — read name and theme directly */
         gchar *name = g_key_file_get_string(kf, "Settings", "PlayerName", NULL);
