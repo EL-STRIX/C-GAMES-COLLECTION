@@ -118,6 +118,15 @@ static void test_load_missing_score(void) {
 }
 
 /* -----------------------------------------------------------------------
+ * test_return_to_launcher
+ * NEW: Ensure return_to_launcher returns TRUE.
+ * ----------------------------------------------------------------------- */
+static void test_return_to_launcher(void) {
+    gboolean result = return_to_launcher();
+    g_assert_true(result);
+}
+
+/* -----------------------------------------------------------------------
  * test_theme_preservation
  * NEW: Ensure save_global_settings(name, -1) preserves the existing theme.
  * ----------------------------------------------------------------------- */
@@ -153,5 +162,6 @@ int main(int argc, char **argv) {
     g_test_add_func("/persistence/scores_lower_better", test_scores_lower_better);
     g_test_add_func("/persistence/load_missing_score",  test_load_missing_score);
     g_test_add_func("/persistence/theme_preservation",  test_theme_preservation);
+    g_test_add_func("/persistence/return_to_launcher",  test_return_to_launcher);
     return g_test_run();
 }
