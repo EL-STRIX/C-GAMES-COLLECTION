@@ -55,7 +55,7 @@ typedef struct
 static void ng_start_game_logic(NgAppData *app)
 {
     // Determine the secret target (1-100 inclusive)
-    app->secret_number = (rand() % 100) + 1;
+    app->secret_number = g_random_int_range(1, 101);
     app->attempts = 0;
 
     // Reset UI controls
@@ -321,12 +321,6 @@ static GtkWidget *ng_create_result_page(NgAppData *app)
 
 GtkWidget* ng_create_ui(void)
 {
-    static gboolean rng_seeded = FALSE;
-    if (!rng_seeded) {
-        srand((unsigned)time(NULL));
-        rng_seeded = TRUE;
-    }
-
     NgAppData *app = g_new0(NgAppData, 1);
 
     app->stack = gtk_stack_new();

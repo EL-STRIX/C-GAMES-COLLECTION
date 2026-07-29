@@ -178,7 +178,7 @@ static void sgw_start_next_round_ui(SgwAppData *data) {
 
 /* Process a single round: generate computer choice, decide winner, update UI */
 static void sgw_process_round(SgwAppData *data, int user_choice) {
-    int computer_choice = (rand() % 3) + 1;
+    int computer_choice = g_random_int_range(1, 4);
     const char *user_str, *comp_str;
     switch (user_choice) {
         case CHOICE_SNAKE: user_str = "Snake"; break;
@@ -457,12 +457,6 @@ static GtkWidget* sgw_create_result_page(SgwAppData *data) {
 
 GtkWidget* sgw_create_ui(void)
 {
-    static gboolean rng_seeded = FALSE;
-    if (!rng_seeded) {
-        srand((unsigned)time(NULL));
-        rng_seeded = TRUE;
-    }
-
     SgwAppData *app = g_new0(SgwAppData, 1);
 
     app->stack = gtk_stack_new();
