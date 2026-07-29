@@ -146,12 +146,68 @@ static void test_theme_preservation(void) {
     }
 }
 
+/* -----------------------------------------------------------------------
+ * test_load_css_valid
+ * NEW: Ensure load_css_from_file can load a valid CSS file.
+ * ----------------------------------------------------------------------- */
+static void test_load_css_valid(void) {
+    /* Create a valid test CSS file to avoid theme parser warnings from existing themes */
+    char *base_dir = NULL;
+#ifdef _WIN32
+    char path[MAX_PATH];
+    if (GetModuleFileNameA(NULL, path, MAX_PATH)) {
+        base_dir = g_path_get_dirname(path);
+    }
+#else
+    char *exe_path = g_file_read_link("/proc/self/exe", NULL);
+    if (exe_path) {
+        base_dir = g_path_get_dirname(exe_path);
+        g_free(exe_path);
+    }
+#endif
+    if (!base_dir) {
+        base_dir = g_get_current_dir(); // fallback
+    }
+
+    char *css_path = g_build_filename(base_dir, "..", "assets", "css", "test_dummy.css", NULL);
+    g_free(base_dir);
+
+    /* Create a dummy CSS file */
+    GError *error = NULL;
+    gboolean success = g_file_set_contents(css_path, "* { color: red; }", -1, &error);
+    g_assert_no_error(error);
+    g_assert_true(success);
+
+    /* Load the CSS file */
+    GtkCssProvider *provider = load_css_from_file("test_dummy.css");
+    g_assert_nonnull(provider);
+
+    /* Cleanup */
+    g_object_unref(provider);
+    remove(css_path);
+    g_free(css_path);
+}
+
+/* -----------------------------------------------------------------------
+ * test_load_css_path_traversal
+ * NEW: Ensure load_css_from_file prevents path traversal.
+ * ----------------------------------------------------------------------- */
+static void test_load_css_path_traversal(void) {
+    g_test_expect_message(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "*Security violation: path traversal detected in css filename*");
+    GtkCssProvider *provider = load_css_from_file("../dummy.css");
+    g_assert_null(provider);
+    g_test_assert_expected_messages();
+}
+
 int main(int argc, char **argv) {
+    gtk_init();
     g_test_init(&argc, &argv, NULL);
     g_test_add_func("/persistence/settings",          test_settings);
     g_test_add_func("/persistence/scores",            test_scores);
     g_test_add_func("/persistence/scores_lower_better", test_scores_lower_better);
     g_test_add_func("/persistence/load_missing_score",  test_load_missing_score);
     g_test_add_func("/persistence/theme_preservation",  test_theme_preservation);
+    g_test_add_func("/persistence/load_css_valid",      test_load_css_valid);
+    g_test_add_func("/persistence/load_css_path_traversal", test_load_css_path_traversal);
     return g_test_run();
 }
