@@ -300,45 +300,8 @@ static void ttt_on_header_back_clicked(GtkButton *btn, gpointer user_data)
     switch_to_launcher();
 }
 
-GtkWidget* ttt_create_ui(void)
+static void create_welcome_screen(TttAppData *app)
 {
-
-    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    TttAppData *app = g_new0(TttAppData, 1);
-
-
-    GtkWidget *header = create_game_header("Epic Tic Tac Toe Battle", TRUE);
-    gtk_box_append(GTK_BOX(vbox), header);
-
-    app->stack = gtk_stack_new();
-    gtk_stack_set_transition_type(GTK_STACK(app->stack), GTK_STACK_TRANSITION_TYPE_CROSSFADE);
-    // Global Overlay for the "Return to Main Menu" button
-    GtkWidget *overlay = gtk_overlay_new();
-    gtk_overlay_set_child(GTK_OVERLAY(overlay), app->stack);
-
-    GtkWidget *btn_box_back = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
-    gtk_widget_set_halign(btn_box_back, GTK_ALIGN_CENTER);
-    GtkWidget *back_icon = gtk_label_new("\u25c0");
-    GtkWidget *back_lbl = gtk_label_new("Main Menu");
-    gtk_box_append(GTK_BOX(btn_box_back), back_icon);
-    gtk_box_append(GTK_BOX(btn_box_back), back_lbl);
-    
-    GtkWidget *global_btn_back = gtk_button_new();
-    gtk_button_set_child(GTK_BUTTON(global_btn_back), btn_box_back);
-    gtk_widget_set_halign(global_btn_back, GTK_ALIGN_START);
-    gtk_widget_set_valign(global_btn_back, GTK_ALIGN_START);
-    gtk_widget_set_margin_top(global_btn_back, 15);
-    gtk_widget_set_margin_end(global_btn_back, 15);
-    gtk_widget_add_css_class(global_btn_back, "btn-secondary");
-    g_signal_connect(global_btn_back, "clicked", G_CALLBACK(ttt_on_header_back_clicked), app);
-
-    gtk_overlay_add_overlay(GTK_OVERLAY(overlay), global_btn_back);
-
-    gtk_box_append(GTK_BOX(vbox), overlay);
-
-    // ============================================================
-    // PAGE 1: START SCREEN
-    // ============================================================
     GtkWidget *start_page_wrapper = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_halign(start_page_wrapper, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(start_page_wrapper, GTK_ALIGN_CENTER);
@@ -374,10 +337,10 @@ GtkWidget* ttt_create_ui(void)
 
     gtk_box_append(GTK_BOX(start_page_wrapper), start_card);
     gtk_stack_add_named(GTK_STACK(app->stack), start_page_wrapper, "start_page");
+}
 
-    // ============================================================
-    // PAGE 2: GAME BOARD
-    // ============================================================
+static void create_game_screen(TttAppData *app)
+{
     GtkWidget *game_page_wrapper = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_halign(game_page_wrapper, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(game_page_wrapper, GTK_ALIGN_CENTER);
@@ -443,10 +406,10 @@ GtkWidget* ttt_create_ui(void)
 
     gtk_box_append(GTK_BOX(game_page_wrapper), game_card);
     gtk_stack_add_named(GTK_STACK(app->stack), game_page_wrapper, "game_page");
+}
 
-    // ============================================================
-    // PAGE 3: RESULT SCREEN
-    // ============================================================
+static void create_result_screen(TttAppData *app)
+{
     GtkWidget *result_page_wrapper = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_halign(result_page_wrapper, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(result_page_wrapper, GTK_ALIGN_CENTER);
@@ -481,6 +444,48 @@ GtkWidget* ttt_create_ui(void)
 
     gtk_box_append(GTK_BOX(result_page_wrapper), result_card);
     gtk_stack_add_named(GTK_STACK(app->stack), result_page_wrapper, "result_page");
+}
+
+
+GtkWidget* ttt_create_ui(void)
+{
+
+    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    TttAppData *app = g_new0(TttAppData, 1);
+
+
+    GtkWidget *header = create_game_header("Epic Tic Tac Toe Battle", TRUE);
+    gtk_box_append(GTK_BOX(vbox), header);
+
+    app->stack = gtk_stack_new();
+    gtk_stack_set_transition_type(GTK_STACK(app->stack), GTK_STACK_TRANSITION_TYPE_CROSSFADE);
+    // Global Overlay for the "Return to Main Menu" button
+    GtkWidget *overlay = gtk_overlay_new();
+    gtk_overlay_set_child(GTK_OVERLAY(overlay), app->stack);
+
+    GtkWidget *btn_box_back = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+    gtk_widget_set_halign(btn_box_back, GTK_ALIGN_CENTER);
+    GtkWidget *back_icon = gtk_label_new("\u25c0");
+    GtkWidget *back_lbl = gtk_label_new("Main Menu");
+    gtk_box_append(GTK_BOX(btn_box_back), back_icon);
+    gtk_box_append(GTK_BOX(btn_box_back), back_lbl);
+
+    GtkWidget *global_btn_back = gtk_button_new();
+    gtk_button_set_child(GTK_BUTTON(global_btn_back), btn_box_back);
+    gtk_widget_set_halign(global_btn_back, GTK_ALIGN_START);
+    gtk_widget_set_valign(global_btn_back, GTK_ALIGN_START);
+    gtk_widget_set_margin_top(global_btn_back, 15);
+    gtk_widget_set_margin_end(global_btn_back, 15);
+    gtk_widget_add_css_class(global_btn_back, "btn-secondary");
+    g_signal_connect(global_btn_back, "clicked", G_CALLBACK(ttt_on_header_back_clicked), app);
+
+    gtk_overlay_add_overlay(GTK_OVERLAY(overlay), global_btn_back);
+
+    gtk_box_append(GTK_BOX(vbox), overlay);
+
+    create_welcome_screen(app);
+    create_game_screen(app);
+    create_result_screen(app);
     
     int theme_id;
     char player_name[50];
