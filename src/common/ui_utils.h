@@ -48,4 +48,12 @@ void switch_to_launcher(void);
  */
 GtkWidget* create_game_header(const char *title, gboolean show_title_buttons);
 
+/**
+ * @brief Load a CSS file from the assets/css directory and apply it to the display.
+ * @param filename  Basename only (e.g. "theme_dark.css"). Path separators are rejected.
+ * @return A new GtkCssProvider already applied, or NULL on security violation.
+ *         Caller does NOT need to unref — provider is owned by the style context.
+ */
+GtkCssProvider* load_css_from_file(const char *filename);
+
 #endif /* UI_UTILS_H */

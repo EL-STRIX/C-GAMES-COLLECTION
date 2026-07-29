@@ -1,7 +1,9 @@
 #include "ui_utils.h"
 #include "persistence.h"
 #include <stdio.h>
-
+#ifdef _WIN32
+#include <windows.h>
+#endif
 static GtkCssProvider *current_theme_provider = NULL;
 
 GtkWidget* create_card_box(void)
@@ -85,4 +87,50 @@ GtkWidget* create_game_header(const char *title, gboolean show_title_buttons)
     gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), title_lbl);
 
     return header;
+}
+
+// Helper function to dynamically locate and load CSS from assets/css directory
+GtkCssProvider* load_css_from_file(const char *filename) {
+    if (strpbrk(filename, "/\\")) {
+        g_warning("Security violation: path traversal detected in css filename '%s'", filename);
+        return NULL;
+    }
+    
+    char *base_dir = NULL;
+    
+#ifdef _WIN32
+    char path[MAX_PATH];
+    if (GetModuleFileNameA(NULL, path, MAX_PATH)) {
+        base_dir = g_path_get_dirname(path);
+    }
+#else
+    char *exe_path = g_file_read_link("/proc/self/exe", NULL);
+    if (exe_path) {
+        base_dir = g_path_get_dirname(exe_path);
+        g_free(exe_path);
+    }
+#endif
+
+    if (!base_dir) {
+        base_dir = g_get_current_dir(); // fallback
+    }
+    
+    // Construct path: base_dir/../assets/css/filename
+    // Since executable is in 'bin', base_dir/../assets/css points to the correct location
+    char *assets_dir = g_build_filename(base_dir, "..", "assets", "css", filename, NULL);
+    
+    GtkCssProvider *provider = gtk_css_provider_new();
+    GFile *css_file = g_file_new_for_path(assets_dir);
+    
+    // Load it directly to screen
+    gtk_css_provider_load_from_file(provider, css_file);
+    gtk_style_context_add_provider_for_display(gdk_display_get_default(), 
+                                               GTK_STYLE_PROVIDER(provider), 
+                                               GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+                                               
+    g_object_unref(css_file);
+    g_free(assets_dir);
+    g_free(base_dir);
+    
+    return provider;
 }

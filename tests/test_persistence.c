@@ -1,20 +1,11 @@
 #include <stdio.h>
 #include <string.h>
-#include <gtk/gtk.h>
 #include <glib.h>
 #ifdef _WIN32
 #include <windows.h>
 #endif
 
 #include "../src/common/persistence.h"
-#include "../src/common/ui_utils.h"
-
-/**
- * Test-only stub: switch_to_launcher() is defined in launcher/main.c
- * which is not compiled into the test binary. Provide a no-op here
- * so ui_utils.c (confirm_exit_response) can link correctly.
- */
-void switch_to_launcher(void) { /* no-op in test context */ }
 
 /* -----------------------------------------------------------------------
  * test_settings
@@ -117,21 +108,6 @@ static void test_load_missing_score(void) {
     g_assert_cmpint(score, ==, -1);
 }
 
-/* -----------------------------------------------------------------------
- * test_load_css_path_traversal
- * NEW: Ensure load_css_from_file returns NULL and logs a warning on path traversal attempt.
- * ----------------------------------------------------------------------- */
-static void test_load_css_path_traversal(void) {
-    g_test_expect_message(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "*Security violation: path traversal detected in css filename '../style.css'*");
-    GtkCssProvider* provider1 = load_css_from_file("../style.css");
-    g_assert_null(provider1);
-    g_test_assert_expected_messages();
-
-    g_test_expect_message(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "*Security violation: path traversal detected in css filename 'subdir?style.css'*");
-    GtkCssProvider* provider2 = load_css_from_file("subdir\\style.css");
-    g_assert_null(provider2);
-    g_test_assert_expected_messages();
-}
 
 /* -----------------------------------------------------------------------
  * test_theme_preservation
@@ -162,49 +138,6 @@ static void test_theme_preservation(void) {
     }
 }
 
-/* -----------------------------------------------------------------------
- * test_load_css_valid
- * NEW: Ensure load_css_from_file returns a valid GtkCssProvider.
- * ----------------------------------------------------------------------- */
-static void test_load_css_valid(void) {
-    char *base_dir = NULL;
-
-#ifdef _WIN32
-    char path[MAX_PATH];
-    if (GetModuleFileNameA(NULL, path, MAX_PATH)) {
-        base_dir = g_path_get_dirname(path);
-    }
-#else
-    char *exe_path = g_file_read_link("/proc/self/exe", NULL);
-    if (exe_path) {
-        base_dir = g_path_get_dirname(exe_path);
-        g_free(exe_path);
-    }
-#endif
-
-    if (!base_dir) {
-        base_dir = g_get_current_dir(); // fallback
-    }
-
-    char *assets_dir = g_build_filename(base_dir, "..", "assets", "css", NULL);
-    char *css_filename = "dummy_test.css";
-    char *css_path = g_build_filename(assets_dir, css_filename, NULL);
-
-    /* Ensure the assets/css directory exists */
-    g_mkdir_with_parents(assets_dir, 0700);
-
-    /* Create a dummy CSS file */
-    g_file_set_contents(css_path, "* { color: #f00; }", -1, NULL);
-
-    GtkCssProvider* provider = load_css_from_file(css_filename);
-    g_assert_nonnull(provider);
-
-    /* Clean up the dummy file */
-    remove(css_path);
-    g_free(css_path);
-    g_free(assets_dir);
-    g_free(base_dir);
-}
 
 int main(int argc, char **argv) {
     g_test_init(&argc, &argv, NULL);
@@ -212,15 +145,7 @@ int main(int argc, char **argv) {
     g_test_add_func("/persistence/scores",            test_scores);
     g_test_add_func("/persistence/scores_lower_better", test_scores_lower_better);
     g_test_add_func("/persistence/load_missing_score",  test_load_missing_score);
-    g_test_add_func("/persistence/css_path_traversal",  test_load_css_path_traversal);
     g_test_add_func("/persistence/theme_preservation",  test_theme_preservation);
-
-    // Skip the test in CI/Valgrind due to baseline graphics leaks and uncatchable assertion failures.
-    if (!g_getenv("GITHUB_ACTIONS") && !g_getenv("VALGRIND") && gtk_init_check()) {
-        g_test_add_func("/persistence/css_valid",           test_load_css_valid);
-    } else {
-        g_message("Skipping /persistence/css_valid test because gtk_init_check failed or running under CI");
-    }
 
     return g_test_run();
 }

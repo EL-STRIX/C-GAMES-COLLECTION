@@ -10,7 +10,6 @@
 #define PERSISTENCE_H
 
 #include <stddef.h>  /* size_t */
-#include <gtk/gtk.h> /* GtkCssProvider, gboolean — kept for CSS loader return type */
 #include <glib.h>
 
 /**
@@ -49,12 +48,6 @@ void save_global_settings(const char *player_name, int theme_id);
  */
 void load_global_settings(char *player_name, size_t out_size, int *theme_id);
 
-/**
- * @brief Load a CSS file from the assets/css directory and apply it to the display.
- * @param filename  Basename only (e.g. "theme_dark.css"). Path separators are rejected.
- * @return A new GtkCssProvider already applied, or NULL on security violation.
- *         Caller does NOT need to unref — provider is owned by the style context.
- */
-GtkCssProvider* load_css_from_file(const char *filename);
+
 
 #endif /* PERSISTENCE_H */
