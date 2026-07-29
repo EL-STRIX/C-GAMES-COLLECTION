@@ -10,3 +10,8 @@ jobs:
       pull-requests: write
     steps:
       - uses: hmarr/auto-approve-action@v4
+        with:
+          # Provide a personal access token (PAT) from a bot account that has permission
+          # to approve pull requests. Create a repository secret named AUTO_APPROVE_TOKEN
+          # and set it to that PAT. Do NOT use the same account that opens PRs.
+          github_token: ${{ secrets.AUTO_APPROVE_TOKEN }}
