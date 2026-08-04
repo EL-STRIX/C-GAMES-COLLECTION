@@ -134,3 +134,25 @@ GtkCssProvider* load_css_from_file(const char *filename) {
     
     return provider;
 }
+
+GtkWidget* create_choice_button(const char *emoji, const char *label_text, GCallback callback, gpointer data) {
+    GtkWidget *btn = gtk_button_new();
+    gtk_widget_add_css_class(btn, "choice-btn");
+
+    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+    gtk_widget_set_halign(box, GTK_ALIGN_CENTER);
+
+    GtkWidget *lbl_emoji = gtk_label_new(emoji);
+    gtk_widget_add_css_class(lbl_emoji, "choice-emoji");
+
+    GtkWidget *lbl_text = gtk_label_new(label_text);
+    gtk_widget_add_css_class(lbl_text, "choice-label");
+
+    gtk_box_append(GTK_BOX(box), lbl_emoji);
+    gtk_box_append(GTK_BOX(box), lbl_text);
+
+    gtk_button_set_child(GTK_BUTTON(btn), box);
+    g_signal_connect(btn, "clicked", callback, data);
+
+    return btn;
+}
