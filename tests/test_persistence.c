@@ -139,9 +139,46 @@ static void test_theme_preservation(void) {
 }
 
 
+/* -----------------------------------------------------------------------
+ * test_load_score_path_traversal
+ * NEW: Ensure load_top_score rejects game_name with path traversal chars.
+ * ----------------------------------------------------------------------- */
+static void test_load_score_path_traversal(void) {
+    char player[50] = {0};
+
+    /* Expect the g_warning from the path traversal check */
+    g_test_expect_message(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "*Security violation: path traversal detected*");
+    int score = load_top_score("../test_game", player, sizeof(player));
+    g_assert_cmpint(score, ==, -1);
+    g_test_assert_expected_messages();
+
+    g_test_expect_message(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "*Security violation: path traversal detected*");
+    score = load_top_score("test\\game", player, sizeof(player));
+    g_assert_cmpint(score, ==, -1);
+    g_test_assert_expected_messages();
+}
+
+/* -----------------------------------------------------------------------
+ * test_load_score_null_buffer
+ * NEW: Ensure load_top_score handles NULL out_player_name and/or out_size=0.
+ * ----------------------------------------------------------------------- */
+static void test_load_score_null_buffer(void) {
+    /* First, save a valid score so there's something to read */
+    save_score("test_game_null", "Alice", 100, 0);
+
+    /* Call load_top_score with NULL buffer */
+    int score = load_top_score("test_game_null", NULL, 0);
+    g_assert_cmpint(score, ==, 100);
+
+    /* Clean up */
+    remove("data/test_game_null_score.ini");
+}
+
 int main(int argc, char **argv) {
     g_test_init(&argc, &argv, NULL);
     g_test_add_func("/persistence/settings",          test_settings);
+    g_test_add_func("/persistence/load_score_path_traversal", test_load_score_path_traversal);
+    g_test_add_func("/persistence/load_score_null_buffer", test_load_score_null_buffer);
     g_test_add_func("/persistence/scores",            test_scores);
     g_test_add_func("/persistence/scores_lower_better", test_scores_lower_better);
     g_test_add_func("/persistence/load_missing_score",  test_load_missing_score);
