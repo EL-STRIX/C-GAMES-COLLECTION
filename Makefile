@@ -42,7 +42,7 @@ $(BIN_DIR)/test_persistence.exe: tests/test_persistence.c src/common/persistence
 	$(CC) $^ -o $@ $(TEST_CFLAGS) $(TEST_LDFLAGS)
 
 $(BIN_DIR)/test_tic_tac_toe.exe: tests/test_tic_tac_toe.c src/common/persistence.c src/common/ui_utils.c | $(BIN_DIR)
-	$(CC) $^ -o $@ $(TEST_CFLAGS) $(TEST_LDFLAGS)
+	$(CC) $^ -o $@ $(TEST_CFLAGS) $(shell pkg-config --cflags gtk4) $(TEST_LDFLAGS) $(shell pkg-config --libs gtk4)
 
 test: $(BIN_DIR)/test_persistence.exe $(BIN_DIR)/test_tic_tac_toe.exe
 	$(BIN_DIR)/test_persistence.exe
