@@ -110,6 +110,23 @@ static void test_load_missing_score(void) {
 
 
 /* -----------------------------------------------------------------------
+ * test_save_score_invalid_path
+ * NEW: Verify missing edge cases for path traversal in save_score and load_top_score.
+ * ----------------------------------------------------------------------- */
+static void test_save_score_invalid_path(void) {
+    g_test_expect_message(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "*Security violation*");
+    save_score("../hacked_game", "Hacker", 9999, 0);
+    g_test_assert_expected_messages();
+
+    g_test_expect_message(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "*Security violation*");
+    char player[50] = {0};
+    int score = load_top_score("../hacked_game", player, sizeof(player));
+    g_test_assert_expected_messages();
+
+    g_assert_cmpint(score, ==, -1);
+}
+
+/* -----------------------------------------------------------------------
  * test_theme_preservation
  * NEW: Ensure save_global_settings(name, -1) preserves the existing theme.
  * ----------------------------------------------------------------------- */
@@ -183,6 +200,7 @@ int main(int argc, char **argv) {
     g_test_add_func("/persistence/scores_lower_better", test_scores_lower_better);
     g_test_add_func("/persistence/load_missing_score",  test_load_missing_score);
     g_test_add_func("/persistence/theme_preservation",  test_theme_preservation);
+    g_test_add_func("/persistence/save_score_invalid_path", test_save_score_invalid_path);
 
     return g_test_run();
 }
