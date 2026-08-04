@@ -110,6 +110,26 @@ static void test_load_missing_score(void) {
 
 
 /* -----------------------------------------------------------------------
+ * test_load_missing_settings
+ * NEW: Verify load_global_settings behaves safely when settings.ini is missing.
+ * ----------------------------------------------------------------------- */
+static void test_load_missing_settings(void) {
+    /* Temporarily rename settings.ini to hide it */
+    rename("data/settings.ini", "data/settings.ini.testbak");
+
+    char out_name[50] = {0};
+    int out_theme = -1;
+    load_global_settings(out_name, sizeof(out_name), &out_theme);
+
+    /* Assert graceful fallback */
+    g_assert_true(strlen(out_name) > 0); /* Name shouldn't be empty, either "Player 1" or from score cache */
+    g_assert_cmpint(out_theme, ==, 0);
+
+    /* Restore settings.ini */
+    rename("data/settings.ini.testbak", "data/settings.ini");
+}
+
+/* -----------------------------------------------------------------------
  * test_theme_preservation
  * NEW: Ensure save_global_settings(name, -1) preserves the existing theme.
  * ----------------------------------------------------------------------- */
@@ -145,6 +165,7 @@ int main(int argc, char **argv) {
     g_test_add_func("/persistence/scores",            test_scores);
     g_test_add_func("/persistence/scores_lower_better", test_scores_lower_better);
     g_test_add_func("/persistence/load_missing_score",  test_load_missing_score);
+    g_test_add_func("/persistence/load_missing_settings", test_load_missing_settings);
     g_test_add_func("/persistence/theme_preservation",  test_theme_preservation);
 
     return g_test_run();
