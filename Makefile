@@ -23,7 +23,8 @@ ALL_SRC = src/launcher/main.c \
           src/common/ui_utils.c
 
 TARGETS = $(BIN_DIR)/c-games-collection.exe \
-          $(BIN_DIR)/test_persistence.exe
+          $(BIN_DIR)/test_persistence.exe \
+          $(BIN_DIR)/test_tic_tac_toe.exe
 
 .PHONY: all clean test
 
@@ -40,8 +41,12 @@ $(BIN_DIR)/c-games-collection.exe: $(ALL_SRC) | $(BIN_DIR)
 $(BIN_DIR)/test_persistence.exe: tests/test_persistence.c src/common/persistence.c | $(BIN_DIR)
 	$(CC) $^ -o $@ $(TEST_CFLAGS) $(TEST_LDFLAGS)
 
-test: $(BIN_DIR)/test_persistence.exe
+$(BIN_DIR)/test_tic_tac_toe.exe: tests/test_tic_tac_toe.c src/common/persistence.c src/common/ui_utils.c | $(BIN_DIR)
+	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
+
+test: $(BIN_DIR)/test_persistence.exe $(BIN_DIR)/test_tic_tac_toe.exe
 	$(BIN_DIR)/test_persistence.exe
+	$(BIN_DIR)/test_tic_tac_toe.exe
 
 clean:
 	rm -f $(BIN_DIR)/*.exe
