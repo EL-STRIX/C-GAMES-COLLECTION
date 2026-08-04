@@ -18,6 +18,7 @@
 #include "../common/constants.h"
 #include "../common/ui_utils.h"
 #include "../common/games.h"
+#include "rps_logic.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -181,17 +182,11 @@ static void rps_process_round(RpsAppData *data, int user_choice) {
     int computer_choice = g_random_int_range(1, 4); /* random int in 1..3 */
     const char *user_str = (user_choice == 1) ? "ROCK" : (user_choice == 2) ? "PAPER" : "SCISSORS";
     const char *comp_str = (computer_choice == 1) ? "ROCK" : (computer_choice == 2) ? "PAPER" : "SCISSORS";
-    int result = 0; /* 0 draw, 1 player win, 2 computer win */
+    int result = rps_evaluate_round(user_choice, computer_choice);
 
-    /* compare choices to determine result and update scores */
-    if (user_choice == computer_choice) result = 0;
-    else if ((user_choice == 1 && computer_choice == 3) ||
-             (user_choice == 2 && computer_choice == 1) ||
-             (user_choice == 3 && computer_choice == 2)) {
-        result = 1;
+    if (result == 1) {
         data->player_score++;
-    } else {
-        result = 2;
+    } else if (result == 2) {
         data->computer_score++;
     }
 
