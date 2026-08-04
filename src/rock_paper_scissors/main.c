@@ -266,29 +266,6 @@ static void rps_on_header_back_clicked(GtkButton *btn, gpointer user_data) {
 
 /* --- UI Construction --- */
 
-/* Helper to build a choice button with emoji + label */
-static GtkWidget* rps_create_choice_button(const char *emoji, const char *label_text, GCallback callback, RpsAppData *data) {
-    GtkWidget *btn = gtk_button_new();
-    gtk_widget_add_css_class(btn, "choice-btn");
-    
-    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
-    gtk_widget_set_halign(box, GTK_ALIGN_CENTER);
-
-    GtkWidget *lbl_emoji = gtk_label_new(emoji);
-    gtk_widget_add_css_class(lbl_emoji, "choice-emoji");
-    
-    GtkWidget *lbl_text = gtk_label_new(label_text);
-    gtk_widget_add_css_class(lbl_text, "choice-label");
-
-    gtk_box_append(GTK_BOX(box), lbl_emoji);
-    gtk_box_append(GTK_BOX(box), lbl_text);
-
-    gtk_button_set_child(GTK_BUTTON(btn), box);
-    g_signal_connect(btn, "clicked", callback, data);
-
-    return btn;
-}
-
 /* 1. Login Screen */
 static GtkWidget* rps_create_welcome_page(RpsAppData *data) {
     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 20);
@@ -362,9 +339,9 @@ static GtkWidget* rps_create_game_page(RpsAppData *data) {
     gtk_widget_set_margin_bottom(data->choices_box, 10);
 
     /* Custom Buttons - USING EMOJIS */
-    GtkWidget *btn_rock = rps_create_choice_button("\u270a", "Rock", G_CALLBACK(on_rock_clicked), data);
-    GtkWidget *btn_paper = rps_create_choice_button("\u270b", "Paper", G_CALLBACK(on_paper_clicked), data);
-    GtkWidget *btn_scissors = rps_create_choice_button("\u270c", "Scissors", G_CALLBACK(on_scissors_clicked), data);
+    GtkWidget *btn_rock = create_choice_button("\u270a", "Rock", G_CALLBACK(on_rock_clicked), data);
+    GtkWidget *btn_paper = create_choice_button("\u270b", "Paper", G_CALLBACK(on_paper_clicked), data);
+    GtkWidget *btn_scissors = create_choice_button("\u270c", "Scissors", G_CALLBACK(on_scissors_clicked), data);
     
     gtk_widget_set_size_request(btn_rock, 80, 80);
     gtk_widget_set_size_request(btn_paper, 80, 80);

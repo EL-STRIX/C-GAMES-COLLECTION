@@ -56,4 +56,14 @@ GtkWidget* create_game_header(const char *title, gboolean show_title_buttons);
  */
 GtkCssProvider* load_css_from_file(const char *filename);
 
+/**
+ * @brief Create a choice button with an emoji and label (used in RPS and SGW).
+ * @param emoji      The emoji string to display.
+ * @param label_text The label text to display below the emoji.
+ * @param callback   The callback to connect to the "clicked" signal.
+ * @param data       User data to pass to the callback.
+ * @return A new GtkWidget containing the button.
+ */
+GtkWidget* create_choice_button(const char *emoji, const char *label_text, GCallback callback, gpointer data);
+
 #endif /* UI_UTILS_H */

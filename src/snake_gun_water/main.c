@@ -282,29 +282,6 @@ static void sgw_on_header_back_clicked(GtkButton *btn, gpointer user_data) {
 
 /* --- UI Construction --- */
 
-/* Helper to build a choice button with emoji + label */
-static GtkWidget* sgw_create_choice_button(const char *emoji, const char *label_text, GCallback callback, SgwAppData *data) {
-    GtkWidget *btn = gtk_button_new();
-    gtk_widget_add_css_class(btn, "choice-btn");
-    
-    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
-    gtk_widget_set_halign(box, GTK_ALIGN_CENTER);
-
-    GtkWidget *lbl_emoji = gtk_label_new(emoji);
-    gtk_widget_add_css_class(lbl_emoji, "choice-emoji");
-    
-    GtkWidget *lbl_text = gtk_label_new(label_text);
-    gtk_widget_add_css_class(lbl_text, "choice-label");
-
-    gtk_box_append(GTK_BOX(box), lbl_emoji);
-    gtk_box_append(GTK_BOX(box), lbl_text);
-
-    gtk_button_set_child(GTK_BUTTON(btn), box);
-    g_signal_connect(btn, "clicked", callback, data);
-
-    return btn;
-}
-
 /* 1. Login Screen */
 static GtkWidget* sgw_create_welcome_page(SgwAppData *data) {
     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 20);
@@ -379,9 +356,9 @@ static GtkWidget* sgw_create_game_page(SgwAppData *data) {
     gtk_widget_set_margin_bottom(data->choices_box, 10);
 
     /* Custom Buttons - USING EMOJIS */
-    GtkWidget *btn_snake = sgw_create_choice_button("\U0001f40d", "SNAKE", G_CALLBACK(on_snake_clicked), data);
-    GtkWidget *btn_gun = sgw_create_choice_button("\U0001f52b", "GUN", G_CALLBACK(on_gun_clicked), data);
-    GtkWidget *btn_water = sgw_create_choice_button("\U0001f4a7", "WATER", G_CALLBACK(on_water_clicked), data);
+    GtkWidget *btn_snake = create_choice_button("\U0001f40d", "SNAKE", G_CALLBACK(on_snake_clicked), data);
+    GtkWidget *btn_gun = create_choice_button("\U0001f52b", "GUN", G_CALLBACK(on_gun_clicked), data);
+    GtkWidget *btn_water = create_choice_button("\U0001f4a7", "WATER", G_CALLBACK(on_water_clicked), data);
     
     gtk_widget_set_size_request(btn_snake, 80, 80);
     gtk_widget_set_size_request(btn_gun, 80, 80);
