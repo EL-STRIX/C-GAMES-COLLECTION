@@ -122,17 +122,24 @@ static void update_ui_board(TttAppData *app)
             char val = app->game.board[r][c];
             GtkWidget *btn = app->buttons[r][c];
 
-            gtk_widget_remove_css_class(btn, "player-x");
-            gtk_widget_remove_css_class(btn, "player-o");
-
             if (val == 'X') {
-                gtk_button_set_label(GTK_BUTTON(btn), "X");
-                gtk_widget_add_css_class(btn, "player-x");
+                if (!gtk_widget_has_css_class(btn, "player-x")) {
+                    gtk_widget_remove_css_class(btn, "player-o");
+                    gtk_button_set_label(GTK_BUTTON(btn), "X");
+                    gtk_widget_add_css_class(btn, "player-x");
+                }
             } else if (val == 'O') {
-                gtk_button_set_label(GTK_BUTTON(btn), "O");
-                gtk_widget_add_css_class(btn, "player-o");
+                if (!gtk_widget_has_css_class(btn, "player-o")) {
+                    gtk_widget_remove_css_class(btn, "player-x");
+                    gtk_button_set_label(GTK_BUTTON(btn), "O");
+                    gtk_widget_add_css_class(btn, "player-o");
+                }
             } else {
-                gtk_button_set_label(GTK_BUTTON(btn), "");
+                if (gtk_widget_has_css_class(btn, "player-x") || gtk_widget_has_css_class(btn, "player-o")) {
+                    gtk_widget_remove_css_class(btn, "player-x");
+                    gtk_widget_remove_css_class(btn, "player-o");
+                    gtk_button_set_label(GTK_BUTTON(btn), "");
+                }
             }
         }
     }
