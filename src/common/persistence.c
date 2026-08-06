@@ -5,10 +5,45 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <wincrypt.h>
 #endif
 
+// Helper function to get a secure random unsigned integer
+static unsigned int get_secure_random_uint(void) {
+    unsigned int random_value = 0;
+#ifdef _WIN32
+    HCRYPTPROV hProvider = 0;
+    if (CryptAcquireContext(&hProvider, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
+        CryptGenRandom(hProvider, sizeof(random_value), (BYTE*)&random_value);
+        CryptReleaseContext(hProvider, 0);
+        return random_value;
+    }
+#else
+    FILE *f = fopen("/dev/urandom", "rb");
+    if (f) {
+        size_t read_bytes = fread(&random_value, sizeof(random_value), 1, f);
+        fclose(f);
+        if (read_bytes == 1) {
+            return random_value;
+        }
+    }
+#endif
+    return g_random_int(); // Fallback
+}
 
+int get_secure_random_int_range(int begin, int end) {
+    if (end <= begin) return begin;
+    int range = end - begin;
+    unsigned int random_value = get_secure_random_uint();
+    unsigned int remainder = (unsigned int)(-range) % (unsigned int)range;
 
+    // Loop to avoid modulo bias
+    while (random_value < remainder) {
+        random_value = get_secure_random_uint();
+    }
+
+    return begin + (int)(random_value % (unsigned int)range);
+}
 
 // Helper function to dynamically locate the data directory relative to the executable
 static const char* get_data_dir(void) {

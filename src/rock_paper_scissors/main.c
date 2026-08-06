@@ -178,7 +178,7 @@ static void rps_start_next_round_ui(RpsAppData *data) {
 
 /* Process a single round: generate computer choice, decide winner, update UI */
 static void rps_process_round(RpsAppData *data, int user_choice) {
-    int computer_choice = g_random_int_range(1, 4); /* random int in 1..3 */
+    int computer_choice = get_secure_random_int_range(1, 4); /* random int in 1..3 */
     const char *user_str = (user_choice == 1) ? "ROCK" : (user_choice == 2) ? "PAPER" : "SCISSORS";
     const char *comp_str = (computer_choice == 1) ? "ROCK" : (computer_choice == 2) ? "PAPER" : "SCISSORS";
     int result = 0; /* 0 draw, 1 player win, 2 computer win */

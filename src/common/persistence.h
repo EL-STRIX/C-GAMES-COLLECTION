@@ -48,6 +48,14 @@ void save_global_settings(const char *player_name, int theme_id);
  */
 void load_global_settings(char *player_name, size_t out_size, int *theme_id);
 
-
+/**
+ * @brief Generate a secure random integer within the range [begin, end - 1].
+ *        Uses OS-level secure PRNG where possible (CryptGenRandom on Windows,
+ *        /dev/urandom on POSIX), falling back to g_random_int() if necessary.
+ * @param begin  The lower bound (inclusive).
+ * @param end    The upper bound (exclusive).
+ * @return A secure random integer in the range.
+ */
+int get_secure_random_int_range(int begin, int end);
 
 #endif /* PERSISTENCE_H */
