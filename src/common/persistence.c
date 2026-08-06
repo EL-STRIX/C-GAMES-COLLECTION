@@ -162,6 +162,14 @@ void save_score(const char *game_name, const char *player_name, int score, int i
     }
 }
 
+typedef struct {
+    char player_name[50];
+    int theme_id;
+    gboolean is_cached;
+} CachedSettings;
+
+static CachedSettings settings_cache = { .is_cached = FALSE };
+
 void save_global_settings(const char *player_name, int theme_id) {
 
     /* If theme_id == -1, preserve the existing theme from the saved file */
@@ -183,12 +191,27 @@ void save_global_settings(const char *player_name, int theme_id) {
         if (error) g_error_free(error);
     } else {
         g_message("Saved global settings successfully.");
+        settings_cache.is_cached = FALSE;
     }
     g_key_file_free(kf);
     g_free(filename);
 }
 
 void load_global_settings(char *player_name, size_t out_size, int *theme_id) {
+    if (settings_cache.is_cached) {
+        if (player_name && out_size > 0) {
+            strncpy(player_name, settings_cache.player_name, out_size - 1);
+            player_name[out_size - 1] = '\0';
+        }
+        if (theme_id) {
+            *theme_id = settings_cache.theme_id;
+        }
+        return;
+    }
+
+    char temp_player_name[50] = "Player 1";
+    int temp_theme_id = 0;
+
     GKeyFile *kf = g_key_file_new();
     GError *error = NULL;
     const char *data_dir = get_data_dir();
@@ -196,55 +219,62 @@ void load_global_settings(char *player_name, size_t out_size, int *theme_id) {
     if (g_key_file_load_from_file(kf, filename, G_KEY_FILE_NONE, &error)) {
         /* settings.ini found — read name and theme directly */
         gchar *name = g_key_file_get_string(kf, "Settings", "PlayerName", NULL);
-        if (name && out_size > 0) {
-            strncpy(player_name, name, out_size - 1);
-            player_name[out_size - 1] = '\0';
+        if (name) {
+            strncpy(temp_player_name, name, sizeof(temp_player_name) - 1);
+            temp_player_name[sizeof(temp_player_name) - 1] = '\0';
             g_free(name);
-        } else if (out_size > 0) {
-            snprintf(player_name, out_size, "Player 1");
         }
 
         GError *err = NULL;
         int t = g_key_file_get_integer(kf, "Settings", "ThemeID", &err);
         if (err) {
-            if (theme_id) *theme_id = 0;
             g_error_free(err);
         } else {
-            if (theme_id) *theme_id = (t >= 0) ? t : 0;
+            temp_theme_id = (t >= 0) ? t : 0;
         }
     } else {
         /* settings.ini missing — try to recover player name from game history */
         if (error) g_error_free(error);
 
-        if (out_size > 0) {
-            char temp_player[50];
-            if (load_top_score("rps", temp_player, sizeof(temp_player)) != -1
-                    && strcmp(temp_player, "Unknown") != 0
-                    && strcmp(temp_player, "None") != 0
-                    && strcmp(temp_player, "Guest") != 0) {
-                snprintf(player_name, out_size, "%s", temp_player);
-            } else if (load_top_score("number_guessing", temp_player, sizeof(temp_player)) != -1
-                    && strcmp(temp_player, "Unknown") != 0
-                    && strcmp(temp_player, "None") != 0
-                    && strcmp(temp_player, "Guest") != 0) {
-                snprintf(player_name, out_size, "%s", temp_player);
-            } else if (load_top_score("sgw", temp_player, sizeof(temp_player)) != -1
-                    && strcmp(temp_player, "Unknown") != 0
-                    && strcmp(temp_player, "None") != 0
-                    && strcmp(temp_player, "Guest") != 0) {
-                snprintf(player_name, out_size, "%s", temp_player);
-            } else if (load_top_score("ttt_gui", temp_player, sizeof(temp_player)) != -1
-                    && strcmp(temp_player, "Unknown") != 0
-                    && strcmp(temp_player, "None") != 0
-                    && strcmp(temp_player, "Guest") != 0) {
-                snprintf(player_name, out_size, "%s", temp_player);
-            } else {
-                snprintf(player_name, out_size, "Player 1");
-            }
+        char temp_player[50];
+        if (load_top_score("rps", temp_player, sizeof(temp_player)) != -1
+                && strcmp(temp_player, "Unknown") != 0
+                && strcmp(temp_player, "None") != 0
+                && strcmp(temp_player, "Guest") != 0) {
+            snprintf(temp_player_name, sizeof(temp_player_name), "%s", temp_player);
+        } else if (load_top_score("number_guessing", temp_player, sizeof(temp_player)) != -1
+                && strcmp(temp_player, "Unknown") != 0
+                && strcmp(temp_player, "None") != 0
+                && strcmp(temp_player, "Guest") != 0) {
+            snprintf(temp_player_name, sizeof(temp_player_name), "%s", temp_player);
+        } else if (load_top_score("sgw", temp_player, sizeof(temp_player)) != -1
+                && strcmp(temp_player, "Unknown") != 0
+                && strcmp(temp_player, "None") != 0
+                && strcmp(temp_player, "Guest") != 0) {
+            snprintf(temp_player_name, sizeof(temp_player_name), "%s", temp_player);
+        } else if (load_top_score("ttt_gui", temp_player, sizeof(temp_player)) != -1
+                && strcmp(temp_player, "Unknown") != 0
+                && strcmp(temp_player, "None") != 0
+                && strcmp(temp_player, "Guest") != 0) {
+            snprintf(temp_player_name, sizeof(temp_player_name), "%s", temp_player);
         }
-        if (theme_id) *theme_id = 0;
     }
     g_key_file_free(kf);
     g_free(filename);
+
+    /* Update cache */
+    strncpy(settings_cache.player_name, temp_player_name, sizeof(settings_cache.player_name) - 1);
+    settings_cache.player_name[sizeof(settings_cache.player_name) - 1] = '\0';
+    settings_cache.theme_id = temp_theme_id;
+    settings_cache.is_cached = TRUE;
+
+    /* Output results */
+    if (player_name && out_size > 0) {
+        strncpy(player_name, temp_player_name, out_size - 1);
+        player_name[out_size - 1] = '\0';
+    }
+    if (theme_id) {
+        *theme_id = temp_theme_id;
+    }
 }
 
