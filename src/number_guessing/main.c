@@ -55,7 +55,7 @@ typedef struct
 static void ng_start_game_logic(NgAppData *app)
 {
     // Determine the secret target (1-100 inclusive)
-    app->secret_number = g_random_int_range(1, 101);
+    app->secret_number = get_secure_random_int_range(1, 101);
     app->attempts = 0;
 
     // Reset UI controls

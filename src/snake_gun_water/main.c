@@ -178,7 +178,7 @@ static void sgw_start_next_round_ui(SgwAppData *data) {
 
 /* Process a single round: generate computer choice, decide winner, update UI */
 static void sgw_process_round(SgwAppData *data, int user_choice) {
-    int computer_choice = g_random_int_range(1, 4);
+    int computer_choice = get_secure_random_int_range(1, 4);
     const char *user_str, *comp_str;
     switch (user_choice) {
         case CHOICE_SNAKE: user_str = "Snake"; break;
