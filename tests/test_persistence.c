@@ -35,6 +35,8 @@ static void test_settings(void) {
     /* Restore original data so the user's real settings aren't destroyed */
     if (original_name[0] != '\0') {
         save_global_settings(original_name, original_theme);
+    } else {
+        remove("data/settings.ini");
     }
 }
 
@@ -152,6 +154,8 @@ static void test_theme_preservation(void) {
     /* Restore original so the user's real settings aren't destroyed */
     if (original_name[0] != '\0') {
         save_global_settings(original_name, original_theme);
+    } else {
+        remove("data/settings.ini");
     }
 }
 
