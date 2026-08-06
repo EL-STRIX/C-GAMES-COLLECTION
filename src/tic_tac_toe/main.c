@@ -517,6 +517,8 @@ GtkWidget* ttt_create_ui(void)
         gtk_stack_set_visible_child_name(GTK_STACK(app->stack), "start_page");
     }
 
+    g_object_set_data_full(G_OBJECT(vbox), "app_data", app, g_free);
+
     return vbox;
 }
 

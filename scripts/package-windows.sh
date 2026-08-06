@@ -9,12 +9,11 @@ VERSION="v4.0.0"
 RELEASE_DIR="release/C-GAMES-COLLECTION-${VERSION}-Windows"
 ZIP_FILE="C-GAMES-COLLECTION-${VERSION}-Windows.zip"
 
-echo "[1/7] Building Project..."
+echo "[1/7] Building Project (if not built)..."
 MAKE_CMD="make"
 if command -v mingw32-make &> /dev/null; then
     MAKE_CMD="mingw32-make"
 fi
-$MAKE_CMD clean
 $MAKE_CMD all
 
 echo "[2/7] Creating Release Directories..."

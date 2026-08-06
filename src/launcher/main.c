@@ -60,14 +60,14 @@ void switch_to_launcher(void) {
 
 static void on_save_settings(GtkButton *btn, gpointer user_data) {
     (void)btn;
-    GtkWidget **widgets = (GtkWidget **)user_data;
+    GtkWidget *dialog = GTK_WIDGET(user_data);
+    GtkWidget **widgets = (GtkWidget **)g_object_get_data(G_OBJECT(dialog), "settings_widgets");
     GtkEntryBuffer *buf = gtk_entry_get_buffer(GTK_ENTRY(widgets[0]));
     const char *name = gtk_entry_buffer_get_text(buf);
     int theme_id = (int)gtk_drop_down_get_selected(GTK_DROP_DOWN(widgets[1]));
     
     save_global_settings(name, theme_id);
-    gtk_window_destroy(GTK_WINDOW(widgets[2]));
-    g_free(widgets);
+    gtk_window_destroy(GTK_WINDOW(dialog));
     
     // Automatically apply theme to launcher if changed
     apply_global_theme();
@@ -106,7 +106,8 @@ static void open_settings_dialog(GtkButton *btn, gpointer user_data) {
     widgets[0] = entry_name;
     widgets[1] = dropdown;
     widgets[2] = dialog;
-    g_signal_connect(save_btn, "clicked", G_CALLBACK(on_save_settings), widgets);
+    g_object_set_data_full(G_OBJECT(dialog), "settings_widgets", widgets, g_free);
+    g_signal_connect(save_btn, "clicked", G_CALLBACK(on_save_settings), dialog);
     
     gtk_box_append(GTK_BOX(box), lbl_name);
     gtk_box_append(GTK_BOX(box), entry_name);

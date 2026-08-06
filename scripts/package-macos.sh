@@ -10,8 +10,7 @@ APP_NAME="C-Games-Collection"
 APP_BUNDLE="release/${APP_NAME}.app"
 ZIP_FILE="C-GAMES-COLLECTION-${VERSION}-macOS.zip"
 
-echo "[1/5] Building Project..."
-make clean
+echo "[1/5] Building Project (if not built)..."
 make all
 
 echo "[2/5] Creating App Bundle Structure..."

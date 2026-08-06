@@ -472,5 +472,7 @@ GtkWidget* rps_create_ui(void)
     gtk_widget_set_vexpand(overlay, TRUE);
     gtk_box_append(GTK_BOX(vbox), overlay);
 
+    g_object_set_data_full(G_OBJECT(vbox), "app_data", app, g_free);
+
     return vbox;
 }

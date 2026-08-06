@@ -9,8 +9,7 @@ VERSION="v4.0.0" # This should ideally be passed in or read from a config
 RELEASE_DIR="release/C-GAMES-COLLECTION-${VERSION}-Ubuntu"
 TAR_FILE="C-GAMES-COLLECTION-${VERSION}-Ubuntu.tar.gz"
 
-echo "[1/4] Building Project..."
-make clean
+echo "[1/4] Building Project (if not built)..."
 make all
 
 echo "[2/4] Creating Release Directories..."
