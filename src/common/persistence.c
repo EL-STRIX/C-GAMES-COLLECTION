@@ -112,8 +112,20 @@ static void update_score_cache(const char *game_name, const char *player_name, i
     }
 }
 
+static gboolean is_valid_game_name(const char *game_name) {
+    if (!game_name || *game_name == '\0') {
+        return FALSE;
+    }
+    for (int i = 0; game_name[i] != '\0'; i++) {
+        if (!g_ascii_isalnum(game_name[i]) && game_name[i] != '_') {
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
 int load_top_score(const char *game_name, char *out_player_name, size_t out_size) {
-    if (strpbrk(game_name, "/\\.")) {
+    if (!is_valid_game_name(game_name)) {
         g_warning("Security violation: path traversal detected in game_name '%s'", game_name);
         return -1;
     }
@@ -173,7 +185,7 @@ int load_top_score(const char *game_name, char *out_player_name, size_t out_size
 }
 
 void save_score(const char *game_name, const char *player_name, int score, int is_lower_better) {
-    if (strpbrk(game_name, "/\\.")) {
+    if (!is_valid_game_name(game_name)) {
         g_warning("Security violation: path traversal detected in game_name '%s'", game_name);
         return;
     }
