@@ -205,6 +205,46 @@ static void test_load_score_null_buffer(void) {
     remove("data/test_game_null_score.ini");
 }
 
+/* -----------------------------------------------------------------------
+ * test_secure_random_int_range
+ * NEW: Verify behavior of get_secure_random_int_range.
+ * ----------------------------------------------------------------------- */
+static void test_secure_random_int_range(void) {
+    /* Test basic positive range */
+    for (int i = 0; i < 100; i++) {
+        int result = get_secure_random_int_range(5, 10);
+        g_assert_cmpint(result, >=, 5);
+        g_assert_cmpint(result, <=, 10);
+    }
+
+    /* Test negative range */
+    for (int i = 0; i < 100; i++) {
+        int result = get_secure_random_int_range(-10, -5);
+        g_assert_cmpint(result, >=, -10);
+        g_assert_cmpint(result, <=, -5);
+    }
+
+    /* Test mixed range */
+    for (int i = 0; i < 100; i++) {
+        int result = get_secure_random_int_range(-5, 5);
+        g_assert_cmpint(result, >=, -5);
+        g_assert_cmpint(result, <=, 5);
+    }
+
+    /* Test edge case: begin == end */
+    for (int i = 0; i < 10; i++) {
+        int result = get_secure_random_int_range(42, 42);
+        g_assert_cmpint(result, ==, 42);
+    }
+
+    /* Test inverted range (begin > end) */
+    for (int i = 0; i < 100; i++) {
+        int result = get_secure_random_int_range(10, 5);
+        g_assert_cmpint(result, >=, 5);
+        g_assert_cmpint(result, <=, 10);
+    }
+}
+
 int main(int argc, char **argv) {
     g_test_init(&argc, &argv, NULL);
     g_test_add_func("/persistence/settings",          test_settings);
@@ -215,6 +255,7 @@ int main(int argc, char **argv) {
     g_test_add_func("/persistence/load_missing_score",  test_load_missing_score);
     g_test_add_func("/persistence/theme_preservation",  test_theme_preservation);
     g_test_add_func("/persistence/save_score_invalid_path", test_save_score_invalid_path);
+    g_test_add_func("/persistence/secure_random_int_range", test_secure_random_int_range);
 
     return g_test_run();
 }
