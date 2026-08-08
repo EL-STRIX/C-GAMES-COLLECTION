@@ -133,7 +133,11 @@ int load_top_score(const char *game_name, char *out_player_name, size_t out_size
     }
 
     const char *data_dir = get_data_dir();
-    char *filename = g_strdup_printf("%s/%s_score.ini", data_dir, game_name);
+    char *raw_filename = g_strdup_printf("%s_score.ini", game_name);
+    char *safe_basename = g_path_get_basename(raw_filename);
+    char *filename = g_build_filename(data_dir, safe_basename, NULL);
+    g_free(safe_basename);
+    g_free(raw_filename);
     
     GKeyFile *kf = g_key_file_new();
     GError *error = NULL;
@@ -180,7 +184,12 @@ void save_score(const char *game_name, const char *player_name, int score, int i
     
     if (is_new_record) {
         const char *data_dir = get_data_dir();
-        char *filename = g_strdup_printf("%s/%s_score.ini", data_dir, game_name);
+        char *raw_filename = g_strdup_printf("%s_score.ini", game_name);
+        char *safe_basename = g_path_get_basename(raw_filename);
+        char *filename = g_build_filename(data_dir, safe_basename, NULL);
+        g_free(safe_basename);
+        g_free(raw_filename);
+
         GKeyFile *kf = g_key_file_new();
         g_key_file_set_string(kf, "Score", "Player", player_name);
         g_key_file_set_integer(kf, "Score", "Value", score);
@@ -220,7 +229,7 @@ void save_global_settings(const char *player_name, int theme_id) {
     g_key_file_set_integer(kf, "Settings", "ThemeID", theme_id);
     GError *error = NULL;
     const char *data_dir = get_data_dir();
-    char *filename = g_strdup_printf("%s/settings.ini", data_dir);
+    char *filename = g_build_filename(data_dir, "settings.ini", NULL);
     if (!g_key_file_save_to_file(kf, filename, &error)) {
         g_warning("Failed to save global settings: %s", error ? error->message : "Unknown error");
         if (error) g_error_free(error);
@@ -250,7 +259,7 @@ void load_global_settings(char *player_name, size_t out_size, int *theme_id) {
     GKeyFile *kf = g_key_file_new();
     GError *error = NULL;
     const char *data_dir = get_data_dir();
-    char *filename = g_strdup_printf("%s/settings.ini", data_dir);
+    char *filename = g_build_filename(data_dir, "settings.ini", NULL);
     if (g_key_file_load_from_file(kf, filename, G_KEY_FILE_NONE, &error)) {
         /* settings.ini found — read name and theme directly */
         gchar *name = g_key_file_get_string(kf, "Settings", "PlayerName", NULL);
