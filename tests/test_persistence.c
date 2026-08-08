@@ -177,6 +177,16 @@ static void test_load_score_path_traversal(void) {
     score = load_top_score("test\\game", player, sizeof(player));
     g_assert_cmpint(score, ==, -1);
     g_test_assert_expected_messages();
+
+    g_test_expect_message(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "*Security violation: path traversal detected*");
+    score = load_top_score("test/game", player, sizeof(player));
+    g_assert_cmpint(score, ==, -1);
+    g_test_assert_expected_messages();
+
+    g_test_expect_message(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "*Security violation: path traversal detected*");
+    score = load_top_score("test.game", player, sizeof(player));
+    g_assert_cmpint(score, ==, -1);
+    g_test_assert_expected_messages();
 }
 
 /* -----------------------------------------------------------------------
