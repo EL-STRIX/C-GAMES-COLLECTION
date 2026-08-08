@@ -59,24 +59,7 @@ GtkCssProvider* load_css_from_file(const char *filename) {
         return NULL;
     }
     
-    char *base_dir = NULL;
-    
-#ifdef _WIN32
-    char path[MAX_PATH];
-    if (GetModuleFileNameA(NULL, path, MAX_PATH)) {
-        base_dir = g_path_get_dirname(path);
-    }
-#else
-    char *exe_path = g_file_read_link("/proc/self/exe", NULL);
-    if (exe_path) {
-        base_dir = g_path_get_dirname(exe_path);
-        g_free(exe_path);
-    }
-#endif
-
-    if (!base_dir) {
-        base_dir = g_get_current_dir(); // fallback
-    }
+    char *base_dir = get_base_dir();
     
     // Construct path: base_dir/../assets/css/filename
     // Since executable is in 'bin', base_dir/../assets/css points to the correct location
