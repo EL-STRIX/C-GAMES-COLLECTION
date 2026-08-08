@@ -46,13 +46,7 @@ int get_secure_random_int_range(int begin, int end) {
     return begin + (int)(random_value % (unsigned int)range);
 }
 
-// Helper function to dynamically locate the data directory relative to the executable
-static const char* get_data_dir(void) {
-    static char *cached_data_dir = NULL;
-    if (cached_data_dir) {
-        return cached_data_dir;
-    }
-
+char* get_base_dir(void) {
     char *base_dir = NULL;
     
 #ifdef _WIN32
@@ -72,6 +66,18 @@ static const char* get_data_dir(void) {
         base_dir = g_get_current_dir(); // fallback
     }
     
+    return base_dir;
+}
+
+// Helper function to dynamically locate the data directory relative to the executable
+static const char* get_data_dir(void) {
+    static char *cached_data_dir = NULL;
+    if (cached_data_dir) {
+        return cached_data_dir;
+    }
+
+    char *base_dir = get_base_dir();
+
     // Construct path: base_dir/../data
     cached_data_dir = g_build_filename(base_dir, "..", "data", NULL);
     g_free(base_dir);

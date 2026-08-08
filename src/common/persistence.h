@@ -58,4 +58,10 @@ void load_global_settings(char *player_name, size_t out_size, int *theme_id);
  */
 int get_secure_random_int_range(int begin, int end);
 
+/**
+ * @brief Get the base directory where the executable is located.
+ * @return A newly allocated string containing the directory path. Must be freed with g_free().
+ */
+char* get_base_dir(void);
+
 #endif /* PERSISTENCE_H */
