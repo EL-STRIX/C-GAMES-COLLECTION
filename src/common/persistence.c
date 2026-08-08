@@ -28,7 +28,8 @@ static unsigned int get_secure_random_uint(void) {
         }
     }
 #endif
-    return g_random_int(); // Fallback
+    g_error("Failed to generate secure random number");
+    return 0; // Unreachable, but satisfies compiler if g_error is not seen as noreturn in some configurations
 }
 
 int get_secure_random_int_range(int begin, int end) {
