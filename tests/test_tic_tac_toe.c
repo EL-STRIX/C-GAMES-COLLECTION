@@ -5,6 +5,66 @@
 // Mock the required external function
 void switch_to_launcher(void) {}
 
+static void test_check_winner(void) {
+    TttAppData app;
+    memset(&app, 0, sizeof(app));
+
+    // Case 1: No winner (initial board)
+    reset_board_logic(&app);
+    g_assert_cmpint(check_winner(&app), ==, 0);
+
+    // Case 2: Row winner
+    reset_board_logic(&app);
+    app.game.board[0][0] = 'X';
+    app.game.board[0][1] = 'X';
+    app.game.board[0][2] = 'X';
+    g_assert_cmpint(check_winner(&app), ==, 1);
+
+    reset_board_logic(&app);
+    app.game.board[1][0] = 'O';
+    app.game.board[1][1] = 'O';
+    app.game.board[1][2] = 'O';
+    g_assert_cmpint(check_winner(&app), ==, 1);
+
+    reset_board_logic(&app);
+    app.game.board[2][0] = 'X';
+    app.game.board[2][1] = 'X';
+    app.game.board[2][2] = 'X';
+    g_assert_cmpint(check_winner(&app), ==, 1);
+
+    // Case 3: Column winner
+    reset_board_logic(&app);
+    app.game.board[0][0] = 'O';
+    app.game.board[1][0] = 'O';
+    app.game.board[2][0] = 'O';
+    g_assert_cmpint(check_winner(&app), ==, 1);
+
+    reset_board_logic(&app);
+    app.game.board[0][1] = 'X';
+    app.game.board[1][1] = 'X';
+    app.game.board[2][1] = 'X';
+    g_assert_cmpint(check_winner(&app), ==, 1);
+
+    reset_board_logic(&app);
+    app.game.board[0][2] = 'O';
+    app.game.board[1][2] = 'O';
+    app.game.board[2][2] = 'O';
+    g_assert_cmpint(check_winner(&app), ==, 1);
+
+    // Case 4: Diagonal winner
+    reset_board_logic(&app);
+    app.game.board[0][0] = 'X';
+    app.game.board[1][1] = 'X';
+    app.game.board[2][2] = 'X';
+    g_assert_cmpint(check_winner(&app), ==, 1);
+
+    reset_board_logic(&app);
+    app.game.board[0][2] = 'O';
+    app.game.board[1][1] = 'O';
+    app.game.board[2][0] = 'O';
+    g_assert_cmpint(check_winner(&app), ==, 1);
+}
+
 static void test_check_draw(void) {
     TttAppData app;
     memset(&app, 0, sizeof(app));
@@ -49,5 +109,6 @@ int main(int argc, char **argv) {
     g_test_init(&argc, &argv, NULL);
     g_test_add_func("/tic_tac_toe/reset_board_logic", test_reset_board_logic);
     g_test_add_func("/tic_tac_toe/check_draw", test_check_draw);
+    g_test_add_func("/tic_tac_toe/check_winner", test_check_winner);
     return g_test_run();
 }
