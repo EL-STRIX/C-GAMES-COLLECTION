@@ -293,27 +293,28 @@ void load_global_settings(char *player_name, size_t out_size, int *theme_id) {
         /* settings.ini missing — try to recover player name from game history */
         if (error) g_error_free(error);
 
-        char temp_player[50];
-        if (load_top_score("rps", temp_player, sizeof(temp_player)) != -1
-                && strcmp(temp_player, "Unknown") != 0
-                && strcmp(temp_player, "None") != 0
-                && strcmp(temp_player, "Guest") != 0) {
-            snprintf(temp_player_name, sizeof(temp_player_name), "%s", temp_player);
-        } else if (load_top_score("number_guessing", temp_player, sizeof(temp_player)) != -1
-                && strcmp(temp_player, "Unknown") != 0
-                && strcmp(temp_player, "None") != 0
-                && strcmp(temp_player, "Guest") != 0) {
-            snprintf(temp_player_name, sizeof(temp_player_name), "%s", temp_player);
-        } else if (load_top_score("sgw", temp_player, sizeof(temp_player)) != -1
-                && strcmp(temp_player, "Unknown") != 0
-                && strcmp(temp_player, "None") != 0
-                && strcmp(temp_player, "Guest") != 0) {
-            snprintf(temp_player_name, sizeof(temp_player_name), "%s", temp_player);
-        } else if (load_top_score("ttt_gui", temp_player, sizeof(temp_player)) != -1
-                && strcmp(temp_player, "Unknown") != 0
-                && strcmp(temp_player, "None") != 0
-                && strcmp(temp_player, "Guest") != 0) {
-            snprintf(temp_player_name, sizeof(temp_player_name), "%s", temp_player);
+        static gboolean missing_state_cached = FALSE;
+        static char cached_player_name[50] = "";
+
+        if (missing_state_cached) {
+            if (cached_player_name[0] != '\0') {
+                snprintf(temp_player_name, sizeof(temp_player_name), "%s", cached_player_name);
+            }
+        } else {
+            char temp_player[50];
+            const char *games[] = {"rps", "number_guessing", "sgw", "ttt_gui"};
+            for (size_t i = 0; i < sizeof(games)/sizeof(games[0]); i++) {
+                if (load_top_score(games[i], temp_player, sizeof(temp_player)) != -1
+                        && strcmp(temp_player, "Unknown") != 0
+                        && strcmp(temp_player, "None") != 0
+                        && strcmp(temp_player, "Guest") != 0) {
+                    snprintf(temp_player_name, sizeof(temp_player_name), "%s", temp_player);
+                    strncpy(cached_player_name, temp_player_name, sizeof(cached_player_name) - 1);
+                    cached_player_name[sizeof(cached_player_name) - 1] = '\0';
+                    break;
+                }
+            }
+            missing_state_cached = TRUE;
         }
     }
     g_key_file_free(kf);
