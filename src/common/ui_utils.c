@@ -16,43 +16,6 @@ GtkWidget* create_card_box(void)
     return box;
 }
 
-void confirm_exit_response(GObject *source_object, GAsyncResult *res, gpointer user_data)
-{
-    (void)user_data; /* window not needed — switch_to_launcher() uses the global */
-    GtkAlertDialog *dialog = GTK_ALERT_DIALOG(source_object);
-    GError *error = NULL;
-    int response = gtk_alert_dialog_choose_finish(dialog, res, &error);
-    if (error) {
-        g_error_free(error);
-        return;
-    }
-
-    /* Response 1 is the second button ("Return to Menu") */
-    if (response == 1) {
-        switch_to_launcher();
-    }
-}
-
-void handle_header_back_clicked(GtkWidget *window, GtkWidget *stack, const char *game_page_name)
-{
-    const char *visible_child = gtk_stack_get_visible_child_name(GTK_STACK(stack));
-
-    if (g_strcmp0(visible_child, game_page_name) == 0) {
-        /* Player is mid-game: confirm before navigating away */
-        GtkAlertDialog *dialog = gtk_alert_dialog_new("Are you sure you want to return to the main menu?");
-        gtk_alert_dialog_set_detail(dialog, "Any unsaved progress will be lost.");
-        const char *buttons[] = {"Cancel", "Return to Menu", NULL};
-        gtk_alert_dialog_set_buttons(dialog, buttons);
-        gtk_alert_dialog_set_cancel_button(dialog, 0);
-        gtk_alert_dialog_set_default_button(dialog, 0);
-        gtk_alert_dialog_choose(dialog, GTK_WINDOW(window), NULL, confirm_exit_response, NULL);
-        g_object_unref(dialog);
-    } else {
-        /* Player is on welcome/result screen: go back silently */
-        switch_to_launcher();
-    }
-}
-
 void apply_global_theme(void) {
     char dummy_name[50];
     int theme_id;
