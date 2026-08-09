@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <glib.h>
+#include <glib/gstdio.h>
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -14,14 +15,9 @@
  * delete the REAL user settings file. Tests should use a temp directory
  * or a dedicated test key so they don't destroy production data.
  *
- * The current approach saves/restores the original settings around the test.
+ * The current approach uses a temp directory setup in main().
  * ----------------------------------------------------------------------- */
 static void test_settings(void) {
-    /* Save whatever currently exists so we can restore it after the test */
-    char original_name[50] = {0};
-    int  original_theme    = 0;
-    load_global_settings(original_name, sizeof(original_name), &original_theme);
-
     /* Write test data */
     save_global_settings("TestPlayer", 2);
 
@@ -31,13 +27,6 @@ static void test_settings(void) {
 
     g_assert_cmpstr(out_name, ==, "TestPlayer");
     g_assert_cmpint(out_theme, ==, 2);
-
-    /* Restore original data so the user's real settings aren't destroyed */
-    if (original_name[0] != '\0') {
-        save_global_settings(original_name, original_theme);
-    } else {
-        remove("data/settings.ini");
-    }
 }
 
 /* -----------------------------------------------------------------------
@@ -67,9 +56,6 @@ static void test_scores(void) {
     top_score = load_top_score("test_game", top_player, sizeof(top_player));
     g_assert_cmpstr(top_player, ==, "Charlie");
     g_assert_cmpint(top_score,  ==, 200);
-
-    /* Cleanup test artefact only */
-    remove("data/test_game_score.ini");
 }
 
 /* -----------------------------------------------------------------------
@@ -96,8 +82,6 @@ static void test_scores_lower_better(void) {
     top_score = load_top_score("test_game_lb", top_player, sizeof(top_player));
     g_assert_cmpstr(top_player, ==, "Charlie");
     g_assert_cmpint(top_score,  ==, 3);
-
-    remove("data/test_game_lb_score.ini");
 }
 
 /* -----------------------------------------------------------------------
@@ -133,11 +117,6 @@ static void test_save_score_invalid_path(void) {
  * NEW: Ensure save_global_settings(name, -1) preserves the existing theme.
  * ----------------------------------------------------------------------- */
 static void test_theme_preservation(void) {
-    /* Save whatever currently exists so we can restore it after the test */
-    char original_name[50] = {0};
-    int  original_theme    = 0;
-    load_global_settings(original_name, sizeof(original_name), &original_theme);
-
     /* Save a known theme */
     save_global_settings("ThemeTestPlayer", 2);
 
@@ -150,13 +129,6 @@ static void test_theme_preservation(void) {
 
     g_assert_cmpstr(out_name,  ==, "UpdatedName");
     g_assert_cmpint(out_theme, ==, 2); /* theme must be preserved */
-
-    /* Restore original so the user's real settings aren't destroyed */
-    if (original_name[0] != '\0') {
-        save_global_settings(original_name, original_theme);
-    } else {
-        remove("data/settings.ini");
-    }
 }
 
 
@@ -200,9 +172,6 @@ static void test_load_score_null_buffer(void) {
     /* Call load_top_score with NULL buffer */
     int score = load_top_score("test_game_null", NULL, 0);
     g_assert_cmpint(score, ==, 100);
-
-    /* Clean up */
-    remove("data/test_game_null_score.ini");
 }
 
 /* -----------------------------------------------------------------------
@@ -247,6 +216,15 @@ static void test_secure_random_int_range(void) {
 
 int main(int argc, char **argv) {
     g_test_init(&argc, &argv, NULL);
+
+    /* Sandbox the data directory so tests don't overwrite production data */
+    gchar *tmp_dir = g_dir_make_tmp("test_persistence_XXXXXX", NULL);
+    gchar *tmp_data_dir = g_build_filename(tmp_dir, "data", NULL);
+    g_mkdir(tmp_data_dir, 0700);
+
+    /* Tell persistence.c to use our temporary data directory */
+    g_setenv("PERSISTENCE_TEST_DATA_DIR", tmp_data_dir, TRUE);
+
     g_test_add_func("/persistence/settings",          test_settings);
     g_test_add_func("/persistence/load_score_path_traversal", test_load_score_path_traversal);
     g_test_add_func("/persistence/load_score_null_buffer", test_load_score_null_buffer);
@@ -257,5 +235,27 @@ int main(int argc, char **argv) {
     g_test_add_func("/persistence/save_score_invalid_path", test_save_score_invalid_path);
     g_test_add_func("/persistence/secure_random_int_range", test_secure_random_int_range);
 
-    return g_test_run();
+    int result = g_test_run();
+
+    /* Clean up the temporary test environment */
+    gchar *settings_file = g_build_filename(tmp_data_dir, "settings.ini", NULL);
+    gchar *score_file1 = g_build_filename(tmp_data_dir, "test_game_score.ini", NULL);
+    gchar *score_file2 = g_build_filename(tmp_data_dir, "test_game_lb_score.ini", NULL);
+    gchar *score_file3 = g_build_filename(tmp_data_dir, "test_game_null_score.ini", NULL);
+
+    g_remove(settings_file);
+    g_remove(score_file1);
+    g_remove(score_file2);
+    g_remove(score_file3);
+    g_rmdir(tmp_data_dir);
+    g_rmdir(tmp_dir);
+
+    g_free(settings_file);
+    g_free(score_file1);
+    g_free(score_file2);
+    g_free(score_file3);
+    g_free(tmp_data_dir);
+    g_free(tmp_dir);
+
+    return result;
 }

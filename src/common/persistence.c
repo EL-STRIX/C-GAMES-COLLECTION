@@ -76,6 +76,13 @@ static const char* get_data_dir(void) {
         return cached_data_dir;
     }
 
+    const char *test_dir = g_getenv("PERSISTENCE_TEST_DATA_DIR");
+    if (test_dir) {
+        cached_data_dir = g_strdup(test_dir);
+        g_mkdir_with_parents(cached_data_dir, 0700);
+        return cached_data_dir;
+    }
+
     char *base_dir = get_base_dir();
 
     // Construct path: base_dir/../data
