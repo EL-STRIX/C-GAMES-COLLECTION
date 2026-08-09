@@ -263,9 +263,7 @@ static GtkWidget *ng_create_game_page(NgAppData *app)
     gtk_box_append(GTK_BOX(box), app->feedback_revealer);
 
     // Add developer footer at the very bottom
-    GtkWidget *dev_footer = gtk_label_new("Developed by SUJAY PAUL");
-    gtk_widget_add_css_class(dev_footer, "footer-credit");
-    gtk_box_append(GTK_BOX(box), dev_footer);
+    add_developer_footer(box);
 
     return box;
 }
@@ -309,9 +307,7 @@ static GtkWidget *ng_create_result_page(NgAppData *app)
     gtk_box_append(GTK_BOX(box), btn_box);
 
     // Add developer footer at the very bottom
-    GtkWidget *dev_footer = gtk_label_new("Developed by SUJAY PAUL");
-    gtk_widget_add_css_class(dev_footer, "footer-credit");
-    gtk_box_append(GTK_BOX(box), dev_footer);
+    add_developer_footer(box);
 
     return box;
 }

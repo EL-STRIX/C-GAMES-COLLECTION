@@ -50,4 +50,10 @@ GtkCssProvider* load_css_from_file(const char *filename);
  */
 GtkWidget* create_choice_button(const char *emoji, const char *label_text, GCallback callback, gpointer data);
 
+/**
+ * @brief Add a standardized developer credit footer to the bottom of a container.
+ * @param box The container (usually a GtkBox) to append the footer to.
+ */
+void add_developer_footer(GtkWidget *box);
+
 #endif /* UI_UTILS_H */

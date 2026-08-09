@@ -102,3 +102,10 @@ GtkWidget* create_choice_button(const char *emoji, const char *label_text, GCall
 
     return btn;
 }
+
+void add_developer_footer(GtkWidget *box)
+{
+    GtkWidget *footer = gtk_label_new("Developed by SUJAY PAUL");
+    gtk_widget_add_css_class(footer, "footer-credit");
+    gtk_box_append(GTK_BOX(box), footer);
+}
