@@ -7,6 +7,9 @@ static int mock_computer_choice = 1; // Rock by default
 
 #define get_secure_random_int_range mock_get_secure_random_int_range
 
+int mock_get_secure_random_int_range(int begin, int end);
+void switch_to_launcher(void);
+
 int mock_get_secure_random_int_range(int begin, int end) {
     (void)begin;
     (void)end;

@@ -5,7 +5,7 @@ echo "Starting Portable Windows Packaging Process..."
 
 # Directories
 PROJECT_ROOT=$(pwd)
-VERSION="v5.0.0"
+VERSION="v5.0.1"
 RELEASE_DIR="release/C-GAMES-COLLECTION-${VERSION}-Windows"
 ZIP_FILE="C-GAMES-COLLECTION-${VERSION}-Windows.zip"
 

@@ -4,6 +4,13 @@ All notable changes to the **C-GAMES-COLLECTION** project will be documented in 
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.1] - 2026-08-09
+
+### Fixed
+- Fixed `-Wmissing-prototypes` compiler warnings in `test_snake_gun_water.c`, `test_number_guessing.c`, and `test_rock_paper_scissors.c` by providing explicit function prototypes for the test mock overrides.
+
+---
+
 ## [5.0.0] - 2026-08-09
 
 ### Added
