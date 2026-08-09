@@ -59,6 +59,21 @@ GtkCssProvider* load_css_from_file(const char *filename) {
         return NULL;
     }
     
+    static struct {
+        char filename[64];
+        GtkCssProvider *provider;
+    } css_cache[5];
+    static int cache_count = 0;
+
+    for (int i = 0; i < cache_count; i++) {
+        if (strcmp(css_cache[i].filename, filename) == 0) {
+            gtk_style_context_add_provider_for_display(gdk_display_get_default(),
+                                                       GTK_STYLE_PROVIDER(css_cache[i].provider),
+                                                       GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+            return g_object_ref(css_cache[i].provider);
+        }
+    }
+
     char *base_dir = get_base_dir();
     
     // Construct path: base_dir/../assets/css/filename
@@ -78,6 +93,12 @@ GtkCssProvider* load_css_from_file(const char *filename) {
     g_free(assets_dir);
     g_free(base_dir);
     
+    if (cache_count < 5) {
+        g_strlcpy(css_cache[cache_count].filename, filename, sizeof(css_cache[cache_count].filename));
+        css_cache[cache_count].provider = g_object_ref(provider);
+        cache_count++;
+    }
+
     return provider;
 }
 
