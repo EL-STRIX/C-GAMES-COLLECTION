@@ -26,7 +26,8 @@ TARGETS = $(BIN_DIR)/c-games-collection.exe \
           $(BIN_DIR)/test_persistence.exe \
           $(BIN_DIR)/test_tic_tac_toe.exe \
           $(BIN_DIR)/test_snake_gun_water.exe \
-          $(BIN_DIR)/test_number_guessing.exe
+          $(BIN_DIR)/test_number_guessing.exe \
+          $(BIN_DIR)/test_rock_paper_scissors.exe
 
 .PHONY: all clean test
 
@@ -52,11 +53,15 @@ $(BIN_DIR)/test_snake_gun_water.exe: tests/test_snake_gun_water.c src/common/per
 $(BIN_DIR)/test_number_guessing.exe: tests/test_number_guessing.c src/common/persistence.c src/common/ui_utils.c | $(BIN_DIR)
 	$(CC) $^ -o $@ $(TEST_CFLAGS) $(shell pkg-config --cflags gtk4) $(TEST_LDFLAGS) $(shell pkg-config --libs gtk4)
 
-test: $(BIN_DIR)/test_persistence.exe $(BIN_DIR)/test_tic_tac_toe.exe $(BIN_DIR)/test_snake_gun_water.exe $(BIN_DIR)/test_number_guessing.exe
+$(BIN_DIR)/test_rock_paper_scissors.exe: tests/test_rock_paper_scissors.c src/common/persistence.c src/common/ui_utils.c | $(BIN_DIR)
+	$(CC) $^ -o $@ $(TEST_CFLAGS) $(shell pkg-config --cflags gtk4) $(TEST_LDFLAGS) $(shell pkg-config --libs gtk4)
+
+test: $(BIN_DIR)/test_persistence.exe $(BIN_DIR)/test_tic_tac_toe.exe $(BIN_DIR)/test_snake_gun_water.exe $(BIN_DIR)/test_number_guessing.exe $(BIN_DIR)/test_rock_paper_scissors.exe
 	$(BIN_DIR)/test_persistence.exe
 	$(BIN_DIR)/test_tic_tac_toe.exe
 	$(BIN_DIR)/test_snake_gun_water.exe
 	$(BIN_DIR)/test_number_guessing.exe
+	$(BIN_DIR)/test_rock_paper_scissors.exe
 
 clean:
 	rm -f $(BIN_DIR)/*.exe
