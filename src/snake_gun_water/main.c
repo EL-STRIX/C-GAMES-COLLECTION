@@ -378,9 +378,7 @@ static GtkWidget* sgw_create_game_page(SgwAppData *data) {
     g_signal_connect(data->next_round_btn, "clicked", G_CALLBACK(sgw_on_next_round_clicked), data);
     gtk_box_append(GTK_BOX(card), data->next_round_btn);
 
-    GtkWidget *credit_lbl = gtk_label_new("Developed by SUJAY PAUL");
-    gtk_widget_add_css_class(credit_lbl, "footer-credit");
-    gtk_box_append(GTK_BOX(card), credit_lbl);
+    add_developer_footer(card);
 
     return center_box;
 }
@@ -425,9 +423,7 @@ static GtkWidget* sgw_create_result_page(SgwAppData *data) {
     gtk_box_append(GTK_BOX(card), button_box);
     /* -------------------------------------- */
 
-    GtkWidget *credit_lbl = gtk_label_new("Developed by SUJAY PAUL");
-    gtk_widget_add_css_class(credit_lbl, "footer-credit");
-    gtk_box_append(GTK_BOX(card), credit_lbl);
+    add_developer_footer(card);
 
     return vbox;
 }

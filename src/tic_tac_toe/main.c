@@ -287,15 +287,6 @@ static void ttt_on_play_again_clicked(GtkWidget *widget, gpointer data)
 // BUILD CARD HELPERS
 // ============================================================
 
-
-
-static void add_footer(GtkWidget *box)
-{
-    GtkWidget *footer = gtk_label_new("Developed by SUJAY PAUL");
-    gtk_widget_add_css_class(footer, "footer-credit");
-    gtk_box_append(GTK_BOX(box), footer);
-}
-
 // ============================================================
 // MAIN UI SETUP
 // ============================================================
@@ -409,7 +400,7 @@ static void create_game_screen(TttAppData *app)
     gtk_box_append(GTK_BOX(game_card), btn_reset);
     gtk_box_append(GTK_BOX(game_card), lbl_tip_game);
     
-    add_footer(game_card); 
+    add_developer_footer(game_card);
 
     gtk_box_append(GTK_BOX(game_page_wrapper), game_card);
     gtk_stack_add_named(GTK_STACK(app->stack), game_page_wrapper, "game_page");
@@ -447,7 +438,7 @@ static void create_result_screen(TttAppData *app)
     gtk_box_append(GTK_BOX(result_card), app->result_subtitle);
     gtk_box_append(GTK_BOX(result_card), app->result_score_label);
     gtk_box_append(GTK_BOX(result_card), box_actions);
-    add_footer(result_card);
+    add_developer_footer(result_card);
 
     gtk_box_append(GTK_BOX(result_page_wrapper), result_card);
     gtk_stack_add_named(GTK_STACK(app->stack), result_page_wrapper, "result_page");
