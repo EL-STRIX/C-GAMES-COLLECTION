@@ -5,7 +5,7 @@ echo "Starting Ubuntu Packaging Process..."
 
 # Directories
 PROJECT_ROOT=$(pwd)
-VERSION="v4.0.0" # This should ideally be passed in or read from a config
+VERSION="v5.0.0" # This should ideally be passed in or read from a config
 RELEASE_DIR="release/C-GAMES-COLLECTION-${VERSION}-Ubuntu"
 TAR_FILE="C-GAMES-COLLECTION-${VERSION}-Ubuntu.tar.gz"
 

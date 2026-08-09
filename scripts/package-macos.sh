@@ -5,7 +5,7 @@ echo "Starting macOS Packaging Process..."
 
 # Directories
 PROJECT_ROOT=$(pwd)
-VERSION="v4.0.0"
+VERSION="v5.0.0"
 APP_NAME="C-Games-Collection"
 APP_BUNDLE="release/${APP_NAME}.app"
 ZIP_FILE="C-GAMES-COLLECTION-${VERSION}-macOS.zip"
